@@ -2,7 +2,7 @@
 
 ## Context
 
-见 proposal.md。当前存在本地静态考试演示，但未发现容器、CI 或生产部署配置；本提案确定部署协议和验收目标，不假设已有云平台。演示的 localhost 静态服务不是生产 API。前后端独立、PostgreSQL、私有文件和 Outbox 是其他 change 的架构输入，恢复必须覆盖它们之间的一致性。
+见 proposal.md。本提案以 reference 的部署运维标准确定部署协议和验收目标，不绑定特定云平台。前后端独立、PostgreSQL、私有文件和 Outbox 是其他 change 的架构输入，恢复必须覆盖它们之间的一致性。
 
 ## Goals / Non-Goals
 

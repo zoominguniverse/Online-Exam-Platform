@@ -2,7 +2,7 @@
 
 ## Context
 
-见 proposal.md。收尾检查发现根目录新增免依赖 Node 静态服务 `server.cjs` 和本地考试演示，`package.json` 仅包含演示启动与测试命令；尚无业务 API、数据库或迁移，业务服务仍从零建立。前后端分离与 PostgreSQL 是用户明确约束；产品行为取自 design-exam-product，安全服务由 secure-exam-platform 负责。数据与 API 规格是实施契约，不以演示或框架默认行为替代。
+见 proposal.md。本设计以 README 的业务功能与 reference 的验收标准为输入。前后端分离与 PostgreSQL 是用户明确约束；产品行为取自 design-exam-product，安全服务由 secure-exam-platform 负责。数据与 API 规格是实施契约，不以框架默认行为替代。
 
 ## Goals / Non-Goals
 
@@ -86,4 +86,4 @@ page/pageSize 与错误封装依 CT03、CT06；例如试卷列表仅允许 type�
 
 ## Migration Plan
 
-独立建立 backend，保留根目录演示和现有脚本，前端 localStorage 演示成绩不导入为可信正式答卷。先建立版本化基线迁移和系统主体，再按账号／题库／答卷／消息依次增加表。每次迁移只增文件，声明升级、条件重跑、回退及数据恢复条件，在真实 PostgreSQL 副本演练；运行时角色不拥有改结构权限。发布遵循 RD05，收缩在 7 日回滚窗口后独立执行。失败回退兼容应用版本；破坏性迁移须恢复备份，不假定逆 SQL 可找回丢失的数据。
+独立建立 backend，先建立版本化基线迁移和系统主体，再按账号／题库／答卷／消息依次增加表。每次迁移只增文件，声明升级、条件重跑、回退及数据恢复条件，在真实 PostgreSQL 副本演练；运行时角色不拥有改结构权限。发布遵循 RD05，收缩在 7 日回滚窗口后独立执行。失败回退兼容应用版本；破坏性迁移须恢复备份，不假定逆 SQL 可找回丢失的数据。

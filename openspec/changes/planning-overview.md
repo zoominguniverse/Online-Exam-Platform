@@ -2,8 +2,6 @@
 
 本规划依据 [README.md](../../README.md) 和 [规范验收标准](../../reference/规范验收标准.md)，按用户要求建立五个 change。所有实施任务尚未执行；本目录只交付规划，不代表功能或上线验收已通过。
 
-收尾现状核对：工作区另有本地考试演示（index.html、app.js、exam-core.js、server.cjs、package.json、tests/exam.test.cjs），README 新增其运行说明，原 29 项功能清单未变。本次未修改这些文件。演示的浏览器保存、内置答案和自动计分仅作参考，不满足正式平台身份、服务端提交和自行批改契约；相关设计已记录衔接与迁移边界。
-
 ## Change 清单
 
 | 领域 | Change | 规格能力 | 交付范围 |

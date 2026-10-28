@@ -2,7 +2,7 @@
 
 ## Context
 
-见 proposal.md。收尾检查发现 `tests/exam.test.cjs` 及 `npm test` 已用于本地演示逻辑，尚无 PostgreSQL、接口、安全或完整端到端测试。本 change 扩展为平台验证体系，保留有用的演示用例并逐项核对目标契约；前端自动计分用例不能证明服务端自行批改正确。所有 scenario 编号是稳定来源，reference 的“50／100 ms”明确是示例，本提案采用相称的阈值。
+见 proposal.md。本 change 根据 README 功能和 reference 检查项建立平台验证体系，覆盖业务规则、真实 PostgreSQL、接口、安全与关键端到端流程。所有 scenario 编号是稳定用例来源，reference 的“50／100 ms”明确是示例，本提案采用与考试服务相称、可测量的阈值。
 
 ## Goals / Non-Goals
 
