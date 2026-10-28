@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#7560d5">
+  <meta name="description" content="一个轻量的在线考试练习页面，支持倒计时、自动交卷和答案解析。">
+  <title>知序 · 在线考试</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="exam-core.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="知序首页"><span class="brand-icon">知</span><span>知序<span class="brand-sub">在线考试</span></span></a>
+    <span class="top-label">学习的每一步，都算数。</span>
+    <div class="profile"><span class="avatar">同</span><span>同学，你好</span></div>
+  </header>
+  <main class="workspace">
+    <div class="breadcrumb">学习空间 <span>/</span> 在线练习 <span>/</span> <strong>计算机基础</strong></div>
+    <section class="heading"><div><div class="eyebrow">KNOWLEDGE CHECK</div><h1>给知识一次小小的检验<span>。</span></h1><p>专注当下，按照自己的节奏完成这次练习。</p></div><span class="practice-badge"><span></span> 模拟练习</span></section>
+    <div class="exam-layout">
+      <div class="main-column">
+        <section class="paper-info"><div class="paper-icon" aria-hidden="true">▤</div><div><h2>计算机基础知识测试</h2><p>单选题 <i>·</i> 共 5 题 <i>·</i> 满分 100 分</p></div><span class="level">基础入门</span></section>
+        <section class="question-panel" id="question-panel" aria-labelledby="question-title"></section>
+        <div class="below-note"><span aria-hidden="true">◇</span> 每一次练习，都是向前的一步。</div>
+      </div>
+      <aside class="sidebar">
+        <section class="timer-panel"><div class="section-label"><span>◷ &nbsp; 剩余时间</span><span class="status" id="status">未开始</span></div><div class="timer" id="timer" role="timer" aria-label="剩余时间">10:00</div><p id="timer-note">准备好后，开始你的练习</p><div class="timer-track"><div id="timer-progress"></div></div><div class="duration-control" id="duration-control"><label for="duration">练习时长</label><select id="duration"><option value="1">1 分钟</option><option value="5">5 分钟</option><option value="10" selected>10 分钟</option></select></div></section>
+        <section class="answer-panel"><div class="section-label"><h2>答题卡</h2><span id="answer-count">0 / 5</span></div><div id="answer-grid" class="answer-grid" aria-label="题目导航"></div><div class="legend"><span><i class="legend-done"></i>已答</span><span><i></i>未答</span><span><i class="legend-flag"></i>标记</span></div><div class="answer-divider"></div><div class="progress-label"><span>答题进度</span><strong id="progress-label">0%</strong></div><div class="answer-track"><div id="answer-progress"></div></div><button class="button primary submit" id="submit">开始考试 <span>→</span></button><p class="submit-note" id="submit-note">开始后计时，到时自动交卷</p></section>
+        <section class="tips"><span class="tips-icon" aria-hidden="true">✧</span><div><h3>温馨提示</h3><p>每题只有一个正确答案。<br>不确定的题目可以先标记，稍后再回顾。</p><p>答题进度会自动保存在当前浏览器。</p></div></section>
+      </aside>
+    </div>
+    <footer><span>知序 · 让每一次学习都有回响</span><span>轻量练习 / 专注成长</span></footer>
+  </main>
+  <dialog id="confirm-dialog"><h2>准备交卷了吗？</h2><p id="confirm-message"></p><div class="dialog-actions"><button class="button secondary" id="cancel-submit">继续答题</button><button class="button primary" id="confirm-submit">确认交卷</button></div></dialog>
+  <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
+</body>
+</html>
