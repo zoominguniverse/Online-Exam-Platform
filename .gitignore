@@ -32,6 +32,7 @@ coverage/
 .nyc_output/
 .cache/
 .vite/
+artifacts/
 
 # Local AI assistant settings
 .claude/settings.local.json

@@ -20,6 +20,10 @@
 - **WHEN** 静态核对文档与已注册路由
 - **THEN** 提交使用 `POST /api/v1/attempts/{id}/submissions` 等资源路径，不存在 GET 修改数据或 `/submit` 动词接口
 
+#### Scenario: CT02-N2 到期答卷 GET 无写入
+- **WHEN** 对数据库仍为作答中但已截止的答卷执行 GET 详情或列表
+- **THEN** 仅计算有效展示状态，不调用状态更新、答案保存、审计或 Outbox 写入；持久化冻结由后台扫描和写请求负责
+
 ### Requirement: CT03 统一响应和错误码
 所有应用 JSON 响应 SHALL 包含 `code,message,data,requestId`，成功码为 `OK`，失败 data 可包含字段错误但不含堆栈。错误清单 SHALL 分为参数 PARAM／400、认证 AUTHN／401、授权 AUTHZ／403、隐藏资源 RESOURCE／404、冲突 BIZ／409、依赖 DEP／503、限流 RATE／429、未预期 INTERNAL／500，并登记具体码。
 

@@ -1,6 +1,12 @@
 # Online-Exam-Platform
 在线考试平台
 
+## 当前实现状态
+
+已有浏览器本地考试演示，以及独立的 PostgreSQL 后端基础 API。后端支持注册登录、会话撤销、开始答卷、草稿、提交、到期冻结、自行批改、成绩及错题查询；附带迁移、幂等、Outbox 与真实数据库测试。前端演示尚未接入后端，下面的学生／管理系统功能表仍是完整目标范围。
+
+后端运行与接口见 [API 说明](docs/api/README.md)，字段见 [数据字典](docs/data/dictionary.md)，进度见 [实施任务](openspec/changes/build-exam-backend/tasks.md)。运行组件门禁：`npm ci --prefix backend` 后执行 `npm run gate --prefix backend`；测试自动创建并清理隔离 PostgreSQL，需允许本机回环监听。生产运行配置及数据迁移按 API 说明执行。
+
 ## 运行考试演示
 
 已提供一个免依赖的中文考试页面，支持 5 道单选题、1/5/10 分钟倒计时、答题标记、刷新恢复、到时自动交卷、成绩及答案解析。
