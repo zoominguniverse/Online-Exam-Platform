@@ -1,0 +1,12 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/auth/index",
+    "pages/profile/index",
+    "pages/papers/index",
+    "pages/tasks/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "在线考试 · 学生端"
+  }
+}

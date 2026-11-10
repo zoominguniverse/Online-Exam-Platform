@@ -29,6 +29,7 @@ dist/
 build/
 target/
 coverage/
+backend/artifacts/
 .nyc_output/
 .cache/
 .vite/

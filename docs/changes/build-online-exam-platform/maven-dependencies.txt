@@ -1,0 +1,63 @@
+com.onlineexam:exam-platform:jar:0.1.0-SNAPSHOT
++- com.twelvemonkeys.imageio:imageio-webp:jar:3.15.3:compile
+|  +- com.twelvemonkeys.imageio:imageio-core:jar:3.15.3:compile
+|  +- com.twelvemonkeys.imageio:imageio-metadata:jar:3.15.3:compile
+|  +- com.twelvemonkeys.common:common-lang:jar:3.15.3:compile
+|  +- com.twelvemonkeys.common:common-io:jar:3.15.3:compile
+|  \- com.twelvemonkeys.common:common-image:jar:3.15.3:compile
++- org.jsoup:jsoup:jar:1.24.1:compile
++- org.springframework.boot:spring-boot-starter-web:jar:3.5.16:compile
+|  +- org.springframework.boot:spring-boot-starter:jar:3.5.16:compile
+|  |  +- org.springframework.boot:spring-boot:jar:3.5.16:compile
+|  |  +- org.springframework.boot:spring-boot-autoconfigure:jar:3.5.16:compile
+|  |  +- org.springframework.boot:spring-boot-starter-logging:jar:3.5.16:compile
+|  |  |  +- ch.qos.logback:logback-classic:jar:1.5.34:compile
+|  |  |  |  \- ch.qos.logback:logback-core:jar:1.5.34:compile
+|  |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.24.3:compile
+|  |  |  |  \- org.apache.logging.log4j:log4j-api:jar:2.24.3:compile
+|  |  |  \- org.slf4j:jul-to-slf4j:jar:2.0.18:compile
+|  |  +- jakarta.annotation:jakarta.annotation-api:jar:2.1.1:compile
+|  |  \- org.yaml:snakeyaml:jar:2.4:compile
+|  +- org.springframework.boot:spring-boot-starter-json:jar:3.5.16:compile
+|  |  +- com.fasterxml.jackson.core:jackson-databind:jar:2.21.4:compile
+|  |  +- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.21.4:compile
+|  |  \- com.fasterxml.jackson.module:jackson-module-parameter-names:jar:2.21.4:compile
+|  +- org.springframework.boot:spring-boot-starter-tomcat:jar:3.5.16:compile
+|  |  +- org.apache.tomcat.embed:tomcat-embed-core:jar:10.1.55:compile
+|  |  +- org.apache.tomcat.embed:tomcat-embed-el:jar:10.1.55:compile
+|  |  \- org.apache.tomcat.embed:tomcat-embed-websocket:jar:10.1.55:compile
+|  +- org.springframework:spring-web:jar:6.2.19:compile
+|  |  \- org.springframework:spring-beans:jar:6.2.19:compile
+|  \- org.springframework:spring-webmvc:jar:6.2.19:compile
+|     +- org.springframework:spring-context:jar:6.2.19:compile
+|     \- org.springframework:spring-expression:jar:6.2.19:compile
++- org.springframework.boot:spring-boot-starter-actuator:jar:3.5.16:compile
+|  +- org.springframework.boot:spring-boot-actuator-autoconfigure:jar:3.5.16:compile
+|  |  \- org.springframework.boot:spring-boot-actuator:jar:3.5.16:compile
+|  +- io.micrometer:micrometer-observation:jar:1.15.12:compile
+|  |  \- io.micrometer:micrometer-commons:jar:1.15.12:compile
+|  \- io.micrometer:micrometer-jakarta9:jar:1.15.12:compile
+|     \- io.micrometer:micrometer-core:jar:1.15.12:compile
+|        +- org.hdrhistogram:HdrHistogram:jar:2.2.2:runtime
+|        \- org.latencyutils:LatencyUtils:jar:2.0.3:runtime
++- org.springframework.boot:spring-boot-starter-security:jar:3.5.16:compile
+|  +- org.springframework:spring-aop:jar:6.2.19:compile
+|  +- org.springframework.security:spring-security-config:jar:6.5.11:compile
+|  |  \- org.springframework.security:spring-security-core:jar:6.5.11:compile
+|  |     \- org.springframework.security:spring-security-crypto:jar:6.5.11:compile
+|  \- org.springframework.security:spring-security-web:jar:6.5.11:compile
++- org.mybatis.spring.boot:mybatis-spring-boot-starter:jar:3.0.5:compile
+|  +- org.springframework.boot:spring-boot-starter-jdbc:jar:3.5.16:compile
+|  |  +- com.zaxxer:HikariCP:jar:6.3.3:compile
+|  |  \- org.springframework:spring-jdbc:jar:6.2.19:compile
+|  |     \- org.springframework:spring-tx:jar:6.2.19:compile
+|  +- org.mybatis.spring.boot:mybatis-spring-boot-autoconfigure:jar:3.0.5:compile
+|  +- org.mybatis:mybatis:jar:3.5.19:compile
+|  \- org.mybatis:mybatis-spring:jar:3.0.5:compile
++- org.flywaydb:flyway-core:jar:11.7.2:compile
+|  +- com.fasterxml.jackson.dataformat:jackson-dataformat-toml:jar:2.21.4:compile
+|  |  \- com.fasterxml.jackson.core:jackson-core:jar:2.21.4:compile
+|  \- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.21.4:compile
+|     \- com.fasterxml.jackson.core:jackson-annotations:jar:2.21:compile
++- org.flywaydb:flyway-database-postgresql:jar:11.7.2:compile
+\- org.postgresql:postgresql:jar:42.7.11:runtime

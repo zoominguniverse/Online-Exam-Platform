@@ -193,6 +193,7 @@ stateDiagram-v2
 | 当前用户 | GET /me、PATCH /me/profile、POST /me/avatar | 可编辑资料及图片；返回 ProfileVM |
 | 密码变更 | POST /me/password | 当前密码与新密码，成功后撤销全部会话并重新登录 |
 | 微信身份 | POST /auth/wechat/bind、POST /auth/wechat/login、DELETE /auth/wechat/binding | 新 code，绑定时加平台凭据；返回可撤销 token |
+| 微信注册 | POST /auth/wechat/register | 新 code、年级与账号凭据；账号注册和绑定同事务，返回可撤销 token |
 | 账号 | GET/POST /admin/users、GET/PATCH/DELETE /admin/users/{id}、POST /admin/users/{id}/disable 或 enable | 角色、年级筛选；角色和状态仅管理员变更 |
 | 学科题目 | GET/POST /admin/subjects 或 questions、GET/PATCH/DELETE /admin/subjects/{id} 或 questions/{id} | 列表及带版本的编辑对象 |
 | 图片 | POST /attachments、GET /attachments/{id} | multipart 文件、业务引用；授权后二进制内容 |

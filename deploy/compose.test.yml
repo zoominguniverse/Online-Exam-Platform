@@ -1,0 +1,15 @@
+services:
+  interface-tests:
+    build:
+      context: ../backend
+      target: build
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/exam_java_dev
+      DATABASE_USER: exam_migrator
+      DATABASE_PASSWORD: ${EXAM_MIGRATION_PASSWORD:?Set EXAM_MIGRATION_PASSWORD}
+      PRIVATE_STORAGE_ROOT: /tmp/exam-platform-test-attachments
+      EXAM_TEST_EXPECTED_VERSION: ${EXAM_TEST_EXPECTED_VERSION:-v1}
+    command: ["mvn", "-B", "-ntp", "-Dmaven.repo.local=/opt/maven-repository", "test"]
+    depends_on:
+      db:
+        condition: service_healthy

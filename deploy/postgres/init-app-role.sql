@@ -1,0 +1,4 @@
+\getenv app_password DATABASE_APP_PASSWORD
+CREATE ROLE exam_app LOGIN PASSWORD :'app_password';
+REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+GRANT USAGE ON SCHEMA public TO exam_app;

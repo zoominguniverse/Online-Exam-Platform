@@ -1,0 +1,63 @@
+{
+  "scanned": 58,
+  "findings": [
+    {
+      "package": "org.apache.logging.log4j:log4j-api",
+      "version": "2.24.3",
+      "advisories": [
+        "GHSA-qv9r-c865-cp47"
+      ]
+    },
+    {
+      "package": "com.fasterxml.jackson.core:jackson-databind",
+      "version": "2.21.4",
+      "advisories": [
+        "GHSA-5gvw-p9qm-jgwh",
+        "GHSA-5jmj-h7xm-6q6v",
+        "GHSA-cxp5-3px4-pw24",
+        "GHSA-gx83-3vf8-gh7j",
+        "GHSA-mhm7-754m-9p8w",
+        "GHSA-q4xh-88c3-wmh7",
+        "GHSA-vvgp-rfg2-7rr6",
+        "GHSA-wjgm-6hv5-3cvf",
+        "GHSA-wv8q-qhhj-9h54"
+      ]
+    },
+    {
+      "package": "org.apache.tomcat.embed:tomcat-embed-core",
+      "version": "10.1.55",
+      "advisories": [
+        "GHSA-5v3h-fjv2-54fg",
+        "GHSA-9xv2-5v5q-p794",
+        "GHSA-f525-44xv-f2qj",
+        "GHSA-gcx9-497g-6cp6",
+        "GHSA-h3x4-894j-xpx5",
+        "GHSA-h792-v28v-ppgr",
+        "GHSA-mqg3-r7h5-24x4"
+      ]
+    },
+    {
+      "package": "org.springframework:spring-webmvc",
+      "version": "6.2.19",
+      "advisories": [
+        "GHSA-j9f9-w8pj-32f8",
+        "GHSA-pc63-qcmh-9cmg"
+      ]
+    },
+    {
+      "package": "com.fasterxml.jackson.core:jackson-core",
+      "version": "2.21.4",
+      "advisories": [
+        "GHSA-7hhh-6rmp-j9qf",
+        "GHSA-p6pp-m3f8-5c89"
+      ]
+    },
+    {
+      "package": "org.postgresql:postgresql",
+      "version": "42.7.11",
+      "advisories": [
+        "GHSA-j92g-9f8w-j867"
+      ]
+    }
+  ]
+}

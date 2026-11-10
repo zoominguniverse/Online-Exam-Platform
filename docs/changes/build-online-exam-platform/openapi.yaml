@@ -1,0 +1,453 @@
+openapi: 3.1.0
+info:
+  title: Online Exam Platform
+  version: 0.1.0
+  description: 已实现的版本和身份接口。所有响应使用 code、message、data、requestId。
+servers:
+  - url: /api/v1
+paths:
+  /version:
+    get:
+      operationId: version
+      responses:
+        '200':
+          description: API 版本
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: object
+                        properties:
+                          apiVersion: { type: string, const: v1 }
+  /catalog/grades:
+    get:
+      operationId: grades
+      responses:
+        '200':
+          description: 已启用的年级目录
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          required: [id, name]
+                          properties:
+                            id: { type: string, format: uuid }
+                            name: { type: string }
+        '503': { $ref: '#/components/responses/Error' }
+  /auth/csrf:
+    get:
+      operationId: csrfToken
+      responses:
+        '200':
+          description: 返回 CSRF 请求头名称与值，并下发同源安全 Cookie
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: object
+                        required: [headerName, token]
+                        properties:
+                          headerName: { type: string, const: X-XSRF-TOKEN }
+                          token: { type: string }
+  /auth/register:
+    post:
+      operationId: registerStudent
+      parameters:
+        - $ref: '#/components/parameters/Csrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StudentRegistration' }
+      responses:
+        '201': { $ref: '#/components/responses/Account' }
+        '400': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+  /auth/login:
+    post:
+      operationId: loginWeb
+      parameters:
+        - $ref: '#/components/parameters/Csrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Credentials' }
+      responses:
+        '200':
+          description: 已登录并下发 Web 会话 Cookie
+          headers:
+            Set-Cookie:
+              description: '__Host-exam_session; Path=/; HttpOnly; Secure; SameSite=Lax'
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AccountEnvelope' }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/Error' }
+  /auth/logout:
+    post:
+      operationId: logoutWeb
+      security: [{ webSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Csrf'
+      responses:
+        '200': { $ref: '#/components/responses/Empty' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+  /me:
+    get:
+      operationId: currentAccount
+      security: [{ webSession: [] }, { wechatToken: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Account' }
+        '401': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+  /me/password:
+    post:
+      operationId: changePassword
+      security: [{ webSession: [] }, { wechatToken: [] }]
+      description: Web 请求须提供 CSRF 请求头。成功后撤销 Web 和小程序全部会话。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword: { $ref: '#/components/schemas/Password' }
+                newPassword: { $ref: '#/components/schemas/Password' }
+      responses:
+        '200': { $ref: '#/components/responses/Empty' }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+  /admin/users:
+    get:
+      operationId: listAccounts
+      security: [{ webSession: [] }]
+      parameters:
+        - { in: query, name: role, schema: { $ref: '#/components/schemas/Role' } }
+        - { in: query, name: gradeId, schema: { type: string, format: uuid } }
+        - { in: query, name: page, schema: { type: integer, minimum: 1, default: 1 } }
+        - { in: query, name: pageSize, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - { in: query, name: sort, schema: { type: string, enum: [createdAt, username], default: createdAt } }
+      responses:
+        '200':
+          description: 账号分页列表，已删除账号不出现在列表中
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: object
+                        required: [items, total, page, pageSize]
+                        properties:
+                          items: { type: array, items: { $ref: '#/components/schemas/Account' } }
+                          total: { type: integer }
+                          page: { type: integer }
+                          pageSize: { type: integer }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+    post:
+      operationId: createManagedAccount
+      security: [{ webSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Csrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [username, password, role]
+              properties:
+                username: { $ref: '#/components/schemas/Username' }
+                password: { $ref: '#/components/schemas/Password' }
+                role: { $ref: '#/components/schemas/Role' }
+                gradeId: { $ref: '#/components/schemas/GradeId' }
+      responses:
+        '201': { $ref: '#/components/responses/Account' }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+  /admin/users/{id}:
+    parameters:
+      - $ref: '#/components/parameters/AccountId'
+    get:
+      operationId: accountDetail
+      security: [{ webSession: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Account' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+    patch:
+      operationId: editAccount
+      security: [{ webSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Csrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [username, role, expectedVersion]
+              properties:
+                username: { $ref: '#/components/schemas/Username' }
+                role: { $ref: '#/components/schemas/Role' }
+                gradeId: { $ref: '#/components/schemas/GradeId' }
+                expectedVersion: { type: integer, minimum: 1 }
+      responses: &accountMutation
+        '200': { $ref: '#/components/responses/Account' }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+    delete:
+      operationId: deleteAccount
+      security: [{ webSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Csrf'
+      requestBody: { $ref: '#/components/requestBodies/AccountVersion' }
+      responses: *accountMutation
+  /admin/users/{id}/enable:
+    post:
+      operationId: enableAccount
+      security: [{ webSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+        - $ref: '#/components/parameters/Csrf'
+      requestBody: { $ref: '#/components/requestBodies/AccountVersion' }
+      responses: *accountMutation
+  /admin/users/{id}/disable:
+    post:
+      operationId: disableAccount
+      security: [{ webSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+        - $ref: '#/components/parameters/Csrf'
+      requestBody: { $ref: '#/components/requestBodies/AccountVersion' }
+      responses: *accountMutation
+  /auth/wechat/bind:
+    post:
+      operationId: bindWeChat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [code, username, password]
+              properties:
+                code: { $ref: '#/components/schemas/WechatCode' }
+                username: { $ref: '#/components/schemas/Username' }
+                password: { $ref: '#/components/schemas/Password' }
+      responses:
+        '200': { $ref: '#/components/responses/WechatSession' }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+  /auth/wechat/register:
+    post:
+      operationId: registerWithWeChat
+      description: 注册学生并绑定微信。绑定失败时账号创建回滚。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [code, username, password, gradeId]
+              properties:
+                code: { $ref: '#/components/schemas/WechatCode' }
+                username: { $ref: '#/components/schemas/Username' }
+                password: { $ref: '#/components/schemas/Password' }
+                gradeId: { type: string, format: uuid }
+      responses:
+        '201': { $ref: '#/components/responses/WechatSession' }
+        '400': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+  /auth/wechat/login:
+    post:
+      operationId: loginWithWeChat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [code]
+              properties:
+                code: { $ref: '#/components/schemas/WechatCode' }
+      responses:
+        '200': { $ref: '#/components/responses/WechatSession' }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+  /auth/wechat/binding:
+    delete:
+      operationId: unbindWeChat
+      security: [{ wechatToken: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Empty' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+components:
+  securitySchemes:
+    webSession: { type: apiKey, in: cookie, name: __Host-exam_session }
+    wechatToken: { type: http, scheme: bearer }
+  parameters:
+    Csrf:
+      in: header
+      name: X-XSRF-TOKEN
+      required: true
+      description: 使用 /auth/csrf 返回的值，并携带响应设置的 Cookie
+      schema: { type: string }
+    AccountId:
+      in: path
+      name: id
+      required: true
+      schema: { type: string, format: uuid }
+  requestBodies:
+    AccountVersion:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [expectedVersion]
+            additionalProperties: false
+            properties:
+              expectedVersion: { type: integer, minimum: 1 }
+  responses:
+    Account:
+      description: 安全账号视图
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/AccountEnvelope' }
+    WechatSession:
+      description: 小程序令牌及安全账号视图
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Envelope'
+              - properties:
+                  data:
+                    type: object
+                    required: [token, user]
+                    properties:
+                      token: { type: string }
+                      user: { $ref: '#/components/schemas/Account' }
+    Empty:
+      description: 操作成功
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Envelope'
+              - properties:
+                  data: { type: 'null' }
+    Error:
+      description: 业务错误
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Envelope'
+              - properties:
+                  code:
+                    enum: [VALIDATION_ERROR, UNAUTHENTICATED, FORBIDDEN, NOT_FOUND, VERSION_CONFLICT, RATE_LIMITED, BINDING_CONFLICT, DEPENDENCY_UNAVAILABLE]
+                  data: { type: 'null' }
+  schemas:
+    Envelope:
+      type: object
+      required: [code, message, data, requestId]
+      properties:
+        code: { type: [integer, string] }
+        message: { type: string }
+        data: {}
+        requestId: { type: string, format: uuid }
+    AccountEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - properties:
+            data: { $ref: '#/components/schemas/Account' }
+    Account:
+      type: object
+      required: [id, username, role, status, gradeId, version, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        username: { type: string }
+        role: { $ref: '#/components/schemas/Role' }
+        status: { type: string, enum: [ENABLED, DISABLED, DELETED] }
+        gradeId: { $ref: '#/components/schemas/GradeId' }
+        version: { type: integer, minimum: 1 }
+        createdAt: { type: string, format: date-time }
+    Credentials:
+      type: object
+      additionalProperties: false
+      required: [username, password]
+      properties:
+        username: { $ref: '#/components/schemas/Username' }
+        password: { $ref: '#/components/schemas/Password' }
+    StudentRegistration:
+      type: object
+      additionalProperties: false
+      required: [username, password, gradeId]
+      properties:
+        username: { $ref: '#/components/schemas/Username' }
+        password: { $ref: '#/components/schemas/Password' }
+        gradeId: { type: string, format: uuid }
+    Username:
+      type: string
+      description: 规范化后 3–32 位英文字母、数字、下划线、点或连字符
+    Password:
+      type: string
+      format: password
+      description: 12–72 个 UTF-8 字节
+    Role:
+      type: string
+      enum: [STUDENT, ADMIN]
+    GradeId:
+      type: [string, 'null']
+      format: uuid
+      description: 学生必填，管理员为空
+    WechatCode:
+      type: string
+      description: wx.login 返回的一次性 code

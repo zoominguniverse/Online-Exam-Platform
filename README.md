@@ -1,6 +1,10 @@
 # Online-Exam-Platform
 在线考试平台
 
+Java API、管理端、学生端和小程序按[新规约任务](openspec/changes/build-online-exam-platform/tasks.md)推进。[开发启动说明](deploy/README.md)包含 Docker、两个 Web 入口、小程序开发入口和测试命令。[构建依赖清单](docs/changes/build-online-exam-platform/dependencies.md)记录固定版本、许可证和安全公告。
+
+`build-online-exam-platform` 是当前实施规约。[旧五项规划](openspec/changes/planning-overview.md)保留作历史参考。下文的考试演示及其测试继续独立保留，演示的浏览器本地成绩不作为平台成绩导入。功能表为项目目标，实施进度以任务清单为准。
+
 ## 运行考试演示
 
 已提供一个免依赖的中文考试页面，支持 5 道单选题、1/5/10 分钟倒计时、答题标记、刷新恢复、到时自动交卷、成绩及答案解析。

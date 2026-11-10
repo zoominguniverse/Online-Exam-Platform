@@ -1,0 +1,56 @@
+x-api-image: &api-image
+  image: online-exam-java:dev
+  build:
+    context: ../backend
+
+services:
+  db:
+    image: postgres:17.11@sha256:ff87138949ad9a46f32ff23bd6852b52ce024a13dffe9b4087be98292cdd3b4f
+    environment:
+      POSTGRES_DB: exam_java_dev
+      POSTGRES_USER: exam_migrator
+      POSTGRES_PASSWORD: ${EXAM_MIGRATION_PASSWORD:?Set EXAM_MIGRATION_PASSWORD}
+      DATABASE_APP_PASSWORD: ${EXAM_APP_PASSWORD:?Set EXAM_APP_PASSWORD}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "exam_migrator", "-d", "exam_java_dev"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+    volumes:
+      - database:/var/lib/postgresql/data
+      - ./postgres/init-app-role.sql:/docker-entrypoint-initdb.d/10-init-app-role.sql:ro
+
+  migrate:
+    <<: *api-image
+    command: ["--migrate"]
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/exam_java_dev
+      DATABASE_USER: exam_migrator
+      DATABASE_PASSWORD: ${EXAM_MIGRATION_PASSWORD:?Set EXAM_MIGRATION_PASSWORD}
+      BOOTSTRAP_ADMIN_USERNAME: ${EXAM_BOOTSTRAP_ADMIN_USERNAME:-admin}
+      BOOTSTRAP_ADMIN_PASSWORD: ${EXAM_BOOTSTRAP_ADMIN_PASSWORD:-}
+      EXAM_SEED_DEV_GRADE: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    <<: *api-image
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/exam_java_dev
+      DATABASE_USER: exam_app
+      PRIVATE_STORAGE_ROOT: /var/lib/exam-platform/attachments
+      WECHAT_APP_ID: ${WECHAT_APP_ID:-}
+      WECHAT_APP_SECRET: ${WECHAT_APP_SECRET:-}
+      DATABASE_PASSWORD: ${EXAM_APP_PASSWORD:?Set EXAM_APP_PASSWORD}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    volumes:
+      - attachments:/var/lib/exam-platform/attachments
+    ports:
+      - "127.0.0.1:${EXAM_API_PORT:-8081}:8080"
+
+volumes:
+  database:
+  attachments:

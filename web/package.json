@@ -1,0 +1,27 @@
+{
+  "name": "exam-platform-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:admin": "vite --config admin/vite.config.ts",
+    "dev:student": "vite --config student/vite.config.ts",
+    "build": "vite build --config admin/vite.config.ts && vite build --config student/vite.config.ts"
+  },
+  "engines": {
+    "node": "22.22.2"
+  },
+  "dependencies": {
+    "echarts": "5.6.0",
+    "element-plus": "2.14.8",
+    "katex": "0.16.47",
+    "pinia": "3.0.4",
+    "vue": "3.5.45",
+    "vue-router": "4.6.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "6.0.10",
+    "typescript": "5.9.3",
+    "vite": "7.3.8"
+  }
+}

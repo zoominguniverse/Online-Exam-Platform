@@ -1,0 +1,20 @@
+<view class="page">
+  <view class="title">{{id ? '任务详情' : '我的年级任务'}}</view>
+  <view wx:if="{{busy}}">正在加载任务…</view>
+  <view wx:elif="{{error}}" class="error">{{error}}<button bindtap="retry">重试</button></view>
+  <view wx:elif="{{!tasks.length}}">暂无年级任务。</view>
+  <view wx:for="{{tasks}}" wx:key="id" wx:for-item="task">
+    <navigator wx:if="{{!id}}" url="/pages/tasks/index?id={{task.id}}">{{task.name}}</navigator>
+    <view wx:else>
+      <view>{{task.name}}</view>
+      <view wx:if="{{task.state === 'ARCHIVED'}}">已归档</view>
+      <view wx:for="{{task.papers}}" wx:key="paperId" wx:for-item="paper">
+        {{paper.name}} · {{paper.durationMinutes}} 分钟 · {{paper.status === 'NOT_STARTED' ? '未开始' : paper.status}}
+      </view>
+    </view>
+  </view>
+  <block wx:if="{{!id}}">
+    <button bindtap="previous" disabled="{{busy || page <= 1}}">上一页</button>
+    <button bindtap="next" disabled="{{busy || page * 20 >= total}}">下一页</button>
+  </block>
+</view>
