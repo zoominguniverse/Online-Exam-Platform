@@ -10,6 +10,7 @@
       <view wx:if="{{task.state === 'ARCHIVED'}}">已归档</view>
       <view wx:for="{{task.papers}}" wx:key="paperId" wx:for-item="paper">
         {{paper.name}} · {{paper.durationMinutes}} 分钟 · {{paper.status === 'NOT_STARTED' ? '未开始' : paper.status}}
+        <button data-task="{{task.id}}" data-paper="{{paper.paperId}}" bindtap="start">进入答卷</button>
       </view>
     </view>
   </view>

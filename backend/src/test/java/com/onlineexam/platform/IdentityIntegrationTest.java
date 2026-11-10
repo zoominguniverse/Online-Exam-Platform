@@ -1,6 +1,7 @@
 package com.onlineexam.platform;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,6 +27,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
+import javax.sql.DataSource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,6 +59,7 @@ class IdentityIntegrationTest {
     @Autowired AttachmentService attachments;
     @Autowired AdjustableClock clock;
     @Autowired JdbcTemplate jdbc;
+    @Autowired DataSource dataSource;
     @Value("${PRIVATE_STORAGE_ROOT}") String privateRoot;
     @MockitoBean WeChatIdentityProvider wechat;
     @LocalServerPort int port;
@@ -65,7 +68,8 @@ class IdentityIntegrationTest {
     void prepare() {
         clock.override = null;
         jdbc.execute("""
-                TRUNCATE task_recipients, task_papers, tasks, attachment_links, attachments,
+                TRUNCATE attempt_answers, attempt_start_keys, attempt_items, attempts,
+                    task_recipients, task_papers, tasks, attachment_links, attachments,
                     paper_items, paper_versions, papers, question_versions, questions, subjects
                 """);
         jdbc.update("DELETE FROM wechat_bindings");
@@ -397,11 +401,17 @@ class IdentityIntegrationTest {
             if ("TIMED".equals(type)) timedId = id;
         }
         assertThat(student.get("/me/papers?status=UPCOMING").data().path("total").asInt()).isEqualTo(1);
+        assertThat(student.get("/me/papers?type=TASK").data().path("total").asInt()).isZero();
+        assertThat(student.get("/me/papers?type=TIMED&status=UPCOMING").data().path("items").get(0)
+                .path("id").asText()).isEqualTo(timedId);
         assertThat(student.get("/me/papers/" + timedId).data().path("status").asText()).isEqualTo("UPCOMING");
         clock.override = Instant.parse("2026-11-10T00:01:00Z");
         assertThat(student.get("/me/papers/" + timedId).data().path("status").asText()).isEqualTo("OPEN");
+        assertThat(student.get("/me/papers?type=TIMED&status=OPEN").data().path("total").asInt()).isEqualTo(1);
         clock.override = Instant.parse("2026-11-10T00:02:00Z");
         assertThat(student.get("/me/papers/" + timedId).data().path("status").asText()).isEqualTo("CLOSED");
+        assertThat(student.get("/me/papers?type=TIMED&status=CLOSED").data().path("total").asInt()).isEqualTo(1);
+        assertThat(student.get("/me/papers?type=TIMED&status=OPEN").data().path("total").asInt()).isZero();
         assertThat(student.get("/me/papers?status=OPEN&type=FIXED").data().path("total").asInt()).isEqualTo(1);
         assertThat(student.get("/me/papers/" + fixedId).data().has("items")).isFalse();
         UUID otherGrade = UUID.randomUUID();
@@ -411,6 +421,7 @@ class IdentityIntegrationTest {
                 Map.of("gradeId", otherGrade, "username", "OtherGrade", "password", PASSWORD)).status()).isEqualTo(201);
         assertThat(other.login("OtherGrade", PASSWORD).status()).isEqualTo(200);
         assertThat(other.get("/me/papers/" + fixedId).status()).isEqualTo(404);
+        assertThat(other.get("/me/papers?type=FIXED").data().path("total").asInt()).isZero();
 
         var wrong = Map.of("name", "跨学科", "durationMinutes", 30,
                 "groups", java.util.List.of(Map.of("name", "组", "questionIds", java.util.List.of(foreign))));
@@ -480,6 +491,368 @@ class IdentityIntegrationTest {
                 "subjectId", subject, "difficulty", 3, "stemHtml", "题目", "answer", Map.of("text", "答案")));
         assertThat(created.status()).isEqualTo(201);
         return created.data().path("id").asText();
+    }
+
+    @Test
+    void startsOnlyEligibleOrdinaryPapersAndFreezesSafeSnapshots() throws Exception {
+        clock.override = Instant.parse("2026-11-10T00:00:00Z");
+        var admin = new Browser();
+        assertThat(admin.login("MainAdmin", PASSWORD).status()).isEqualTo(200);
+        var student = new Browser();
+        assertThat(student.write("POST", "/auth/register", Map.of("username", "AttemptStudent",
+                "password", PASSWORD, "gradeId", GRADE)).status()).isEqualTo(201);
+        assertThat(student.login("AttemptStudent", PASSWORD).status()).isEqualTo(200);
+        UUID otherGrade = UUID.randomUUID();
+        jdbc.update("INSERT INTO grades(id, name) VALUES (?, '异年级')", otherGrade);
+        var outsider = new Browser();
+        assertThat(outsider.write("POST", "/auth/register", Map.of("username", "AttemptOutsider",
+                "password", PASSWORD, "gradeId", otherGrade)).status()).isEqualTo(201);
+        assertThat(outsider.login("AttemptOutsider", PASSWORD).status()).isEqualTo(200);
+        String subject = admin.write("POST", "/admin/subjects", Map.of("gradeId", GRADE,
+                "name", "答卷测试学科")).data().path("id").asText();
+        String question = createShortQuestion(admin, subject, "2.50");
+        var group = java.util.List.of(Map.of("name", "题组", "questionIds", java.util.List.of(question)));
+        var draft = Map.of("name", "未发布", "durationMinutes", 20, "groups", group);
+        String unpublished = admin.write("POST", "/admin/papers", Map.of("subjectId", subject,
+                "type", "FIXED", "draft", draft)).data().path("paper").path("id").asText();
+        String fixed = createPublishedPaper(admin, subject, question, "FIXED", "练习卷");
+        String task = createPublishedPaper(admin, subject, question, "TASK", "任务卷");
+        var timedDraft = Map.of("name", "时段卷", "durationMinutes", 20, "groups", group,
+                "opensAt", "2026-11-10T00:01:00Z", "closesAt", "2026-11-10T00:02:00Z");
+        var created = admin.write("POST", "/admin/papers", Map.of("subjectId", subject,
+                "type", "TIMED", "draft", timedDraft));
+        String timed = created.data().path("paper").path("id").asText();
+        assertThat(admin.write("POST", "/admin/papers/" + timed + "/publish",
+                Map.of("expectedVersion", 1)).status()).isEqualTo(200);
+
+        assertThat(new Browser().write("POST", "/me/papers/" + fixed + "/attempts", null).status()).isEqualTo(401);
+        assertThat(admin.write("POST", "/me/papers/" + fixed + "/attempts", null).status()).isEqualTo(403);
+        for (String id : java.util.List.of(unpublished, task)) {
+            assertThat(student.start(id, null).status()).isEqualTo(404);
+        }
+        assertThat(outsider.start(fixed, null).status()).isEqualTo(404);
+        assertThat(student.start(timed, null).status()).isEqualTo(409);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM attempts", Integer.class)).isZero();
+
+        var first = student.start(fixed, "fixed-key");
+        assertThat(first.status()).isEqualTo(201);
+        String firstId = first.data().path("id").asText();
+        assertThat(first.data().path("deadlineAt").asText()).isEqualTo("2026-11-10T00:20:00Z");
+        assertThat(first.data().path("serverNow").asText()).isEqualTo("2026-11-10T00:00:00Z");
+        assertThat(first.data().path("questions").get(0).path("questionVersion").asInt()).isEqualTo(1);
+        assertThat(first.data().path("questions").get(0).path("score").asText()).isEqualTo("2.50");
+        assertThat(first.response().body()).doesNotContain("答案", "correctAnswer", "explanationHtml");
+        assertThat(student.start(fixed, "fixed-key").data().path("id").asText()).isEqualTo(firstId);
+        assertThat(student.start(timed, "fixed-key").status()).isEqualTo(409);
+        assertThat(student.get("/me/attempts/" + firstId).data().path("id").asText()).isEqualTo(firstId);
+        assertThat(outsider.get("/me/attempts/" + firstId).status()).isEqualTo(404);
+        assertThat(student.start(fixed, "another-key").data().path("id").asText()).isNotEqualTo(firstId);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM attempts", Integer.class)).isEqualTo(2);
+
+        var secondSession = new Browser();
+        assertThat(secondSession.login("AttemptStudent", PASSWORD).status()).isEqualTo(200);
+        var concurrentWeb = CompletableFuture.supplyAsync(() -> {
+            try { return student.start(fixed, "concurrent-key"); }
+            catch (Exception error) { throw new RuntimeException(error); }
+        });
+        var concurrentOther = CompletableFuture.supplyAsync(() -> {
+            try { return secondSession.start(fixed, "concurrent-key"); }
+            catch (Exception error) { throw new RuntimeException(error); }
+        });
+        assertThat(concurrentWeb.join().status()).isEqualTo(201);
+        assertThat(concurrentOther.join().status()).isEqualTo(201);
+        assertThat(concurrentWeb.join().data().path("id").asText())
+                .isEqualTo(concurrentOther.join().data().path("id").asText());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM attempts", Integer.class)).isEqualTo(3);
+
+        var revised = Map.of("type", "SHORT", "score", "3.00", "subjectId", subject,
+                "difficulty", 3, "stemHtml", "新题目", "answer", Map.of("text", "新答案"));
+        assertThat(admin.write("PATCH", "/admin/questions/" + question,
+                Map.of("expectedVersion", 1, "question", revised)).status()).isEqualTo(200);
+        var restored = student.get("/me/attempts/" + firstId);
+        assertThat(restored.data().path("questions").get(0).path("stemHtml").asText()).isEqualTo("题目");
+        assertThat(restored.data().path("questions").get(0).path("score").asText()).isEqualTo("2.50");
+        assertThat(restored.response().body()).doesNotContain("答案", "correctAnswer", "explanationHtml");
+
+        clock.override = Instant.parse("2026-11-10T00:01:00Z");
+        var opening = student.start(timed, "opening");
+        assertThat(opening.status()).isEqualTo(201);
+        assertThat(opening.data().path("deadlineAt").asText()).isEqualTo("2026-11-10T00:02:00Z");
+        clock.override = Instant.parse("2026-11-10T00:01:59.999Z");
+        assertThat(student.start(timed, "before-close").status()).isEqualTo(201);
+        clock.override = Instant.parse("2026-11-10T00:02:00Z");
+        assertThat(student.start(timed, "at-close").status()).isEqualTo(409);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM attempts", Integer.class)).isEqualTo(5);
+        assertThat(admin.write("DELETE", "/admin/papers/" + fixed,
+                Map.of("expectedVersion", 2)).status()).isEqualTo(200);
+        assertThat(student.start(fixed, "after-archive").status()).isEqualTo(404);
+        assertThat(student.get("/me/attempts/" + firstId).status()).isEqualTo(200);
+    }
+
+    @Test
+    void startsFrozenTaskPapersOnceAcrossWebAndWechat() throws Exception {
+        clock.override = Instant.parse("2026-11-10T00:00:00Z");
+        var admin = new Browser();
+        assertThat(admin.login("MainAdmin", PASSWORD).status()).isEqualTo(200);
+        var member = new Browser();
+        var memberAccount = member.write("POST", "/auth/register", Map.of("username", "TaskStarter",
+                "password", PASSWORD, "gradeId", GRADE)).data();
+        assertThat(member.login("TaskStarter", PASSWORD).status()).isEqualTo(200);
+        var other = new Browser();
+        assertThat(other.write("POST", "/auth/register", Map.of("username", "TaskOther",
+                "password", PASSWORD, "gradeId", GRADE)).status()).isEqualTo(201);
+        assertThat(other.login("TaskOther", PASSWORD).status()).isEqualTo(200);
+        String subjectId = admin.write("POST", "/admin/subjects", Map.of("gradeId", GRADE,
+                "name", "任务开始学科")).data().path("id").asText();
+        String questionId = createShortQuestion(admin, subjectId, "2.50");
+        String paperA = createPublishedPaper(admin, subjectId, questionId, "TASK", "任务甲");
+        String paperB = createPublishedPaper(admin, subjectId, questionId, "TASK", "任务乙");
+        String ordinary = createPublishedPaper(admin, subjectId, questionId, "FIXED", "普通练习");
+        var form = Map.of("name", "双卷任务", "gradeId", GRADE,
+                "paperIds", java.util.List.of(paperA, paperB));
+        String taskId = admin.write("POST", "/admin/tasks", form).data().path("id").asText();
+        assertThat(member.startTask(taskId, paperA, "before-publish").status()).isEqualTo(404);
+        var taskPublished = admin.write("POST", "/admin/tasks/" + taskId + "/publish",
+                Map.of("expectedVersion", 1));
+        assertThat(taskPublished.status()).isEqualTo(200);
+        String frozenB = taskPublished.data().path("papers").get(1).path("paperVersionId").asText();
+        var revisedPaper = Map.of("name", "新版任务乙", "durationMinutes", 30,
+                "groups", java.util.List.of(Map.of("name", "题组", "questionIds", java.util.List.of(questionId))));
+        assertThat(admin.write("PATCH", "/admin/papers/" + paperB,
+                Map.of("expectedVersion", 2, "draft", revisedPaper)).status()).isEqualTo(200);
+        assertThat(admin.write("POST", "/admin/papers/" + paperB + "/publish",
+                Map.of("expectedVersion", 3)).status()).isEqualTo(200);
+        var late = new Browser();
+        assertThat(late.write("POST", "/auth/register", Map.of("username", "LateStarter",
+                "password", PASSWORD, "gradeId", GRADE)).status()).isEqualTo(201);
+        assertThat(late.login("LateStarter", PASSWORD).status()).isEqualTo(200);
+        assertThat(late.startTask(taskId, paperA, "late").status()).isEqualTo(404);
+        assertThat(member.startTask(taskId, ordinary, "wrong-paper").status()).isEqualTo(404);
+        assertThat(member.startTask(UUID.randomUUID().toString(), paperA, "wrong-task").status()).isEqualTo(404);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM attempts", Integer.class)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM attempt_start_keys", Integer.class)).isZero();
+
+        subject("task-start-code", "task-start-openid");
+        String token = wxBind(new Browser(), "task-start-code", "TaskStarter").data().path("token").asText();
+        var gate = new java.util.concurrent.CountDownLatch(1);
+        var web = CompletableFuture.supplyAsync(() -> {
+            try { gate.await(); return member.startTask(taskId, paperA, "same-task-key"); }
+            catch (Exception error) { throw new RuntimeException(error); }
+        });
+        var wechat = CompletableFuture.supplyAsync(() -> {
+            try { gate.await(); return bearerStart(taskId, paperA, token, "same-task-key"); }
+            catch (Exception error) { throw new RuntimeException(error); }
+        });
+        gate.countDown();
+        assertThat(web.join().status()).isEqualTo(201);
+        assertThat(wechat.join().status()).isEqualTo(201);
+        String firstId = web.join().data().path("id").asText();
+        assertThat(wechat.join().data().path("id").asText()).isEqualTo(firstId);
+        assertThat(member.startTask(UUID.randomUUID().toString(), paperA, "same-task-key").status()).isEqualTo(404);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM attempts WHERE paper_id = ?", Integer.class,
+                UUID.fromString(paperA))).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM attempt_items WHERE attempt_id = ?", Integer.class,
+                UUID.fromString(firstId))).isEqualTo(1);
+        assertThatThrownBy(() -> jdbc.update("""
+                INSERT INTO attempts(id, owner_id, task_id, paper_id, paper_version_id, started_at, deadline_at)
+                SELECT ?, owner_id, task_id, paper_id, paper_version_id, started_at, deadline_at
+                FROM attempts WHERE id = ?
+                """, UUID.randomUUID(), UUID.fromString(firstId)))
+                .isInstanceOf(org.springframework.dao.DuplicateKeyException.class);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM attempts WHERE paper_id = ?", Integer.class,
+                UUID.fromString(paperA))).isEqualTo(1);
+        String deadline = web.join().data().path("deadlineAt").asText();
+        assertThat(web.join().response().body()).doesNotContain("correctAnswer", "explanationHtml", "答案");
+
+        UUID changedGrade = UUID.randomUUID();
+        jdbc.update("INSERT INTO grades(id, name) VALUES (?, '转入年级')", changedGrade);
+        assertThat(admin.write("PATCH", USERS + "/" + memberAccount.path("id").asText(),
+                Map.of("username", "TaskStarter", "role", "STUDENT", "gradeId", changedGrade,
+                        "expectedVersion", 1)).status()).isEqualTo(200);
+
+        var secondGate = new java.util.concurrent.CountDownLatch(1);
+        var secondWeb = CompletableFuture.supplyAsync(() -> {
+            try { secondGate.await(); return member.startTask(taskId, paperB, "different-web"); }
+            catch (Exception error) { throw new RuntimeException(error); }
+        });
+        var secondWechat = CompletableFuture.supplyAsync(() -> {
+            try { secondGate.await(); return bearerStart(taskId, paperB, token, "different-wechat"); }
+            catch (Exception error) { throw new RuntimeException(error); }
+        });
+        secondGate.countDown();
+        assertThat(secondWeb.join().status()).isEqualTo(201);
+        assertThat(secondWechat.join().status()).isEqualTo(201);
+        String secondId = secondWeb.join().data().path("id").asText();
+        assertThat(secondWechat.join().data().path("id").asText()).isEqualTo(secondId);
+        assertThat(secondWeb.join().data().path("paperVersionId").asText()).isEqualTo(frozenB);
+        assertThat(secondId).isNotEqualTo(firstId);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM attempts WHERE owner_id = ?", Integer.class,
+                UUID.fromString(memberAccount.path("id").asText()))).isEqualTo(2);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM attempt_items WHERE attempt_id = ?", Integer.class,
+                UUID.fromString(secondId))).isEqualTo(1);
+
+        var otherStart = other.startTask(taskId, paperA, "other-student");
+        assertThat(otherStart.status()).isEqualTo(201);
+        assertThat(otherStart.data().path("id").asText()).isNotEqualTo(firstId);
+        assertThat(other.get("/me/attempts/" + firstId).status()).isEqualTo(404);
+        assertThat(admin.write("DELETE", "/admin/papers/" + paperB,
+                Map.of("expectedVersion", 4)).status()).isEqualTo(200);
+        assertThat(other.startTask(taskId, paperB, "paper-archived").status()).isEqualTo(404);
+        assertThat(member.startTask(taskId, paperB, "paper-archived-resume").data().path("id").asText())
+                .isEqualTo(secondId);
+        var edited = Map.of("type", "SHORT", "score", "3.00", "subjectId", subjectId,
+                "difficulty", 3, "stemHtml", "修改后题目", "answer", Map.of("text", "修改后答案"));
+        assertThat(admin.write("PATCH", "/admin/questions/" + questionId,
+                Map.of("expectedVersion", 1, "question", edited)).status()).isEqualTo(200);
+        clock.override = Instant.parse("2026-11-10T00:05:00Z");
+        var resumed = bearer("GET", "/me/attempts/" + firstId, token);
+        assertThat(resumed.status()).isEqualTo(200);
+        assertThat(resumed.data().path("deadlineAt").asText()).isEqualTo(deadline);
+        assertThat(resumed.data().path("questions").get(0).path("stemHtml").asText()).isEqualTo("题目");
+        assertThat(member.startTask(taskId, paperA, "retry-after-edit").data().path("id").asText()).isEqualTo(firstId);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM attempt_items WHERE attempt_id = ?", Integer.class,
+                UUID.fromString(firstId))).isEqualTo(1);
+        assertThat(admin.write("DELETE", "/admin/tasks/" + taskId,
+                Map.of("expectedVersion", 2)).status()).isEqualTo(200);
+        assertThat(member.startTask(taskId, paperA, "archived-resume").data().path("id").asText()).isEqualTo(firstId);
+        assertThat(other.startTask(taskId, paperB, "task-archived-new").status()).isEqualTo(404);
+        assertThat(late.startTask(taskId, paperB, "archived-new").status()).isEqualTo(404);
+        assertThat(other.start(ordinary, "ordinary-1").status()).isEqualTo(201);
+        assertThat(other.start(ordinary, "ordinary-2").status()).isEqualTo(201);
+    }
+
+    @Test
+    void savesWholeAnswerSetWithVersionAndDeadlineChecks() throws Exception {
+        clock.override = Instant.parse("2026-11-10T00:00:00Z");
+        var admin = new Browser();
+        assertThat(admin.login("MainAdmin", PASSWORD).status()).isEqualTo(200);
+        var student = new Browser();
+        assertThat(student.write("POST", "/auth/register", Map.of("username", "AnswerStudent",
+                "password", PASSWORD, "gradeId", GRADE)).status()).isEqualTo(201);
+        assertThat(student.login("AnswerStudent", PASSWORD).status()).isEqualTo(200);
+        var other = new Browser();
+        assertThat(other.write("POST", "/auth/register", Map.of("username", "AnswerOther",
+                "password", PASSWORD, "gradeId", GRADE)).status()).isEqualTo(201);
+        assertThat(other.login("AnswerOther", PASSWORD).status()).isEqualTo(200);
+        String subjectId = admin.write("POST", "/admin/subjects", Map.of("gradeId", GRADE,
+                "name", "答案测试学科")).data().path("id").asText();
+        var options = java.util.List.of(Map.of("id", "A", "text", "甲"), Map.of("id", "B", "text", "乙"));
+        var base = Map.<String, Object>of("subjectId", subjectId, "difficulty", 3,
+                "score", "1.00", "stemHtml", "题目");
+        var variants = java.util.List.of(
+                Map.of("type", "SINGLE", "options", options, "answer", Map.of("optionIds", java.util.List.of("A"))),
+                Map.of("type", "MULTIPLE", "options", options, "answer", Map.of("optionIds", java.util.List.of("A", "B"))),
+                Map.of("type", "TRUE_FALSE", "options", java.util.List.of(), "answer", Map.of("optionIds", java.util.List.of("true"))),
+                Map.of("type", "GAP", "options", java.util.List.of(), "stemHtml", "<span data-gap=\"1\">___</span>",
+                        "answer", Map.of("gaps", java.util.List.of("参考"))),
+                Map.of("type", "SHORT", "options", java.util.List.of(), "answer", Map.of("text", "参考")));
+        var questionIds = new java.util.ArrayList<String>();
+        for (var variant : variants) {
+            var draft = new java.util.HashMap<String, Object>(base);
+            draft.putAll(variant);
+            var created = admin.write("POST", "/admin/questions", draft);
+            assertThat(created.status()).isEqualTo(201);
+            questionIds.add(created.data().path("id").asText());
+        }
+        var paperDraft = Map.of("name", "五题型卷", "durationMinutes", 20,
+                "groups", java.util.List.of(Map.of("name", "题组", "questionIds", questionIds)));
+        String paper = admin.write("POST", "/admin/papers", Map.of("subjectId", subjectId,
+                "type", "FIXED", "draft", paperDraft)).data().path("paper").path("id").asText();
+        assertThat(admin.write("POST", "/admin/papers/" + paper + "/publish",
+                Map.of("expectedVersion", 1)).status()).isEqualTo(200);
+        var started = student.start(paper, "answers-start");
+        assertThat(started.status()).isEqualTo(201);
+        String attempt = started.data().path("id").asText();
+        String path = "/me/attempts/" + attempt + "/answers";
+        assertThat(new Browser().write("PUT", path, Map.of("expectedVersion", 1,
+                "answerItems", java.util.List.of())).status()).isEqualTo(401);
+        assertThat(admin.write("PUT", path, Map.of("expectedVersion", 1,
+                "answerItems", java.util.List.of())).status()).isEqualTo(403);
+        var answerItems = java.util.List.of(
+                Map.of("questionId", questionIds.get(0), "answer", Map.of("optionId", "B")),
+                Map.of("questionId", questionIds.get(1), "answer", Map.of("optionIds", java.util.List.of("B", "A"))),
+                Map.of("questionId", questionIds.get(2), "answer", Map.of("optionId", "false")),
+                Map.of("questionId", questionIds.get(3), "answer", Map.of("texts", java.util.List.of("填写"))),
+                Map.of("questionId", questionIds.get(4), "answer", Map.of("text", "作答")));
+        assertThat(other.write("PUT", path, Map.of("expectedVersion", 1, "answerItems", answerItems)).status())
+                .isEqualTo(404);
+        var saved = student.write("PUT", path, Map.of("expectedVersion", 1, "answerItems", answerItems));
+        assertThat(saved.status()).isEqualTo(200);
+        assertThat(saved.data().path("version").asInt()).isEqualTo(2);
+        assertThat(saved.data().path("savedAnswers").size()).isEqualTo(5);
+        assertThat(saved.response().body()).doesNotContain("correctAnswer", "explanationHtml", "参考");
+        subject("answer-code", "answer-openid");
+        String token = wxBind(new Browser(), "answer-code", "AnswerStudent").data().path("token").asText();
+        var restored = bearer("GET", "/me/attempts/" + attempt, token);
+        assertThat(restored.data().path("savedAnswers").size()).isEqualTo(5);
+        assertThat(restored.data().path("version").asInt()).isEqualTo(2);
+        assertThat(restored.data().path("deadlineAt")).isEqualTo(started.data().path("deadlineAt"));
+        assertThat(student.write("PUT", path, Map.of("expectedVersion", 1,
+                "answerItems", java.util.List.of())).status()).isEqualTo(409);
+        var invalid = java.util.List.of(answerItems.get(0),
+                Map.of("questionId", questionIds.get(1), "answer", Map.of("optionIds", java.util.List.of("X"))));
+        assertThat(student.write("PUT", path, Map.of("expectedVersion", 2, "answerItems", invalid)).status())
+                .isEqualTo(400);
+        for (var rejected : java.util.List.of(
+                java.util.List.of(answerItems.get(0), answerItems.get(0)),
+                java.util.List.of(Map.of("questionId", UUID.randomUUID().toString(), "answer", Map.of("text", "外题"))),
+                java.util.List.of(Map.of("questionId", questionIds.get(0), "answer", Map.of("text", "错题型"))),
+                java.util.List.of(Map.of("questionId", questionIds.get(4), "answer", Map.of("text", "x".repeat(10001)))))) {
+            assertThat(student.write("PUT", path, Map.of("expectedVersion", 2, "answerItems", rejected)).status())
+                    .isEqualTo(400);
+        }
+        assertThat(student.get("/me/attempts/" + attempt).data().path("version").asInt()).isEqualTo(2);
+        var cleared = student.write("PUT", path, Map.of("expectedVersion", 2,
+                "answerItems", java.util.List.of(answerItems.get(0))));
+        assertThat(cleared.status()).isEqualTo(200);
+        assertThat(cleared.data().path("savedAnswers").size()).isEqualTo(1);
+        clock.override = Instant.parse("2026-11-10T00:19:59.999Z");
+        var clearedItem = new java.util.HashMap<String, Object>();
+        clearedItem.put("questionId", questionIds.get(0));
+        clearedItem.put("answer", null);
+        var secondSession = new Browser();
+        assertThat(secondSession.login("AnswerStudent", PASSWORD).status()).isEqualTo(200);
+        var gate = new java.util.concurrent.CountDownLatch(1);
+        var firstWrite = CompletableFuture.supplyAsync(() -> {
+            try { gate.await(); return student.write("PUT", path,
+                    Map.of("expectedVersion", 3, "answerItems", java.util.List.of(clearedItem))); }
+            catch (Exception error) { throw new RuntimeException(error); }
+        });
+        var secondWrite = CompletableFuture.supplyAsync(() -> {
+            try { gate.await(); return secondSession.write("PUT", path,
+                    Map.of("expectedVersion", 3, "answerItems", answerItems)); }
+            catch (Exception error) { throw new RuntimeException(error); }
+        });
+        gate.countDown();
+        assertThat(java.util.List.of(firstWrite.join().status(), secondWrite.join().status()))
+                .containsExactlyInAnyOrder(200, 409);
+        var winner = student.get("/me/attempts/" + attempt).data();
+        assertThat(winner.path("version").asInt()).isEqualTo(4);
+        assertThat(winner.path("savedAnswers").size()).isIn(0, 5);
+        try (var blocking = dataSource.getConnection()) {
+            blocking.setAutoCommit(false);
+            try (var lock = blocking.prepareStatement("UPDATE attempts SET version = version WHERE id = ?")) {
+                lock.setObject(1, UUID.fromString(attempt));
+                lock.executeUpdate();
+            }
+            var waitingSave = CompletableFuture.supplyAsync(() -> {
+                try { return student.write("PUT", path, Map.of("expectedVersion", 4,
+                        "answerItems", java.util.List.of())); }
+                catch (Exception error) { throw new RuntimeException(error); }
+            });
+            boolean waiting = false;
+            for (int retry = 0; retry < 80 && !waiting; retry++) {
+                waiting = jdbc.queryForObject("SELECT count(*) FROM pg_stat_activity WHERE wait_event_type = 'Lock' "
+                        + "AND query LIKE '%FROM attempts WHERE id =%'", Integer.class) > 0;
+                if (!waiting) Thread.sleep(25);
+            }
+            assertThat(waiting).isTrue();
+            clock.override = Instant.parse("2026-11-10T00:20:00Z");
+            blocking.commit();
+            assertThat(waitingSave.join().status()).isEqualTo(409);
+        }
+        assertThat(student.get("/me/attempts/" + attempt).data().path("savedAnswers").size())
+                .isEqualTo(winner.path("savedAnswers").size());
     }
 
     @Test
@@ -625,6 +998,15 @@ class IdentityIntegrationTest {
         return new Result(response, json.readTree(response.body()).path("data"));
     }
 
+    private Result bearerStart(String task, String paper, String token, String key) throws Exception {
+        var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/v1/me/tasks/"
+                + task + "/papers/" + paper + "/attempts"))
+                .header("Authorization", "Bearer " + token).header("Idempotency-Key", key)
+                .POST(HttpRequest.BodyPublishers.noBody()).build();
+        var response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        return new Result(response, json.readTree(response.body()).path("data"));
+    }
+
     private record Result(HttpResponse<String> response, JsonNode data) {
         int status() { return response.statusCode(); }
     }
@@ -641,6 +1023,27 @@ class IdentityIntegrationTest {
 
         Result write(String method, String path, Object body) throws Exception {
             return request(method, path, body, true);
+        }
+
+        Result start(String paper, String key) throws Exception {
+            return startPath("/me/papers/" + paper + "/attempts", key);
+        }
+
+        Result startTask(String task, String paper, String key) throws Exception {
+            return startPath("/me/tasks/" + task + "/papers/" + paper + "/attempts", key);
+        }
+
+        Result startPath(String path, String key) throws Exception {
+            var csrf = get("/auth/csrf");
+            var csrfCookie = csrf.response().headers().firstValue("Set-Cookie").orElseThrow().split(";", 2)[0];
+            var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port
+                    + "/api/v1" + path))
+                    .header("Cookie", session + "; " + csrfCookie)
+                    .header(csrf.data().path("headerName").asText(), csrf.data().path("token").asText());
+            if (key != null) request.header("Idempotency-Key", key);
+            var response = http.send(request.POST(HttpRequest.BodyPublishers.noBody()).build(),
+                    HttpResponse.BodyHandlers.ofString());
+            return new Result(response, json.readTree(response.body()).path("data"));
         }
 
         HttpRequest prepare(String method, String path, Object body, boolean withCsrf) throws Exception {

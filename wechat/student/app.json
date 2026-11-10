@@ -4,7 +4,8 @@
     "pages/auth/index",
     "pages/profile/index",
     "pages/papers/index",
-    "pages/tasks/index"
+    "pages/tasks/index",
+    "pages/attempt/index"
   ],
   "window": {
     "navigationBarTitleText": "在线考试 · 学生端"

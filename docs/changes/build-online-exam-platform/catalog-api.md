@@ -17,11 +17,17 @@
 | POST /admin/papers | `subjectId`、`type`、`draft` |
 | GET/PATCH/DELETE /admin/papers/{id} | 详情可用 `versionId` 获取指定快照；修改携带 `draft` 与 `expectedVersion`；删除携带 `expectedVersion`，已发布试卷改为归档 |
 | POST /admin/papers/{id}/publish | 携带 `expectedVersion`，返回已发布内容和冻结题目 |
-| GET /me/papers、GET /me/papers/{id} | 仅可见同年级已发布且未归档的普通练习卷。列表可按 `type` 和 `status` 过滤，响应仅含试卷元信息 |
+| GET /me/papers、GET /me/papers/{id} | 仅可见同年级已发布且未归档的固定卷、时段卷；任务卷不从此入口读取。列表可按 `type=FIXED/TIMED`、`status=OPEN/UPCOMING/CLOSED` 过滤。时段按服务端时钟判定：开始时刻为 `OPEN`，结束时刻为 `CLOSED`。响应仅含试卷元信息；开始请求再次校验资格。 |
+| POST /me/papers/{id}/attempts | 同年级启用学生开始已发布未归档固定卷或开放中的时段卷。Web 需 CSRF；可选 `Idempotency-Key` 为 1–128 个可打印 ASCII 字符，24 小时内同学生同键返回原答卷，同键换卷冲突。无键或新键创建独立答卷。时段卷仅在开始时刻含、结束时刻不含的区间内创建；截止取时长与开放结束较早值。返回安全题目快照、`serverNow`、`deadlineAt`、版本和空 `savedAnswers`。 |
+| GET /me/attempts/{id} | 仅本人可读答卷、冻结题目快照及最新已保存答案；他人答卷为 404。交卷和到期冻结尚属后续任务。 |
+| PUT /me/attempts/{id}/answers | 请求 `{expectedVersion,answerItems:[{questionId,answer}]}`，整份替换已保存答案；遗漏题目或 `answer:null` 清空该题。答案按题型分别为 `optionId`、`optionIds`、`texts`、`text`。以答卷快照校验题目与选项，单题非法则整批 400 且版本不变；旧版本 409 `VERSION_CONFLICT`；截止或非作答状态 409 `EXAM_CLOSED`。成功返回最新答卷、答案、版本与 `serverNow`。Web 需 CSRF。 |
 | GET/POST /admin/tasks | 列表可按 `gradeId`、`state` 筛选；新建接收 `gradeId`、`name`、`paperIds` |
 | GET/PATCH/DELETE /admin/tasks/{id} | 详情含冻结的卷和名单人数；修改携带 `draft` 与 `expectedVersion`；删除携带 `expectedVersion` |
 | POST /admin/tasks/{id}/publish | 携带 `expectedVersion`，同一事务冻结卷版本和启用学生名单 |
-| GET /me/tasks、GET /me/tasks/{id} | 以发布时冻结的名单授权，逐卷返回标识、标题、时长及当前状态 |
+| GET /me/tasks、GET /me/tasks/{id} | 以发布时冻结的名单授权，逐卷返回标识、标题和时长。逐卷状态投影尚属 6.4，当前列表状态不能用作答卷完成依据 |
+| POST /me/tasks/{taskId}/papers/{paperId}/attempts | 冻结成员经任务入口首次开始或恢复任务卷；Web 需 CSRF，小程序可用本人令牌。校验任务已发布、卷关联及归档状态；首次使用任务冻结的卷版本建答卷，同一学生同一任务卷后续请求返回原答卷。可选 `Idempotency-Key` 同普通卷契约，同键换卷返回 409；无资格或未关联返回 404，拒绝不落库。已开始答卷即使任务或卷随后归档仍可恢复，截止不重置。 |
+
+答案自动保存按账号与答卷存储待同步草稿，并记录服务端基准版本和本地修订号。网络请求结果未知时，客户端先读取答卷：若服务端已保存相同答案则确认，若版本变化但答案不同则保留双方内容并提示冲突，不自动覆盖。保存中再次编辑不会由旧响应清除新草稿；退出或换账号清理原账号草稿。服务端返回 `EXAM_CLOSED` 后停止重试，未确认的本地答案不计入服务器记录。
 
 列表使用 `page`（默认 1）和 `pageSize`（默认 20，最大 100）。
 

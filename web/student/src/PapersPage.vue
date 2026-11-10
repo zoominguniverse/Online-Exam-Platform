@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ApiError, read } from '../../shared/api'
+import { ApiError, read, write } from '../../shared/api'
 
 type Paper = {
   id: string; name: string; type: 'FIXED' | 'TIMED'; durationMinutes: number
@@ -18,6 +18,13 @@ const page = ref(1)
 const total = ref(0)
 const busy = ref(false)
 const error = ref('')
+async function start(id: string) {
+  error.value = ''
+  try {
+    const attempt = await write<{ id: string }>('POST', `/me/papers/${id}/attempts`)
+    await router.push('/attempts/' + attempt.id)
+  } catch (cause) { error.value = (cause as Error).message }
+}
 
 async function load(next = page.value) {
   busy.value = true
@@ -53,6 +60,7 @@ onMounted(() => load())
         <p v-if="item.opensAt && item.closesAt">
           {{ time.format(new Date(item.opensAt)) }} 至 {{ time.format(new Date(item.closesAt)) }}（香港时间）
         </p>
+        <button type="button" :disabled="item.status !== 'OPEN'" @click="start(item.id)">开始作答</button>
       </li>
     </ul>
     <nav aria-label="试卷分页">

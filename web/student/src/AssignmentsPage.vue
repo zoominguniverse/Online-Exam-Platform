@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ApiError, read } from '../../shared/api'
+import { ApiError, read, write } from '../../shared/api'
 
 type Task = {
   id: string; name: string; state: 'PUBLISHED' | 'ARCHIVED'
@@ -14,6 +14,13 @@ const page = ref(1)
 const total = ref(0)
 const busy = ref(false)
 const error = ref('')
+async function start(taskId: string, paperId: string) {
+  error.value = ''
+  try {
+    const attempt = await write<{ id: string }>('POST', `/me/tasks/${taskId}/papers/${paperId}/attempts`)
+    await router.push('/attempts/' + attempt.id)
+  } catch (cause) { error.value = (cause as Error).message }
+}
 
 async function load(next = page.value) {
   busy.value = true
@@ -51,6 +58,7 @@ onMounted(() => load())
       <ol v-if="id">
         <li v-for="paper in task.papers" :key="paper.paperId">
           {{ paper.name }} · {{ paper.durationMinutes }} 分钟 · {{ paper.status === 'NOT_STARTED' ? '未开始' : paper.status }}
+          <button type="button" @click="start(task.id, paper.paperId)">进入答卷</button>
         </li>
       </ol>
     </article>

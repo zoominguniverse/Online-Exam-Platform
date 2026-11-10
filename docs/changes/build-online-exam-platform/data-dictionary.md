@@ -26,3 +26,7 @@ PostgreSQL 17 中业务标识为 UUID，时间使用 `timestamptz`。Flyway 由�
 | `paper_items` | 卷版本内题目及位置唯一，保存组名、组序、题序、题目版本和分值 |
 | `tasks` | 年级、名称、草稿卷列表、状态、并发版本和发布时间 |
 | `task_papers`、`task_recipients` | 冻结卷版本及学生 UUID。卷标识跨任务唯一，归档继续保留卷和资格快照 |
+| `attempts` | 答卷 UUID、本人、试卷及发布版本、开始与截止时刻、状态和版本；`task_id IS NOT NULL` 时 `(owner_id,paper_id)` 部分唯一索引确保每名学生每张任务卷一次，普通卷不受约束。V9 还以 `(task_id,paper_id,paper_version_id)` 外键固定任务发布时的卷版本，以 `(task_id,owner_id)` 外键固定发布时成员资格 |
+| `attempt_items` | 按答卷与题序冻结题目版本、题干、选项、参考答案、解析和原分值。`(attempt_id,position)` 与 `(attempt_id,question_id)` 唯一；作答 DTO 仅输出安全字段，不包含参考答案与解析 |
+| `attempt_answers` | V10 新增；`(attempt_id,question_id)` 主键并外键到答卷快照，`answer` 为按题型校验后的 JSONB。每次全量保存先整体校验，再同一事务替换已有答案并递增 `attempts.version`；遗漏或显式 null 清空，不保存空条目 |
+| `attempt_start_keys` | `(owner_id,key)` 唯一，记录普通卷或任务卷开始请求对应的答卷和 24 小时有效期；同键换卷冲突，过期后可重用。任务卷不同键仍由答卷部分唯一索引保证只存在一份 |

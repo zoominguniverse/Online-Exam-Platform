@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Online Exam Platform
   version: 0.1.0
-  description: 已实现的版本和身份接口。所有响应使用 code、message、data、requestId。
+  description: 已实现的 v1 接口契约。所有响应使用 code、message、data、requestId。
 servers:
   - url: /api/v1
 paths:
@@ -139,6 +139,115 @@ paths:
         '400': { $ref: '#/components/responses/Error' }
         '401': { $ref: '#/components/responses/Error' }
         '403': { $ref: '#/components/responses/Error' }
+  /me/papers:
+    get:
+      operationId: listVisiblePapers
+      security: [{ webSession: [] }, { wechatToken: [] }]
+      description: 仅返回当前启用学生所属年级的已发布、未归档固定卷和时段卷元信息；任务卷经任务入口读取。状态取服务端时钟，开放区间左闭右开。此接口不授予开始资格。
+      parameters:
+        - { in: query, name: type, description: TASK 查询始终返回空列表, schema: { type: string, enum: [FIXED, TIMED, TASK] } }
+        - { in: query, name: status, schema: { type: string, enum: [OPEN, UPCOMING, CLOSED] } }
+        - { in: query, name: page, schema: { type: integer, minimum: 1, default: 1 } }
+        - { in: query, name: pageSize, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+      responses:
+        '200':
+          description: 按名称和 UUID 稳定排序的分页元信息，含 items、total、page、pageSize；每项含 id、subjectId、type、name、durationMinutes、opensAt、closesAt、status、serverNow
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+  /me/papers/{id}:
+    get:
+      operationId: visiblePaperDetail
+      security: [{ webSession: [] }, { wechatToken: [] }]
+      description: 返回本人可见的普通卷元信息；不包含题目、答案或解析。
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: 试卷元信息，字段同列表项 }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+  /me/papers/{id}/attempts:
+    post:
+      operationId: startOrdinaryAttempt
+      security: [{ webSession: [] }, { wechatToken: [] }]
+      description: 固定卷与时段卷每次新请求创建独立答卷。相同学生与幂等键在 24 小时内返回同一答卷，同键换卷返回冲突。Web 请求须提供 CSRF。时段卷使用服务端左闭右开区间，截止为开始加时长与开放结束时间的较早值。
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string, format: uuid } }
+        - { in: header, name: Idempotency-Key, required: false, schema: { type: string, minLength: 1, maxLength: 128 } }
+      responses:
+        '201': { $ref: '#/components/responses/Attempt' }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /me/attempts/{id}:
+    get:
+      operationId: readOwnAttempt
+      security: [{ webSession: [] }, { wechatToken: [] }]
+      description: 按答卷标识读取本人的冻结题目快照、截止时间、当前版本与已保存答案。
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { $ref: '#/components/responses/Attempt' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+  /me/attempts/{id}/answers:
+    put:
+      operationId: replaceOwnAnswers
+      security: [{ webSession: [] }, { wechatToken: [] }]
+      description: 整份替换答卷已保存答案。未列题目与 answer:null 均清空；只有未截止且 IN_PROGRESS 可写。Web 请求须提供 CSRF。旧 expectedVersion 返回 VERSION_CONFLICT，截止或不可编辑返回 EXAM_CLOSED。
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [expectedVersion, answerItems]
+              properties:
+                expectedVersion: { type: integer, minimum: 1 }
+                answerItems:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required: [questionId, answer]
+                    properties:
+                      questionId: { type: string, format: uuid }
+                      answer:
+                        description: null 清空；单选与判断用 optionId，多选用 optionIds，填空用 texts，简答用 text。具体题型按答卷快照校验。
+                        oneOf:
+                          - { type: 'null' }
+                          - { type: object }
+      responses:
+        '200': { $ref: '#/components/responses/Attempt' }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /me/tasks/{taskId}/papers/{paperId}/attempts:
+    post:
+      operationId: startOrResumeTaskAttempt
+      security: [{ webSession: [] }, { wechatToken: [] }]
+      description: 冻结成员首次开始或恢复同一任务卷答卷。首次开始要求任务已发布、卷已关联且未归档，使用任务冻结的卷版本。已有答卷在任务或卷归档后仍可恢复，开始时间、快照及截止时间不变。Web 请求须提供 CSRF；同一学生同一任务卷只有一份答卷。
+      parameters:
+        - { in: path, name: taskId, required: true, schema: { type: string, format: uuid } }
+        - { in: path, name: paperId, required: true, schema: { type: string, format: uuid } }
+        - { in: header, name: Idempotency-Key, required: false, schema: { type: string, minLength: 1, maxLength: 128 } }
+      responses:
+        '201': { $ref: '#/components/responses/Attempt' }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
   /admin/users:
     get:
       operationId: listAccounts
@@ -355,6 +464,15 @@ components:
             properties:
               expectedVersion: { type: integer, minimum: 1 }
   responses:
+    Attempt:
+      description: 本人答卷安全视图，题目不包含参考答案、解析或答案附件
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Envelope'
+              - properties:
+                  data: { $ref: '#/components/schemas/Attempt' }
     Account:
       description: 安全账号视图
       content:
@@ -392,9 +510,43 @@ components:
               - $ref: '#/components/schemas/Envelope'
               - properties:
                   code:
-                    enum: [VALIDATION_ERROR, UNAUTHENTICATED, FORBIDDEN, NOT_FOUND, VERSION_CONFLICT, RATE_LIMITED, BINDING_CONFLICT, DEPENDENCY_UNAVAILABLE]
+                    enum: [VALIDATION_ERROR, UNAUTHENTICATED, FORBIDDEN, NOT_FOUND, VERSION_CONFLICT, PAPER_NOT_OPEN, EXAM_CLOSED, RATE_LIMITED, BINDING_CONFLICT, DEPENDENCY_UNAVAILABLE]
                   data: { type: 'null' }
   schemas:
+    Attempt:
+      type: object
+      required: [id, paperId, paperVersionId, status, serverNow, deadlineAt, version, questions, savedAnswers]
+      properties:
+        id: { type: string, format: uuid }
+        paperId: { type: string, format: uuid }
+        paperVersionId: { type: string, format: uuid }
+        status: { type: string, enum: [IN_PROGRESS, WAIT_SELF_GRADE, COMPLETED] }
+        serverNow: { type: string, format: date-time }
+        deadlineAt: { type: string, format: date-time }
+        version: { type: integer }
+        savedAnswers:
+          type: array
+          items:
+            type: object
+            required: [questionId, answer]
+            properties:
+              questionId: { type: string, format: uuid }
+              answer: { type: object }
+        questions:
+          type: array
+          items:
+            type: object
+            required: [position, groupPosition, groupName, questionId, questionVersion, score, type, stemHtml, options]
+            properties:
+              position: { type: integer }
+              groupPosition: { type: integer }
+              groupName: { type: string }
+              questionId: { type: string, format: uuid }
+              questionVersion: { type: integer }
+              score: { type: string }
+              type: { type: string, enum: [SINGLE, MULTIPLE, TRUE_FALSE, GAP, SHORT] }
+              stemHtml: { type: string }
+              options: { type: array, items: { type: object } }
     Envelope:
       type: object
       required: [code, message, data, requestId]

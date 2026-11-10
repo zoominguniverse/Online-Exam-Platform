@@ -23,6 +23,10 @@ async function logout() {
   error.value = ''
   try {
     await write('POST', '/auth/logout')
+    if (account.value) {
+      for (const key of Object.keys(localStorage)) if (key.startsWith(`exam-draft:${account.value.id}:`)) localStorage.removeItem(key)
+      localStorage.removeItem('exam-active-user')
+    }
     await router.replace({ name: 'login' })
   } catch (cause) {
     if (cause instanceof ApiError && cause.status === 401) await router.replace({ name: 'login' })

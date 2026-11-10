@@ -36,6 +36,11 @@ async function submit() {
       await router.replace({ name: 'login', query: { registered: '1' } })
     } else {
       const account = await write<Account>('POST', '/auth/login', credentials)
+      const previous = localStorage.getItem('exam-active-user')
+      if (previous && previous !== account.id) {
+        for (const key of Object.keys(localStorage)) if (key.startsWith(`exam-draft:${previous}:`)) localStorage.removeItem(key)
+      }
+      localStorage.setItem('exam-active-user', account.id)
       if (account.role !== props.role) {
         await router.replace({ name: 'denied' })
         return

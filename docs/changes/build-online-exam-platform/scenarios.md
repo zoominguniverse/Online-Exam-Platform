@@ -18,7 +18,11 @@
 | QB02-B | 同上 | 新版本和归档保留旧题目。发布试卷读取固定题目版本，完整历史答卷回看待验收 |
 | QB03-F / QB03-B | `IdentityIntegrationTest.validatesPrivateImagesAndCleansRolledBackReferences` | 危险属性净化、格式与大小、跨账号直读拒绝、关联失败回滚和孤立文件清理。答卷 DTO 和跨端富文本待验收 |
 | PA01-N / PA01-F | `IdentityIntegrationTest.publishesAllPaperTypesAndFiltersStudentsAtTheExactWindowBoundaries`、`rollsBackPublishedVersionIfUpdatingThePaperFails` 和 Chrome | 三类卷发布、混合组卷、总分顺序、空卷/跨学科/时段校验及中途失败回滚 |
-| PA02-F / PA02-B | `IdentityIntegrationTest.publishesAllPaperTypesAndFiltersStudentsAtTheExactWindowBoundaries` | 只验证练习卷元信息的越级拒绝、上下边界、归档及任务卷隔离。开始答卷行为待实现 |
+| PA02-F / PA02-B | `IdentityIntegrationTest.publishesAllPaperTypesAndFiltersStudentsAtTheExactWindowBoundaries`、`startsOnlyEligibleOrdinaryPapersAndFreezesSafeSnapshots`、`startsFrozenTaskPapersOnceAcrossWebAndWechat` | 隔离 PostgreSQL 17.11 实测：普通卷按年级、发布与开放时段过滤，任务卷普通入口拒绝、任务入口仅冻结成员可开始；开始时刻含、结束时刻不含。拒绝请求不产生答卷。 |
+| ET01-N / ET01-B / PA02-N | `IdentityIntegrationTest.startsOnlyEligibleOrdinaryPapersAndFreezesSafeSnapshots`、`startsFrozenTaskPapersOnceAcrossWebAndWechat`、`savesWholeAnswerSetWithVersionAndDeadlineChecks` | 普通卷与任务卷开始、按答卷 ID 跨认证读取、服务端截止和不可变快照有后端证据；保存后微信令牌读取同一答案与版本。访问时截止冻结、真实客户端跨端恢复及完成后的重练仍待验证，7.1 未完成。 |
+| ET02-N / ET02-B | `IdentityIntegrationTest.savesWholeAnswerSetWithVersionAndDeadlineChecks` | 2026-11-11 隔离 PostgreSQL 17.11：五题型全量保存、遗漏清空、旧版本与非法选项拒绝、同版本双会话并发仅一次成功、截止时拒绝及保存后另一认证路径读取。客户端真实页面证据仍待补齐。 |
+| ET02-F | `tests/attempt-draft.test.cjs` | Node 22 模拟小程序保存中再次编辑、响应丢失后先核对服务端、待同步草稿按账号与答卷存储及退出清理；Web 和微信真实客户端断网验收尚未执行。 |
 | PA03-N / PA03-B | 同上 | 新草稿不覆盖发布版本，旧版本可读取，过期编辑返回 409。已开始答卷的历史保持待验收 |
 | TA01-N / TA01-F / TA01-B | `IdentityIntegrationTest.freezesAssignmentPapersAndEligibilityAndRollsBackIfOnePaperIsAlreadyBound`、Chrome 和 `tests/wechat.test.cjs` | 两卷发布、目标学生可见、名单冻结、禁用撤销和整批回滚。Chrome 验证非目标学生直接访问失败，小程序页面逻辑由替身验证 |
+| TA02-B | `IdentityIntegrationTest.startsFrozenTaskPapersOnceAcrossWebAndWechat` | 2026-11-11：Web Cookie 与微信令牌经真实服务端认证链路，同键及不同键各以同步闸门并发开始；响应均为同一答卷 ID，数据库每成员每任务卷仅一份答卷与一组快照。测试直接插入重复答卷确认唯一约束，且发布后试卷换版仍使用任务冻结版本。微信身份提供器为替身，未进行小程序真机验收。 |
 | TA03-F | 同上 | 修改已发布任务返回 409，归档保留卷和成员。答卷进度联动待实现 |

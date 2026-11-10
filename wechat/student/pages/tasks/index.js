@@ -37,4 +37,11 @@ Page({
   previous() { this.load(this.data.page - 1) },
   next() { this.load(this.data.page + 1) },
   retry() { this.load(this.data.page) },
+  async start({ currentTarget }) {
+    try {
+      const { task, paper } = currentTarget.dataset
+      const result = await request('POST', '/me/tasks/' + task + '/papers/' + paper + '/attempts')
+      wx.navigateTo({ url: '/pages/attempt/index?id=' + result.id })
+    } catch (error) { this.setData({ error: error.message }) }
+  },
 })

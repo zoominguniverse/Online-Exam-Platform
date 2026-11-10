@@ -104,7 +104,11 @@ class WebSecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/api/v1/attachments/*").authenticated()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/me/papers", "/api/v1/me/papers/*").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/me/papers/*/attempts").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/me/attempts/*").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/me/attempts/*/answers").hasRole("STUDENT")
                         .requestMatchers(HttpMethod.GET, "/api/v1/me/tasks", "/api/v1/me/tasks/*").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/me/tasks/*/papers/*/attempts").hasRole("STUDENT")
                         .requestMatchers("/api/v1/me", "/api/v1/me/password", "/api/v1/auth/logout").authenticated()
                         .anyRequest().denyAll()).build();
     }

@@ -8,6 +8,7 @@ import com.onlineexam.platform.domain.Assignment.View;
 import com.onlineexam.platform.domain.QuestionBank.Page;
 import com.onlineexam.platform.repository.SessionRepository.Principal;
 import com.onlineexam.platform.service.AssignmentService;
+import com.onlineexam.platform.service.AttemptService;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -29,8 +31,12 @@ class AssignmentController {
     record Version(int expectedVersion) {}
 
     private final AssignmentService tasks;
+    private final AttemptService attempts;
 
-    AssignmentController(AssignmentService tasks) { this.tasks = tasks; }
+    AssignmentController(AssignmentService tasks, AttemptService attempts) {
+        this.tasks = tasks;
+        this.attempts = attempts;
+    }
 
     @GetMapping("/admin/tasks")
     ApiResponse<Page<Task>> list(@RequestParam(required = false) UUID gradeId,
@@ -71,5 +77,13 @@ class AssignmentController {
     @GetMapping("/me/tasks/{id}")
     ApiResponse<StudentView> mine(@AuthenticationPrincipal Principal student, @PathVariable UUID id) {
         return ApiResponse.ok(tasks.detailForStudent(student.id(), id));
+    }
+
+    @PostMapping("/me/tasks/{taskId}/papers/{paperId}/attempts")
+    @ResponseStatus(HttpStatus.CREATED)
+    ApiResponse<AttemptService.View> start(@AuthenticationPrincipal Principal student,
+            @PathVariable UUID taskId, @PathVariable UUID paperId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String key) {
+        return ApiResponse.ok(attempts.startTask(student.id(), taskId, paperId, key));
     }
 }
