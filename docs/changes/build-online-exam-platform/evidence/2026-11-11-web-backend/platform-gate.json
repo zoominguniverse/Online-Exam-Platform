@@ -1,0 +1,16 @@
+{
+  "scope": "platform",
+  "startedAt": "2026-11-11T06:33:39.840Z",
+  "checks": [
+    {
+      "name": "platform-evidence-preflight",
+      "passed": false,
+      "gaps": [
+        "40 tasks await authorized review/completion",
+        "Actual WeChat experience-build evidence is missing"
+      ]
+    }
+  ],
+  "passed": false,
+  "finishedAt": "2026-11-11T06:33:39.843Z"
+}

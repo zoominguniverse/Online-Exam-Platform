@@ -1,0 +1,9 @@
+{
+  "versions": [
+    "API 版本 v1",
+    "API 版本 v1"
+  ],
+  "networkFailureRecovery": true,
+  "fieldBlurValidation": true,
+  "node": "v22.22.2"
+}

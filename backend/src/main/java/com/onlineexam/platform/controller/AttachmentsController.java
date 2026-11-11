@@ -23,8 +23,9 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/v1")
 class AttachmentsController {
     private final AttachmentService attachments;
+    private final com.onlineexam.platform.service.AttemptService attempts;
 
-    AttachmentsController(AttachmentService attachments) { this.attachments = attachments; }
+    AttachmentsController(AttachmentService attachments,com.onlineexam.platform.service.AttemptService attempts) { this.attachments = attachments;this.attempts=attempts; }
 
     @PostMapping(value = "/attachments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
@@ -50,5 +51,16 @@ class AttachmentsController {
     private static ResponseEntity<byte[]> reply(AttachmentService.Image image) {
         return ResponseEntity.ok().contentType(MediaType.parseMediaType(image.contentType()))
                 .cacheControl(CacheControl.noStore()).body(image.bytes());
+    }
+    @GetMapping("/me/avatar/image")
+    ResponseEntity<byte[]> avatar(@AuthenticationPrincipal Principal principal) { return reply(attachments.avatar(principal.id())); }
+    @GetMapping("/me/attempts/{attempt}/questions/{question}/attachments/{id}")
+    ResponseEntity<byte[]> attemptImage(@AuthenticationPrincipal Principal principal,@PathVariable UUID attempt,@PathVariable UUID question,@PathVariable UUID id) {
+        attempts.read(principal.id(),attempt);
+        return reply(attachments.attemptImage(id,attempt,question,principal.id(),false));
+    }
+    @GetMapping("/admin/attempts/{attempt}/questions/{question}/attachments/{id}")
+    ResponseEntity<byte[]> adminImage(@PathVariable UUID attempt,@PathVariable UUID question,@PathVariable UUID id) {
+        return reply(attachments.attemptImage(id,attempt,question,null,true));
     }
 }

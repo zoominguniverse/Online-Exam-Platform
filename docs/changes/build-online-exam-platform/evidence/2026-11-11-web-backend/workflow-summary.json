@@ -1,0 +1,958 @@
+{
+  "node": "v22.22.2",
+  "project": "exam-browser-c7938ce5c2",
+  "browser": "158.0.8127.18",
+  "flow": "Real admin UI -> student Web -> PostgreSQL",
+  "failureRecoveries": [
+    {
+      "role": "/admin",
+      "route": "/dashboard"
+    },
+    {
+      "role": "/admin",
+      "route": "/users/students"
+    },
+    {
+      "role": "/admin",
+      "route": "/users/admins"
+    },
+    {
+      "role": "/admin",
+      "route": "/users/new/students"
+    },
+    {
+      "role": "/admin",
+      "route": "/users/new/admins"
+    },
+    {
+      "role": "/admin",
+      "route": "/users/dd16e022-fb52-446d-9513-4068c44aa624/edit"
+    },
+    {
+      "role": "/admin",
+      "route": "/subjects"
+    },
+    {
+      "role": "/admin",
+      "route": "/questions"
+    },
+    {
+      "role": "/admin",
+      "route": "/questions/new"
+    },
+    {
+      "role": "/admin",
+      "route": "/questions/83993040-43f1-49e5-adb9-aa58748f57d1/edit"
+    },
+    {
+      "role": "/admin",
+      "route": "/papers"
+    },
+    {
+      "role": "/admin",
+      "route": "/papers/new"
+    },
+    {
+      "role": "/admin",
+      "route": "/papers/c489eda9-b626-41d4-9f22-1a36e4fbb6d4/edit"
+    },
+    {
+      "role": "/admin",
+      "route": "/tasks"
+    },
+    {
+      "role": "/admin",
+      "route": "/attempts"
+    },
+    {
+      "role": "/admin",
+      "route": "/attempts/2d2b7820-5898-4732-b006-f5d5d4a3f5a7"
+    },
+    {
+      "role": "/admin",
+      "route": "/messages"
+    },
+    {
+      "role": "/admin",
+      "route": "/messages/56ce9c48-3ee4-43a2-8967-62e8056c8fdf"
+    },
+    {
+      "role": "/admin",
+      "route": "/messages/new"
+    },
+    {
+      "role": "/admin",
+      "route": "/profile"
+    },
+    {
+      "role": "/admin",
+      "route": "/activities"
+    },
+    {
+      "role": "/student",
+      "route": "/papers"
+    },
+    {
+      "role": "/student",
+      "route": "/tasks"
+    },
+    {
+      "role": "/student",
+      "route": "/tasks/9eac39c2-c252-4bea-be4e-179aad87bde7"
+    },
+    {
+      "role": "/student",
+      "route": "/records"
+    },
+    {
+      "role": "/student",
+      "route": "/attempts/2d2b7820-5898-4732-b006-f5d5d4a3f5a7/review"
+    },
+    {
+      "role": "/student",
+      "route": "/mistakes"
+    },
+    {
+      "role": "/student",
+      "route": "/mistakes/9d275a0c-4cef-40b1-b8d7-e8f951dda962"
+    },
+    {
+      "role": "/student",
+      "route": "/profile"
+    },
+    {
+      "role": "/student",
+      "route": "/messages"
+    },
+    {
+      "role": "/student",
+      "route": "/messages/56ce9c48-3ee4-43a2-8967-62e8056c8fdf"
+    },
+    {
+      "role": "/student",
+      "route": "/activities"
+    }
+  ],
+  "attemptId": "2d2b7820-5898-4732-b006-f5d5d4a3f5a7",
+  "taskId": "9eac39c2-c252-4bea-be4e-179aad87bde7",
+  "requestId": "892a7fff-93bf-484d-a635-0c6bbc129b67",
+  "messageId": "56ce9c48-3ee4-43a2-8967-62e8056c8fdf",
+  "finalScore": "2.50",
+  "routesChecked": {
+    "admin": 23,
+    "student": 15,
+    "widths": [
+      375,
+      768,
+      1440
+    ]
+  },
+  "contrast": [
+    {
+      "route": "/admin/dashboard",
+      "width": 375,
+      "checked": 10,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/students",
+      "width": 375,
+      "checked": 27,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/admins",
+      "width": 375,
+      "checked": 17,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/new/students",
+      "width": 375,
+      "checked": 7,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/new/admins",
+      "width": 375,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/dd16e022-fb52-446d-9513-4068c44aa624/edit",
+      "width": 375,
+      "checked": 8,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/subjects",
+      "width": 375,
+      "checked": 14,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/questions",
+      "width": 375,
+      "checked": 65,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/questions/new",
+      "width": 375,
+      "checked": 21,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/questions/83993040-43f1-49e5-adb9-aa58748f57d1/edit",
+      "width": 375,
+      "checked": 27,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/papers",
+      "width": 375,
+      "checked": 25,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/papers/new",
+      "width": 375,
+      "checked": 11,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/papers/c489eda9-b626-41d4-9f22-1a36e4fbb6d4/edit",
+      "width": 375,
+      "checked": 37,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/tasks",
+      "width": 375,
+      "checked": 12,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/attempts",
+      "width": 375,
+      "checked": 5,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/attempts/2d2b7820-5898-4732-b006-f5d5d4a3f5a7",
+      "width": 375,
+      "checked": 58,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/messages",
+      "width": 375,
+      "checked": 3,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/messages/56ce9c48-3ee4-43a2-8967-62e8056c8fdf",
+      "width": 375,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/messages/new",
+      "width": 375,
+      "checked": 9,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/profile",
+      "width": 375,
+      "checked": 8,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/activities",
+      "width": 375,
+      "checked": 132,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/",
+      "width": 375,
+      "checked": 4,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/login",
+      "width": 375,
+      "checked": 4,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/home",
+      "width": 375,
+      "checked": 7,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/papers",
+      "width": 375,
+      "checked": 5,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/tasks",
+      "width": 375,
+      "checked": 5,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/tasks/9eac39c2-c252-4bea-be4e-179aad87bde7",
+      "width": 375,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/records",
+      "width": 375,
+      "checked": 4,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/attempts/2d2b7820-5898-4732-b006-f5d5d4a3f5a7/review",
+      "width": 375,
+      "checked": 57,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/mistakes",
+      "width": 375,
+      "checked": 3,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/mistakes/9d275a0c-4cef-40b1-b8d7-e8f951dda962",
+      "width": 375,
+      "checked": 2,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/profile",
+      "width": 375,
+      "checked": 9,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/messages",
+      "width": 375,
+      "checked": 2,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/messages/56ce9c48-3ee4-43a2-8967-62e8056c8fdf",
+      "width": 375,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/activities",
+      "width": 375,
+      "checked": 81,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/",
+      "width": 375,
+      "checked": 4,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/login",
+      "width": 375,
+      "checked": 5,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/register",
+      "width": 375,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/dashboard",
+      "width": 768,
+      "checked": 10,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/students",
+      "width": 768,
+      "checked": 27,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/admins",
+      "width": 768,
+      "checked": 17,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/new/students",
+      "width": 768,
+      "checked": 7,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/new/admins",
+      "width": 768,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/dd16e022-fb52-446d-9513-4068c44aa624/edit",
+      "width": 768,
+      "checked": 8,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/subjects",
+      "width": 768,
+      "checked": 14,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/questions",
+      "width": 768,
+      "checked": 65,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/questions/new",
+      "width": 768,
+      "checked": 21,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/questions/83993040-43f1-49e5-adb9-aa58748f57d1/edit",
+      "width": 768,
+      "checked": 27,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/papers",
+      "width": 768,
+      "checked": 25,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/papers/new",
+      "width": 768,
+      "checked": 11,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/papers/c489eda9-b626-41d4-9f22-1a36e4fbb6d4/edit",
+      "width": 768,
+      "checked": 37,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/tasks",
+      "width": 768,
+      "checked": 12,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/attempts",
+      "width": 768,
+      "checked": 5,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/attempts/2d2b7820-5898-4732-b006-f5d5d4a3f5a7",
+      "width": 768,
+      "checked": 58,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/messages",
+      "width": 768,
+      "checked": 3,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/messages/56ce9c48-3ee4-43a2-8967-62e8056c8fdf",
+      "width": 768,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/messages/new",
+      "width": 768,
+      "checked": 9,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/profile",
+      "width": 768,
+      "checked": 8,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/activities",
+      "width": 768,
+      "checked": 132,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/",
+      "width": 768,
+      "checked": 4,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/login",
+      "width": 768,
+      "checked": 4,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/home",
+      "width": 768,
+      "checked": 7,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/papers",
+      "width": 768,
+      "checked": 5,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/tasks",
+      "width": 768,
+      "checked": 5,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/tasks/9eac39c2-c252-4bea-be4e-179aad87bde7",
+      "width": 768,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/records",
+      "width": 768,
+      "checked": 4,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/attempts/2d2b7820-5898-4732-b006-f5d5d4a3f5a7/review",
+      "width": 768,
+      "checked": 57,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/mistakes",
+      "width": 768,
+      "checked": 3,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/mistakes/9d275a0c-4cef-40b1-b8d7-e8f951dda962",
+      "width": 768,
+      "checked": 2,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/profile",
+      "width": 768,
+      "checked": 9,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/messages",
+      "width": 768,
+      "checked": 2,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/messages/56ce9c48-3ee4-43a2-8967-62e8056c8fdf",
+      "width": 768,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/activities",
+      "width": 768,
+      "checked": 81,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/",
+      "width": 768,
+      "checked": 4,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/login",
+      "width": 768,
+      "checked": 5,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/register",
+      "width": 768,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/dashboard",
+      "width": 1440,
+      "checked": 10,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/students",
+      "width": 1440,
+      "checked": 27,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/admins",
+      "width": 1440,
+      "checked": 17,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/new/students",
+      "width": 1440,
+      "checked": 7,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/new/admins",
+      "width": 1440,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/dd16e022-fb52-446d-9513-4068c44aa624/edit",
+      "width": 1440,
+      "checked": 8,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/subjects",
+      "width": 1440,
+      "checked": 14,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/questions",
+      "width": 1440,
+      "checked": 65,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/questions/new",
+      "width": 1440,
+      "checked": 21,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/questions/83993040-43f1-49e5-adb9-aa58748f57d1/edit",
+      "width": 1440,
+      "checked": 27,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/papers",
+      "width": 1440,
+      "checked": 25,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/papers/new",
+      "width": 1440,
+      "checked": 11,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/papers/c489eda9-b626-41d4-9f22-1a36e4fbb6d4/edit",
+      "width": 1440,
+      "checked": 37,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/tasks",
+      "width": 1440,
+      "checked": 12,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/attempts",
+      "width": 1440,
+      "checked": 5,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/attempts/2d2b7820-5898-4732-b006-f5d5d4a3f5a7",
+      "width": 1440,
+      "checked": 58,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/messages",
+      "width": 1440,
+      "checked": 3,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/messages/56ce9c48-3ee4-43a2-8967-62e8056c8fdf",
+      "width": 1440,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/messages/new",
+      "width": 1440,
+      "checked": 9,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/profile",
+      "width": 1440,
+      "checked": 8,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/activities",
+      "width": 1440,
+      "checked": 132,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/",
+      "width": 1440,
+      "checked": 4,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/login",
+      "width": 1440,
+      "checked": 4,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/home",
+      "width": 1440,
+      "checked": 7,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/papers",
+      "width": 1440,
+      "checked": 5,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/tasks",
+      "width": 1440,
+      "checked": 5,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/tasks/9eac39c2-c252-4bea-be4e-179aad87bde7",
+      "width": 1440,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/records",
+      "width": 1440,
+      "checked": 4,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/attempts/2d2b7820-5898-4732-b006-f5d5d4a3f5a7/review",
+      "width": 1440,
+      "checked": 57,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/mistakes",
+      "width": 1440,
+      "checked": 3,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/mistakes/9d275a0c-4cef-40b1-b8d7-e8f951dda962",
+      "width": 1440,
+      "checked": 3,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/profile",
+      "width": 1440,
+      "checked": 9,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/messages",
+      "width": 1440,
+      "checked": 2,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/messages/56ce9c48-3ee4-43a2-8967-62e8056c8fdf",
+      "width": 1440,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/activities",
+      "width": 1440,
+      "checked": 81,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/",
+      "width": 1440,
+      "checked": 4,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/login",
+      "width": 1440,
+      "checked": 5,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/register",
+      "width": 1440,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    }
+  ],
+  "lostResponseRetries": [
+    "submit",
+    "self-grade",
+    "message"
+  ],
+  "result": "passed",
+  "clientClockChanged": true,
+  "backgroundRecovery": true
+}

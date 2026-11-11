@@ -126,6 +126,7 @@ function move<T>(items: T[], index: number, by: number) {
 }
 
 async function save() {
+  if(busy.value)return
   busy.value = true
   error.value = ''
   notice.value = ''

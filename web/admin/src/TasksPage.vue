@@ -7,6 +7,7 @@ import CatalogNav from './CatalogNav.vue'
 type State = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
 type Task = { id: string; name: string; gradeId: string; state: State; version: number; paperIds: string[] }
 type View = { task: Task; papers: { paperId: string; name: string; position: number }[]; recipientCount: number }
+const props=defineProps<{id?:string}>()
 const states = { DRAFT: '草稿', PUBLISHED: '已发布', ARCHIVED: '已归档' }
 const grades = ref<Grade[]>([])
 const items = ref<Task[]>([])
@@ -48,6 +49,7 @@ async function available(next = 1) {
 }
 
 async function perform(run: () => Promise<void>) {
+  if(busy.value)return
   busy.value = true
   error.value = ''
   notice.value = ''
@@ -111,7 +113,8 @@ async function change(kind: 'publish' | 'delete') {
   await load()
 }
 
-onMounted(() => perform(() => load()))
+async function initialize(){await load();if(props.id)await inspect(props.id)}
+onMounted(() => perform(initialize))
 </script>
 
 <template>
@@ -119,7 +122,7 @@ onMounted(() => perform(() => load()))
     <CatalogNav />
     <h1>年级任务管理</h1>
     <p v-if="busy" role="status">正在处理…</p>
-    <p v-if="error" role="alert">{{ error }} <button type="button" :disabled="busy" @click="perform(() => load())">刷新列表</button></p>
+    <p v-if="error" role="alert">{{ error }} <button type="button" :disabled="busy" @click="perform(initialize)">刷新列表</button></p>
     <p v-if="notice" role="status">{{ notice }}</p>
     <p v-if="!busy && !error && !items.length">暂无年级任务。</p>
     <ul>
@@ -134,7 +137,7 @@ onMounted(() => perform(() => load()))
       <button type="button" :disabled="busy" @click="reset">新建任务</button>
     </nav>
     <h2>{{ detail?.task.name ?? '新建任务' }}</h2>
-    <form v-if="editable" @submit.prevent="perform(save)">
+    <form v-if="editable&&(!id||detail)" @submit.prevent="perform(save)">
       <label>任务名称<input v-model="name" maxlength="100" required :disabled="busy"></label>
       <label>目标年级
         <select v-model="gradeId" :disabled="busy" required @change="selected = []; perform(() => available())">

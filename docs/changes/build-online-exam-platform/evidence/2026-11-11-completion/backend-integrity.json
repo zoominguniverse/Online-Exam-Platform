@@ -1,0 +1,318 @@
+{
+  "unchangedSinceCapacityAndMutations": true,
+  "reference": "exam-mutations-e062841d08",
+  "files": [
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/configuration/AttachmentCleanupConfiguration.java",
+      "sha256": "c653b722063edc8ef3e523bd68650f14a3f542129c782a3515cd0315e94e8755"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/configuration/AttemptDeadlineConfiguration.java",
+      "sha256": "c9075a60ac8f58abb938a5d280d0b8676d833b72f1eb10a352788ce6e5bbb119"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/configuration/AuditConfiguration.java",
+      "sha256": "69ab6aa84d1a29ad8932e26b1ab76efdd9a8716ae2870f4e00f30c1f8b24ccf4"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/configuration/ClockConfiguration.java",
+      "sha256": "c82f0af934251d8fac5e08be1a170a64f4eef0c453ea041b4ba761e03f002016"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/configuration/InitialIdentityConfiguration.java",
+      "sha256": "a0c28e11d6377ffed425590c55ec432dd212db55d1aa9de530379d9cc5eecd39"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/configuration/JsonSizeConfiguration.java",
+      "sha256": "7aeeacf5566d87245396e3f2d913a97f96dfff7b522c72f107a9e1103ed562fb"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/configuration/OperationsConfiguration.java",
+      "sha256": "13c242e853aa28262c639993f19f964f797a4189743295e294d990e5eb392d26"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/configuration/RequestContext.java",
+      "sha256": "62b21cf00dcce68500740ccaf141b4516e98b2c71b281a8a33173378e27947ce"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/configuration/RequestLimitsConfiguration.java",
+      "sha256": "fdd08368a4bc3d294de93ffbfb088233dde8b689f39ea86bc8fa2fa0abda38dd"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/configuration/RequestLoggingConfiguration.java",
+      "sha256": "ebddb154c3985a7931b7c64f8136a975aefe187979a3e1aa35727d8c120fffbe"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/controller/AdminUsersController.java",
+      "sha256": "32fce2b8321b5bdf4b48fbd0ffb78487f2f72a5e834a05c6f451b34a3ec30054"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/controller/ApiErrorAdvice.java",
+      "sha256": "f342ba67214f1869b21ba9f4007c33a6e86ab8b2d6e07910f240a25fd4916c2a"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/controller/ApiResponse.java",
+      "sha256": "f98b4dbebc38669f19d18d94e434d0ec46550646ef422494dd864eabb45be890"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/controller/AssignmentController.java",
+      "sha256": "571be9492f15e227785be4a8d0bdfb5edd529dfac800117190c3a78ae99f27ae"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/controller/AttachmentsController.java",
+      "sha256": "5c0bb36d1706eea2cf4f17f36c0a52d9e5290218467f10bf1ddc008eae8f77ca"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/controller/CommunityController.java",
+      "sha256": "bd7cc501f82d8f926b08e8968bc520b6b6c816577cf8bcf5284d4a2d070a449c"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/controller/IdentityController.java",
+      "sha256": "5038d9a47acac305fe8a3f2a0c3a3ddcb2ef9988a18fcb8310c66faed3f300a0"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/controller/LearningController.java",
+      "sha256": "76bb1c43740051936820c9b049c95db44edddd74026404ea8b434131ef21eebb"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/controller/package-info.java",
+      "sha256": "cdb5ef8db7efee168ca97b4a9c0ed9d3a49ed2692f6d45f84f0c9a420e9ad091"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/controller/PapersController.java",
+      "sha256": "2f39d5f7db8cd569b048d337c585294dac72ee4c37c9b873b6a1ced00c4fbb98"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/controller/QuestionsController.java",
+      "sha256": "4a7a399c88d05ee9693282a8e42e8a71c1e437e332e409cdbea76db1d717a5f0"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/controller/StudentAttemptsController.java",
+      "sha256": "f7e9922f131f9da89b8e482eb2813b574629671a4f71bcef75be997bd4be3a35"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/controller/StudentPapersController.java",
+      "sha256": "1c66f72eaa11e9756e2aa671b8be1ac45e3ef6de9bbaea330e9fd3353091b70f"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/controller/SubjectsController.java",
+      "sha256": "de7c183b84fc41468d010acf15d891ed36710fccef1090e08f56a348c6e01224"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/controller/VersionController.java",
+      "sha256": "e8477e958c2b2937d17c51dd3e3b54717552d164cecd23418bd25e8502e53a5c"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/domain/ApiException.java",
+      "sha256": "db18b31934fa45407db4f43d55cb110eb444c0e7cf0eb7f7eb908f9a6ab10661"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/domain/Assignment.java",
+      "sha256": "cea06d16da77b28e10082273cd343795effa8027ed87ee3814c3c012523d90b8"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/domain/Contracts.java",
+      "sha256": "8cf4dee7786cc3315dabb72bf716143438fab788ef4967f2cc836d15c4ff19d5"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/domain/ExamClosedException.java",
+      "sha256": "4b9c7476a163de24a7e41c10d7c08b004a6ba898412278314efe97839932970f"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/domain/Identity.java",
+      "sha256": "674d749b27a115fabbbcb1e3fabe81718fe582df1e99fab1c602aeb5c38c6daa"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/domain/Paper.java",
+      "sha256": "6cd916728d3731cdf237c63fecdaab30997e3af2656fed546028a019d73f9765"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/domain/QuestionBank.java",
+      "sha256": "45cbe4dbc23cc1057492135c6bb1f8502ed0fda79abfcc4f2b9c55d25ae81854"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/ExamPlatformApplication.java",
+      "sha256": "04f2f69591493d96f782f7359a6e5140921d7bbf7d25233a4de131290b05c5ca"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/repository/AccountRepository.java",
+      "sha256": "8c6d8f6c777512824159df3398a21008125b10d4aaf9c6a0333f79b799d1e616"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/repository/AssignmentRepository.java",
+      "sha256": "8ddf4a44393d5a90a20ec9eff3d28c00fd742cdfb8c5587920c2e01c4a111459"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/repository/AttachmentRepository.java",
+      "sha256": "120ca535b0692e023e2b707ccd380fb3d65add54c7941cd2306a230fdd8968e6"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/repository/AttemptRepository.java",
+      "sha256": "5e80245a8d667bcbb1bb5e499d0db68db8cd0a815c4b723ddfeb9e4c0f7abebd"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/repository/CommunityRepository.java",
+      "sha256": "e522a1a770d2005b64bf0bc6c2c2b6279de53e15d1221a4936bbdeb1c06a3836"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/repository/GradeMapper.java",
+      "sha256": "874ae7f0e21e298f0ad30de6e124f4459fef5a39881e83699e35b805f44d2715"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/repository/LearningRepository.java",
+      "sha256": "d8f8fef2596cd3bab661c17e18ad0fcfba88cf1ee1d8470e54d747a5ad3b806c"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/repository/package-info.java",
+      "sha256": "4f39b7671ef884340d88ab57225c3edd2f181293d20c23a278bdd6dfbebbb133"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/repository/PaperRepository.java",
+      "sha256": "197c3241e212a5f7bc342d3842c664bf47662b68730eb95d541f20adec3a0cb1"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/repository/QuestionRepository.java",
+      "sha256": "3a0aafd27edfec54540fbf045c122a218821eaff1dacc60dbf22ef45de853d75"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/repository/SessionRepository.java",
+      "sha256": "456e439ccbfd31aa84021423a106774ba5303f2020e87312ce5ed209d3b1dc75"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/repository/SubjectRepository.java",
+      "sha256": "179dcc028c39622f62b7dfbca7cd2e8bf1066a32f58bad6c09b78f2685938ca9"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/security/WebSecurityConfiguration.java",
+      "sha256": "5b401c3df8b793a9147da65c3118e11f926126ee7e11097cdc28af0b5a1cf5fb"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/security/WebSession.java",
+      "sha256": "bef0213fee30454476f79d8563f8b75b8e6c8b82eb7aa0e722f1f5022a9dcfc0"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/service/AssignmentService.java",
+      "sha256": "0463e73d2890079c4bd908b5650452963c9d1fa9f5930c8e2a8e0de8b451690c"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/service/AttachmentService.java",
+      "sha256": "3cf4efceb0a6af3853127d357423cac5f93ab170dac8728d138ab03961bb2e1b"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/service/AttemptLifecycle.java",
+      "sha256": "effdbb22dbe56d13fe2facdd78a1638f7cf80db74b87bf9327faf9a232f3295e"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/service/AttemptService.java",
+      "sha256": "0f7865ad45c6df9d9e32e0935d9ef286d5db7fd679da53f640cadaaaf9827ac5"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/service/CommunityService.java",
+      "sha256": "781f2288e363f3113f91fac475940762b3b0575a4465a2142fa4c8846e7bb3da"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/service/IdentityService.java",
+      "sha256": "a23c03bd9f3c2eef6e853d1d3317ca5d61a0c1776bd95aa35492679e8734e611"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/service/LearningService.java",
+      "sha256": "f3aae5f572016a7688e862c819171ec6908705f4ad3b7afc2c85784f0ac0751f"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/service/ObservabilityService.java",
+      "sha256": "1e566f674a9c4181617514a4a3e014a8b9df55224d2fcda540d24e9d66323243"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/service/package-info.java",
+      "sha256": "a964a294be62b17402782e579ef93ebcc875c8a835d4ca0f29763df145640d3a"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/service/PaperService.java",
+      "sha256": "24340a9e3d2f4d892d86ab1146369924c903b7525e23cf993e8bed86a263321f"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/service/QuestionService.java",
+      "sha256": "3f1a23d6f7d0e2a026d1c0eb0a37b15cf8d3472bca5a90c8ecc585a73f96a47e"
+    },
+    {
+      "file": "backend/src/main/java/com/onlineexam/platform/service/SubjectService.java",
+      "sha256": "6e617a468f7f80c7031bc54df8a69d9ab41542879baec8404053ddba232577ca"
+    },
+    {
+      "file": "backend/src/main/resources/application.yml",
+      "sha256": "dccc43c4cd5f839b8f534385cad882f1776f1cfa8a146571ac5b94e656a23078"
+    },
+    {
+      "file": "backend/src/main/resources/db/migration/V10__attempt_answers.sql",
+      "sha256": "bf07041ed37d4fc8e4ea9fe20e21fef8cc0a0ecfb6372fd0830edf308111094d"
+    },
+    {
+      "file": "backend/src/main/resources/db/migration/V11__attempt_freezing.sql",
+      "sha256": "ca70f096cc0108e0b34e890a641b3b6bcb7a5266e08b3c1b85b9188f72f6bc2d"
+    },
+    {
+      "file": "backend/src/main/resources/db/migration/V12__learning_and_communication.sql",
+      "sha256": "8e92bd14dc47fde65f0579cb764cc6c0a170673ab1b82528811ac6e6f241e719"
+    },
+    {
+      "file": "backend/src/main/resources/db/migration/V13__deletion_ledger_compatibility.sql",
+      "sha256": "54363726d30b1a051f3d20d645b9328f9b2d44b475afe9b996a4b743511777b5"
+    },
+    {
+      "file": "backend/src/main/resources/db/migration/V1__create_grades.sql",
+      "sha256": "f7cf7fb66292df71fabfe06be5f34adff522fe50a1cecaaaa2511664d838a89c"
+    },
+    {
+      "file": "backend/src/main/resources/db/migration/V2__identity.sql",
+      "sha256": "c6f6327e72209b480b17ab26723ff8a631ca12f808d165f456ad106f241af1ab"
+    },
+    {
+      "file": "backend/src/main/resources/db/migration/V3__wechat_identity.sql",
+      "sha256": "5f9bbaa96158fa278106e4376b078a2fa4ee3881b243153123bd4970d6902751"
+    },
+    {
+      "file": "backend/src/main/resources/db/migration/V4__question_bank.sql",
+      "sha256": "5ac03b9372bba30de84695dad1d60307259a65cb50f59cc5a9479060ad9c00ae"
+    },
+    {
+      "file": "backend/src/main/resources/db/migration/V5__private_attachments.sql",
+      "sha256": "a998f15e7a3142530db386fa2ba645b89e767d9591318ea98aa58c891a947d8b"
+    },
+    {
+      "file": "backend/src/main/resources/db/migration/V6__paper_authoring.sql",
+      "sha256": "40faf521a028530e7630b71ce4dab840719615f8be252284ef12e8a8e0691b19"
+    },
+    {
+      "file": "backend/src/main/resources/db/migration/V7__task_assignment.sql",
+      "sha256": "63f557981537fa16abf5553066fdbb5d94483599d1cf1c4b819abe09c5db5c19"
+    },
+    {
+      "file": "backend/src/main/resources/db/migration/V8__attempt_start.sql",
+      "sha256": "b0c06eb43baf5b74a578b05d84c26642b980d8621db0d344b4ac8176d1e08462"
+    },
+    {
+      "file": "backend/src/main/resources/db/migration/V9__task_attempt_integrity.sql",
+      "sha256": "e151b9119af896d498adf6d3581b54b7f7ddc6ac66468f40da67c0a7706a31df"
+    },
+    {
+      "file": "backend/src/test/java/com/onlineexam/platform/IdentityIntegrationTest.java",
+      "sha256": "b05072a23aea0244356d108b95d9e5bb1f120973fe1c2da65795829d399c60a1"
+    },
+    {
+      "file": "backend/src/test/java/com/onlineexam/platform/RuntimeAccessIntegrationTest.java",
+      "sha256": "7bb22f6c0ae43a96469d15e09588ec514db98fe6c841bc8d2427aa582aa7399a"
+    },
+    {
+      "file": "backend/src/test/java/com/onlineexam/platform/VersionIntegrationTest.java",
+      "sha256": "d68fd4fe1cbf2f3c85577cb9cad94f2e7fc29bf70825b5ad9d755c6c83d36b6f"
+    },
+    {
+      "file": "backend/pom.xml",
+      "sha256": "d90832f196ed101dfa896cb36328d9eab7011117699ba6daedcac144839b6e40"
+    },
+    {
+      "file": "backend/Dockerfile",
+      "sha256": "ce3f2622ec341e3369b2d6a51f00e8fe6580724fb25e2770beda13d6b5286ab0"
+    }
+  ]
+}

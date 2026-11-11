@@ -1,0 +1,18 @@
+{
+  "reviewedAt": "2026-11-11T12:23:00.270Z",
+  "applyState": "all_done",
+  "tasks": {
+    "complete": 53,
+    "total": 53,
+    "remaining": 0
+  },
+  "platformGatePassed": true,
+  "localDocumentationLinksChecked": 49,
+  "desktopAnd375pxScreenshotsOpened": true,
+  "migrationsPreserved": "V1-V13",
+  "committed": false,
+  "pushed": false,
+  "merged": false,
+  "archived": false,
+  "productionDeployed": false
+}

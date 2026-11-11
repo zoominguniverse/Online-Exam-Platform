@@ -15,6 +15,7 @@ public final class Assignment {
     public record PaperItem(UUID paperId, UUID paperVersionId, int position, String name, int durationMinutes) {}
     public record View(Task task, List<PaperItem> papers, long recipientCount) {}
     public record StudentPaper(UUID paperId, UUID paperVersionId, int position, String name, int durationMinutes,
-                               String status) {}
-    public record StudentView(UUID id, String name, State state, List<StudentPaper> papers) {}
+                               String status, UUID attemptId) {}
+    public record StudentView(UUID id, String name, State state, List<StudentPaper> papers,
+                              long completedCount, int totalCount, boolean completed) {}
 }

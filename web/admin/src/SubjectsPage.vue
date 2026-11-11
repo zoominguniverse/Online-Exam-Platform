@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { read, write, type Grade } from '../../shared/api'
 import { type Page, type Subject } from './catalog'
 import CatalogNav from './CatalogNav.vue'
 
+const props=defineProps<{id?:string}>()
+const router=useRouter()
 const grades = ref<Grade[]>([])
 const items = ref<Subject[]>([])
 const gradeId = ref('')
@@ -29,6 +32,7 @@ async function load(next = page.value) {
     total.value = data.total
     page.value = data.page
     if (!grades.value.length) grades.value = await read<Grade[]>('/catalog/grades')
+    if(props.id)select(await read<Subject>('/admin/subjects/'+props.id))
   } catch (cause) {
     items.value = []
     error.value = (cause as Error).message
@@ -47,6 +51,7 @@ function select(subject?: Subject) {
 }
 
 async function save() {
+  if(busy.value)return
   busy.value = true
   error.value = ''
   notice.value = ''
@@ -58,8 +63,8 @@ async function save() {
       await write('POST', '/admin/subjects', { name: name.value, gradeId: subjectGrade.value })
     }
     select()
-    notice.value = '学科已保存。'
     await load()
+    notice.value = '学科已保存。'
   } catch (cause) {
     error.value = (cause as Error).message
   } finally {
@@ -74,6 +79,7 @@ async function remove() {
   error.value = ''
   try {
     await write('DELETE', '/admin/subjects/' + subject.id, { expectedVersion: subject.version })
+    if(props.id){await router.replace('/subjects');return}
     select()
     notice.value = '学科已删除。'
     await load(items.value.length === 1 && page.value > 1 ? page.value - 1 : page.value)

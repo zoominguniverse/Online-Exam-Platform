@@ -2,14 +2,12 @@ package com.onlineexam.platform;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.onlineexam.platform.domain.ApiException;
-import com.onlineexam.platform.integration.WeChatIdentityProvider;
-import com.onlineexam.platform.integration.WeChatIdentityProvider.Subject;
 import com.onlineexam.platform.service.AttachmentService;
 import com.onlineexam.platform.service.IdentityService;
+import com.onlineexam.platform.service.AttemptLifecycle;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
@@ -44,10 +42,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @ExtendWith(OutputCaptureExtension.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "spring.flyway.enabled=true")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {"spring.flyway.enabled=true", "exam.deadlines.enabled=false"})
 @Import(IdentityIntegrationTest.TestClockConfiguration.class)
 class IdentityIntegrationTest {
     private static final String PASSWORD = "Only-a-test-secret-8176";
@@ -60,15 +58,17 @@ class IdentityIntegrationTest {
     @Autowired AdjustableClock clock;
     @Autowired JdbcTemplate jdbc;
     @Autowired DataSource dataSource;
+    @Autowired AttemptLifecycle lifecycle;
+    @Autowired com.onlineexam.platform.service.ObservabilityService observability;
     @Value("${PRIVATE_STORAGE_ROOT}") String privateRoot;
-    @MockitoBean WeChatIdentityProvider wechat;
     @LocalServerPort int port;
 
     @BeforeEach
     void prepare() {
         clock.override = null;
         jdbc.execute("""
-                TRUNCATE attempt_answers, attempt_start_keys, attempt_items, attempts,
+                TRUNCATE user_daily_activity, audit_events, deleted_account_ledger, message_recipients, messages, profiles,
+                    operation_keys, gradings, mistakes, attempt_submit_keys, attempt_results, attempt_answers, attempt_start_keys, attempt_items, attempts,
                     task_recipients, task_papers, tasks, attachment_links, attachments,
                     paper_items, paper_versions, papers, question_versions, questions, subjects
                 """);
@@ -174,68 +174,6 @@ class IdentityIntegrationTest {
         var ownId = remaining.get("/me").data().path("id").asText();
         assertThat(remaining.write("POST", USERS + "/" + ownId + "/disable", Map.of("expectedVersion", 1)).status())
                 .isEqualTo(409);
-    }
-
-    @Test
-    void consumesCodesAndRevokesTokensWhilePreservingWebIdentity() throws Exception {
-        var web = new Browser();
-        String user = web.write("POST", "/auth/register", Map.of("username", "WechatStudent",
-                "password", PASSWORD, "gradeId", GRADE)).data().path("id").asText();
-        assertThat(web.login("WechatStudent", PASSWORD).status()).isEqualTo(200);
-        var wx = new Browser();
-        subject("first-bind", "same-account");
-        subject("next-login", "same-account");
-        subject("duplicate-bind", "different-account");
-        var bound = wxBind(wx, "first-bind", "WechatStudent");
-        assertThat(bound.status()).isEqualTo(200);
-        String firstToken = bound.data().path("token").asText();
-        assertThat(bound.data().path("user").path("id").asText()).isEqualTo(user);
-        assertThat(wxBind(wx, "duplicate-bind", "WechatStudent").status()).isEqualTo(409);
-        var next = wx.write("POST", "/auth/wechat/login", Map.of("code", "next-login"));
-        assertThat(next.status()).isEqualTo(200);
-        String secondToken = next.data().path("token").asText();
-        assertThat(bearer("GET", "/me", firstToken).data().path("id").asText()).isEqualTo(user);
-        assertThat(bearer("GET", "/me", secondToken).data().path("id").asText()).isEqualTo(user);
-        assertThat(bearer("GET", USERS, secondToken).status()).isIn(401, 403);
-        assertThat(bearer("DELETE", "/auth/wechat/binding", secondToken).status()).isEqualTo(200);
-        assertThat(bearer("GET", "/me", firstToken).status()).isEqualTo(401);
-        assertThat(bearer("GET", "/me", secondToken).status()).isEqualTo(401);
-        assertThat(wxBind(wx, "first-bind", "WechatStudent").status()).isEqualTo(400);
-        assertThat(web.get("/me").data().path("id").asText()).isEqualTo(user);
-    }
-
-    @Test
-    void handlesUpstreamFailuresAndPreventsConcurrentBindingToTwoAccounts() throws Exception {
-        var wx = new Browser();
-        var enrollment = new Browser();
-        for (String name : java.util.List.of("FirstStudent", "SecondStudent")) {
-            assertThat(enrollment.write("POST", "/auth/register", Map.of("username", name,
-                    "password", PASSWORD, "gradeId", GRADE)).status()).isEqualTo(201);
-        }
-        when(wechat.exchange("invalid")).thenThrow(ApiException.validation("登录码无效。"));
-        when(wechat.exchange("timeout")).thenThrow(new ApiException(HttpStatus.SERVICE_UNAVAILABLE,
-                "DEPENDENCY_UNAVAILABLE", "微信服务暂不可用。"));
-        assertThat(wxBind(wx, "invalid", "FirstStudent").status()).isEqualTo(400);
-        assertThat(wxBind(wx, "timeout", "FirstStudent").status()).isEqualTo(503);
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM wechat_bindings", Integer.class)).isZero();
-        subject("code-a", "shared-account");
-        subject("code-b", "shared-account");
-        var a = wx.http.sendAsync(wx.prepare("POST", "/auth/wechat/bind", Map.of("code", "code-a",
-                "username", "FirstStudent", "password", PASSWORD), false), HttpResponse.BodyHandlers.ofString());
-        var b = wx.http.sendAsync(wx.prepare("POST", "/auth/wechat/bind", Map.of("code", "code-b",
-                "username", "SecondStudent", "password", PASSWORD), false), HttpResponse.BodyHandlers.ofString());
-        CompletableFuture.allOf(a, b).get(10, TimeUnit.SECONDS);
-        assertThat(java.util.List.of(a.join().statusCode(), b.join().statusCode())).containsExactlyInAnyOrder(200, 409);
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM wechat_bindings", Integer.class)).isEqualTo(1);
-        var winner = json.readTree((a.join().statusCode() == 200 ? a : b).join().body()).path("data");
-        var admin = new Browser();
-        assertThat(admin.login("MainAdmin", PASSWORD).status()).isEqualTo(200);
-        var user = winner.path("user");
-        assertThat(admin.write("POST", USERS + "/" + user.path("id").asText() + "/disable",
-                Map.of("expectedVersion", user.path("version").asInt())).status()).isEqualTo(200);
-        assertThat(bearer("GET", "/me", winner.path("token").asText()).status()).isEqualTo(401);
-        subject("new-code", "shared-account");
-        assertThat(wx.write("POST", "/auth/wechat/login", Map.of("code", "new-code")).status()).isEqualTo(401);
     }
 
     @Test
@@ -590,7 +528,7 @@ class IdentityIntegrationTest {
     }
 
     @Test
-    void startsFrozenTaskPapersOnceAcrossWebAndWechat() throws Exception {
+    void startsFrozenTaskPapersOnceAcrossIndependentWebSessions() throws Exception {
         clock.override = Instant.parse("2026-11-10T00:00:00Z");
         var admin = new Browser();
         assertThat(admin.login("MainAdmin", PASSWORD).status()).isEqualTo(200);
@@ -632,22 +570,22 @@ class IdentityIntegrationTest {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM attempts", Integer.class)).isZero();
         assertThat(jdbc.queryForObject("SELECT count(*) FROM attempt_start_keys", Integer.class)).isZero();
 
-        subject("task-start-code", "task-start-openid");
-        String token = wxBind(new Browser(), "task-start-code", "TaskStarter").data().path("token").asText();
+        var secondSession = new Browser();
+        assertThat(secondSession.login("TaskStarter", PASSWORD).status()).isEqualTo(200);
         var gate = new java.util.concurrent.CountDownLatch(1);
         var web = CompletableFuture.supplyAsync(() -> {
             try { gate.await(); return member.startTask(taskId, paperA, "same-task-key"); }
             catch (Exception error) { throw new RuntimeException(error); }
         });
-        var wechat = CompletableFuture.supplyAsync(() -> {
-            try { gate.await(); return bearerStart(taskId, paperA, token, "same-task-key"); }
+        var parallelWeb = CompletableFuture.supplyAsync(() -> {
+            try { gate.await(); return secondSession.startTask(taskId, paperA, "same-task-key"); }
             catch (Exception error) { throw new RuntimeException(error); }
         });
         gate.countDown();
         assertThat(web.join().status()).isEqualTo(201);
-        assertThat(wechat.join().status()).isEqualTo(201);
+        assertThat(parallelWeb.join().status()).isEqualTo(201);
         String firstId = web.join().data().path("id").asText();
-        assertThat(wechat.join().data().path("id").asText()).isEqualTo(firstId);
+        assertThat(parallelWeb.join().data().path("id").asText()).isEqualTo(firstId);
         assertThat(member.startTask(UUID.randomUUID().toString(), paperA, "same-task-key").status()).isEqualTo(404);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM attempts WHERE paper_id = ?", Integer.class,
                 UUID.fromString(paperA))).isEqualTo(1);
@@ -675,15 +613,15 @@ class IdentityIntegrationTest {
             try { secondGate.await(); return member.startTask(taskId, paperB, "different-web"); }
             catch (Exception error) { throw new RuntimeException(error); }
         });
-        var secondWechat = CompletableFuture.supplyAsync(() -> {
-            try { secondGate.await(); return bearerStart(taskId, paperB, token, "different-wechat"); }
+        var secondSessionRequest = CompletableFuture.supplyAsync(() -> {
+            try { secondGate.await(); return secondSession.startTask(taskId, paperB, "different-session"); }
             catch (Exception error) { throw new RuntimeException(error); }
         });
         secondGate.countDown();
         assertThat(secondWeb.join().status()).isEqualTo(201);
-        assertThat(secondWechat.join().status()).isEqualTo(201);
+        assertThat(secondSessionRequest.join().status()).isEqualTo(201);
         String secondId = secondWeb.join().data().path("id").asText();
-        assertThat(secondWechat.join().data().path("id").asText()).isEqualTo(secondId);
+        assertThat(secondSessionRequest.join().data().path("id").asText()).isEqualTo(secondId);
         assertThat(secondWeb.join().data().path("paperVersionId").asText()).isEqualTo(frozenB);
         assertThat(secondId).isNotEqualTo(firstId);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM attempts WHERE owner_id = ?", Integer.class,
@@ -705,7 +643,7 @@ class IdentityIntegrationTest {
         assertThat(admin.write("PATCH", "/admin/questions/" + questionId,
                 Map.of("expectedVersion", 1, "question", edited)).status()).isEqualTo(200);
         clock.override = Instant.parse("2026-11-10T00:05:00Z");
-        var resumed = bearer("GET", "/me/attempts/" + firstId, token);
+        var resumed = secondSession.get("/me/attempts/" + firstId);
         assertThat(resumed.status()).isEqualTo(200);
         assertThat(resumed.data().path("deadlineAt").asText()).isEqualTo(deadline);
         assertThat(resumed.data().path("questions").get(0).path("stemHtml").asText()).isEqualTo("题目");
@@ -781,9 +719,9 @@ class IdentityIntegrationTest {
         assertThat(saved.data().path("version").asInt()).isEqualTo(2);
         assertThat(saved.data().path("savedAnswers").size()).isEqualTo(5);
         assertThat(saved.response().body()).doesNotContain("correctAnswer", "explanationHtml", "参考");
-        subject("answer-code", "answer-openid");
-        String token = wxBind(new Browser(), "answer-code", "AnswerStudent").data().path("token").asText();
-        var restored = bearer("GET", "/me/attempts/" + attempt, token);
+        var restoringWeb = new Browser();
+        assertThat(restoringWeb.login("AnswerStudent", PASSWORD).status()).isEqualTo(200);
+        var restored = restoringWeb.get("/me/attempts/" + attempt);
         assertThat(restored.data().path("savedAnswers").size()).isEqualTo(5);
         assertThat(restored.data().path("version").asInt()).isEqualTo(2);
         assertThat(restored.data().path("deadlineAt")).isEqualTo(started.data().path("deadlineAt"));
@@ -856,7 +794,7 @@ class IdentityIntegrationTest {
     }
 
     @Test
-    void expiresIdleSessionsAndRevokesWebAndWechatOnPasswordChange() throws Exception {
+    void expiresIdleSessionsAndRevokesAllWebSessionsOnPasswordChange() throws Exception {
         clock.override = Instant.parse("2026-11-10T00:00:00Z");
         var web = new Browser();
         var idle = new Browser();
@@ -864,20 +802,19 @@ class IdentityIntegrationTest {
                 "password", PASSWORD, "gradeId", GRADE)).status()).isEqualTo(201);
         assertThat(web.login("PasswordStudent", PASSWORD).status()).isEqualTo(200);
         assertThat(idle.login("PasswordStudent", PASSWORD).status()).isEqualTo(200);
-        subject("password-bind", "password-account");
-        var binding = wxBind(new Browser(), "password-bind", "PasswordStudent");
-        assertThat(binding.status()).isEqualTo(200);
-        var token = binding.data().path("token").asText();
+        var activeSession = new Browser();
+        assertThat(activeSession.login("PasswordStudent", PASSWORD).status()).isEqualTo(200);
         clock.override = Instant.parse("2026-11-10T00:29:59Z");
         assertThat(web.get("/me").status()).isEqualTo(200);
+        assertThat(activeSession.get("/me").status()).isEqualTo(200);
         clock.override = Instant.parse("2026-11-10T00:30:00Z");
         assertThat(idle.get("/me").status()).isEqualTo(401);
-        assertThat(bearer("GET", "/me", token).status()).isEqualTo(200);
+        assertThat(activeSession.get("/me").status()).isEqualTo(200);
         String newPassword = "Different-test-secret-9217";
         assertThat(web.write("POST", "/me/password", Map.of("currentPassword", PASSWORD,
                 "newPassword", newPassword)).status()).isEqualTo(200);
         assertThat(web.get("/me").status()).isEqualTo(401);
-        assertThat(bearer("GET", "/me", token).status()).isEqualTo(401);
+        assertThat(activeSession.get("/me").status()).isEqualTo(401);
         assertThat(web.login("PasswordStudent", PASSWORD).status()).isEqualTo(401);
         assertThat(web.login("PasswordStudent", newPassword).status()).isEqualTo(200);
     }
@@ -919,9 +856,9 @@ class IdentityIntegrationTest {
         assertThat(published.data().path("papers").size()).isEqualTo(2);
         assertThat(published.data().path("papers").get(0).path("paperId").asText()).isEqualTo(first);
         assertThat(target.get("/me/tasks/" + id).data().path("papers").get(1).path("name").asText()).isEqualTo("卷乙");
-        subject("task-member-code", "task-member");
-        var token = wxBind(new Browser(), "task-member-code", "TargetMember").data().path("token").asText();
-        assertThat(bearer("GET", "/me/tasks/" + id, token).data().path("papers").get(1).path("status").asText())
+        var secondMember = new Browser();
+        assertThat(secondMember.login("TargetMember", PASSWORD).status()).isEqualTo(200);
+        assertThat(secondMember.get("/me/tasks/" + id).data().path("papers").get(1).path("status").asText())
                 .isEqualTo("NOT_STARTED");
         assertThat(outsider.get("/me/tasks/" + id).status()).isEqualTo(404);
         assertThat(admin.write("PATCH", tasks + "/" + id, Map.of("expectedVersion", 2, "draft", request)).status())
@@ -938,7 +875,7 @@ class IdentityIntegrationTest {
         assertThat(target.get("/me/tasks/" + id).status()).isEqualTo(200);
         assertThat(admin.write("POST", memberPath + "/disable", Map.of("expectedVersion", 2)).status()).isEqualTo(200);
         assertThat(target.get("/me/tasks/" + id).status()).isEqualTo(401);
-        assertThat(bearer("GET", "/me/tasks/" + id, token).status()).isEqualTo(401);
+        assertThat(secondMember.get("/me/tasks/" + id).status()).isEqualTo(401);
 
         assertThat(admin.write("POST", tasks, Map.of("name", "重复卷", "gradeId", GRADE,
                 "paperIds", java.util.List.of(first, first))).status()).isEqualTo(400);
@@ -970,6 +907,494 @@ class IdentityIntegrationTest {
         return id;
     }
 
+    @Test
+    void submitsFinalAnswersAtomicallyAndRetriesTheFrozenResult() throws Exception {
+        var fixture = freezingFixture(true);
+        var student = fixture.student();
+        String id = fixture.id();
+        String path = "/me/attempts/" + id;
+        var savedItems = java.util.List.of(answer(fixture, 4, Map.of("text", "旧草稿")));
+        assertThat(student.write("PUT", path + "/answers", Map.of("expectedVersion", 1, "answerItems", savedItems)).status())
+                .isEqualTo(200);
+        var finals = finalAnswers(fixture);
+        var body = Map.of("expectedVersion", 2, "answerItems", finals);
+        assertThat(new Browser().submit(id, "anonymous", body).status()).isEqualTo(401);
+        assertThat(fixture.admin().submit(id, "admin", body).status()).isEqualTo(403);
+        var other = new Browser();
+        other.write("POST", "/auth/register", Map.of("username", "FreezeOther", "password", PASSWORD, "gradeId", GRADE));
+        other.login("FreezeOther", PASSWORD);
+        assertThat(other.submit(id, "other", body).status()).isEqualTo(404);
+        assertThat(student.submit(id, null, body).status()).isEqualTo(400);
+        assertThat(student.submit(id, "stale", Map.of("expectedVersion", 1, "answerItems", finals)).status()).isEqualTo(409);
+        for (var invalid : java.util.List.of(
+                java.util.List.of(finals.get(0), finals.get(0)),
+                java.util.List.of(finals.get(0), Map.of("questionId", UUID.randomUUID(), "answer", Map.of("text", "外题"))),
+                java.util.List.of(finals.get(0), answer(fixture, 1, Map.of("optionIds", java.util.List.of("X")))),
+                java.util.List.of(finals.get(0), answer(fixture, 4, Map.of("text", "x".repeat(10001)))))) {
+            assertThat(student.submit(id, "invalid", Map.of("expectedVersion", 2, "answerItems", invalid)).status()).isEqualTo(400);
+        }
+        assertThat(student.get(path).data().path("savedAnswers").get(0).path("answer").path("text").asText()).isEqualTo("旧草稿");
+        jdbc.execute("CREATE FUNCTION fail_freeze_test() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'freeze failure'; END $$");
+        jdbc.execute("CREATE TRIGGER fail_freeze_test BEFORE INSERT ON attempt_results FOR EACH ROW EXECUTE FUNCTION fail_freeze_test()");
+        try {
+            assertThat(student.submit(id, "final", body).status()).isEqualTo(503);
+            var unchanged = student.get(path).data();
+            assertThat(unchanged.path("version").asInt()).isEqualTo(2);
+            assertThat(unchanged.path("status").asText()).isEqualTo("IN_PROGRESS");
+            assertThat(unchanged.path("savedAnswers").get(0).path("answer").path("text").asText()).isEqualTo("旧草稿");
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM attempt_submit_keys", Integer.class)).isZero();
+        } finally {
+            jdbc.execute("DROP TRIGGER fail_freeze_test ON attempt_results");
+            jdbc.execute("DROP FUNCTION fail_freeze_test()");
+        }
+        var frozen = student.submit(id, "final", body);
+        assertThat(frozen.status()).isEqualTo(200);
+        assertThat(frozen.data().path("status").asText()).isEqualTo("WAIT_SELF_GRADE");
+        assertThat(frozen.data().path("freezeReason").asText()).isEqualTo("MANUAL");
+        assertThat(frozen.data().path("version").asInt()).isEqualTo(3);
+        assertThat(frozen.data().path("automaticScore").asText()).isEqualTo("0.30");
+        assertThat(frozen.data().path("finalScore").isNull()).isTrue();
+        assertThat(frozen.data().path("savedAnswers").size()).isEqualTo(5);
+        assertThat(frozen.response().body()).doesNotContain("correctAnswer", "explanationHtml", "参考");
+        assertThat(student.submit(id, "final", body).data().path("version").asInt()).isEqualTo(3);
+        var changed = Map.of("expectedVersion", 2, "answerItems", java.util.List.of());
+        assertThat(student.submit(id, "final", changed).status()).isEqualTo(409);
+        assertThat(student.submit(id, "new-key", changed).data().path("savedAnswers")).isEqualTo(frozen.data().path("savedAnswers"));
+        assertThat(student.write("PUT", path + "/answers", changed).status()).isEqualTo(409);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM attempt_results", Integer.class)).isEqualTo(5);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM mistakes", Integer.class)).isZero();
+        String another = student.start(fixture.paper(), "another").data().path("id").asText();
+        assertThat(student.submit(another, "final", body).status()).isEqualTo(409);
+        assertThat(student.get("/me/attempts/" + another).data().path("status").asText()).isEqualTo("IN_PROGRESS");
+    }
+
+    @Test
+    void freezesPersistedAnswersOnReadAndLateSaveWithoutRollingBackTheFreeze() throws Exception {
+        var fixture = freezingFixture(false);
+        String path = "/me/attempts/" + fixture.id();
+        var persisted = java.util.List.of(answer(fixture, 0, Map.of("optionId", "A")));
+        fixture.student().write("PUT", path + "/answers", Map.of("expectedVersion", 1, "answerItems", persisted));
+        clock.override = Instant.parse("2026-11-10T00:20:00Z");
+        var frozen = fixture.student().get(path).data();
+        assertThat(frozen.path("status").asText()).isEqualTo("COMPLETED");
+        assertThat(frozen.path("freezeReason").asText()).isEqualTo("DEADLINE");
+        assertThat(frozen.path("finalScore").asText()).isEqualTo("0.10");
+        assertThat(frozen.path("savedAnswers").size()).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM mistakes", Integer.class)).isEqualTo(2);
+        var late = fixture.student().submit(fixture.id(), "late", Map.of("expectedVersion", 2, "answerItems", finalAnswers(fixture)));
+        assertThat(late.status()).isEqualTo(200);
+        assertThat(late.data().path("savedAnswers")).isEqualTo(frozen.path("savedAnswers"));
+        assertThat(late.data().path("frozenAt")).isEqualTo(frozen.path("frozenAt"));
+        String another = fixture.student().start(fixture.paper(), "after-completed").data().path("id").asText();
+        assertThat(another).isNotEqualTo(fixture.id());
+        clock.override = Instant.parse("2026-11-10T00:40:00Z");
+        // Renew authentication; idle sessions and deadline clocks are independent concerns.
+        fixture.student().login("FreezeStudent", PASSWORD);
+        assertThat(fixture.student().write("PUT", "/me/attempts/" + another + "/answers",
+                Map.of("expectedVersion", 1, "answerItems", finalAnswers(fixture))).status()).isEqualTo(409);
+        var afterLateSave = fixture.student().get("/me/attempts/" + another).data();
+        assertThat(afterLateSave.path("status").asText()).isEqualTo("COMPLETED");
+        assertThat(afterLateSave.path("finalScore").asText()).isEqualTo("0.00");
+        assertThat(afterLateSave.path("savedAnswers").size()).isZero();
+        assertThat(afterLateSave.path("version").asInt()).isEqualTo(2);
+        assertThat(lifecycle.freezeDue()).isZero();
+        // Frozen state still prevents a write after the 24-hour idempotency record expires.
+        clock.override = Instant.parse("2026-11-11T01:00:00Z");
+        fixture.student().login("FreezeStudent", PASSWORD);
+        assertThat(fixture.student().submit(fixture.id(), "late", Map.of("expectedVersion", 2,
+                "answerItems", finalAnswers(fixture))).data().path("finalScore").asText()).isEqualTo("0.10");
+    }
+
+    @Test
+    void serializesManualDeadlineCompetitionAndRecoversOverdueDrafts() throws Exception {
+        var fixture = freezingFixture(false);
+        var stored = java.util.List.of(answer(fixture, 0, Map.of("optionId", "B")));
+        fixture.student().write("PUT", "/me/attempts/" + fixture.id() + "/answers",
+                Map.of("expectedVersion", 1, "answerItems", stored));
+        try (var blocking = dataSource.getConnection()) {
+            blocking.setAutoCommit(false);
+            try (var lock = blocking.prepareStatement("UPDATE attempts SET version = version WHERE id = ?")) {
+                lock.setObject(1, UUID.fromString(fixture.id())); lock.executeUpdate();
+            }
+            clock.override = Instant.parse("2026-11-10T00:19:59.999Z");
+            var submit = CompletableFuture.supplyAsync(() -> {
+                try { return fixture.student().submit(fixture.id(), "race", Map.of("expectedVersion", 2,
+                        "answerItems", finalAnswers(fixture))); }
+                catch (Exception error) { throw new RuntimeException(error); }
+            });
+            awaitAttemptLock();
+            clock.override = Instant.parse("2026-11-10T00:20:00Z");
+            assertThat(lifecycle.freezeDue()).isZero(); // SKIP LOCKED does not block other candidates.
+            blocking.commit();
+            var frozen = submit.get(10, TimeUnit.SECONDS);
+            assertThat(frozen.status()).isEqualTo(200);
+            assertThat(frozen.data().path("freezeReason").asText()).isEqualTo("DEADLINE");
+            assertThat(frozen.data().path("finalScore").asText()).isEqualTo("0.00");
+            assertThat(frozen.data().path("savedAnswers").get(0).path("answer").path("optionId").asText()).isEqualTo("B");
+            assertThat(frozen.data().path("version").asInt()).isEqualTo(3);
+        }
+        assertThat(lifecycle.freezeDue()).isZero();
+        String backlog = fixture.student().start(fixture.paper(), "recovery").data().path("id").asText();
+        fixture.student().write("PUT", "/me/attempts/" + backlog + "/answers",
+                Map.of("expectedVersion", 1, "answerItems", finalAnswers(fixture)));
+        clock.override = Instant.parse("2026-11-10T03:00:00Z");
+        var gate = new java.util.concurrent.CountDownLatch(1);
+        var workers = java.util.stream.IntStream.range(0, 2).mapToObj(index -> CompletableFuture.supplyAsync(() -> {
+            try { gate.await(); return lifecycle.freezeDue(); }
+            catch (InterruptedException error) { throw new RuntimeException(error); }
+        })).toList();
+        gate.countDown();
+        assertThat(workers.get(0).join() + workers.get(1).join()).isEqualTo(1);
+        fixture.student().login("FreezeStudent", PASSWORD);
+        var recovered = fixture.student().get("/me/attempts/" + backlog).data();
+        assertThat(recovered.path("deadlineAt").asText()).isEqualTo("2026-11-10T00:40:00Z");
+        assertThat(recovered.path("status").asText()).isEqualTo("COMPLETED");
+        assertThat(recovered.path("finalScore").asText()).isEqualTo("0.30");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM attempt_results WHERE attempt_id = ?", Integer.class,
+                UUID.fromString(backlog))).isEqualTo(3);
+        // A later correct answer must not delete the earlier mistake entry.
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM mistakes", Integer.class)).isEqualTo(3);
+    }
+
+    private void awaitAttemptLock() throws InterruptedException {
+        for (int retry = 0; retry < 100; retry++) {
+            if (jdbc.queryForObject("SELECT count(*) FROM pg_stat_activity WHERE wait_event_type = 'Lock' "
+                    + "AND query LIKE '%FROM attempts WHERE id =%'", Integer.class) > 0) return;
+            Thread.sleep(25);
+        }
+        throw new AssertionError("HTTP request did not reach the locked attempt");
+    }
+
+    @Test
+    void gradesUnorderedPartialExtraAndMissingSelectionsUsingSnapshotIntegers() throws Exception {
+        var fixture=freezingFixture(false);
+        String subject=fixture.admin().get("/admin/papers/"+fixture.paper()).data().path("paper").path("subjectId").asText();
+        var options=java.util.List.of(Map.of("id","A","text","甲"),Map.of("id","B","text","乙"),Map.of("id","C","text","丙"));
+        var question=Map.of("subjectId",subject,"type","MULTIPLE","difficulty",1,"score","0.20","stemHtml","集合比较", "options",options,"answer",Map.of("optionIds",java.util.List.of("A","B")));
+        assertThat(fixture.admin().write("PATCH","/admin/questions/"+fixture.questions().get(1),Map.of("expectedVersion",1,"question",question)).status()).isEqualTo(200);
+        var created=fixture.admin().write("POST","/admin/papers",Map.of("subjectId",subject,"type","FIXED","draft",Map.of("name","客观边界卷","durationMinutes",20,"groups",java.util.List.of(Map.of("name","客观题","questionIds",fixture.questions().subList(0,2))))));
+        String paper=created.data().path("paper").path("id").asText();fixture.admin().write("POST","/admin/papers/"+paper+"/publish",Map.of("expectedVersion",1));
+        var selections=java.util.List.of(java.util.List.of("B","A"),java.util.List.of("A"),java.util.List.of("A","C"),java.util.List.<String>of());
+        for(int index=0;index<selections.size();index++) {
+            String id=fixture.student().start(paper,"selection-"+index).data().path("id").asText();
+            var answers=new java.util.ArrayList<Map<String,Object>>();answers.add(answer(fixture,0,Map.of("optionId","A")));
+            if(!selections.get(index).isEmpty())answers.add(answer(fixture,1,Map.of("optionIds",selections.get(index))));
+            var result=fixture.student().submit(id,"final-selection-"+index,Map.of("expectedVersion",1,"answerItems",answers));
+            assertThat(result.status()).isEqualTo(200);assertThat(result.data().path("finalScore").asText()).isEqualTo(index==0?"0.30":"0.10");
+        }
+    }
+
+    @Test
+    void reportsHongKongMonthBoundariesAndDeadlineAlertsWithoutExposingAnswers() throws Exception {
+        var fixture=freezingFixture(false);
+        clock.override=Instant.parse("2026-11-10T00:20:31Z");
+        fixture.admin().login("MainAdmin",PASSWORD);
+        var lag=fixture.admin().get("/admin/observability");assertThat(lag.status()).isEqualTo(200);
+        assertThat(lag.data().path("databaseUp").asBoolean()).isTrue();assertThat(lag.data().path("alerts").toString()).contains("DEADLINE_BACKLOG");
+        assertThat(lag.response().body()).doesNotContain("correctAnswer",PASSWORD);
+        fixture.student().get("/me/attempts/"+fixture.id());
+        assertThat(fixture.admin().get("/admin/observability").data().path("overdueCount").asInt()).isZero();
+        clock.override=Instant.parse("2026-10-31T16:00:00Z");
+        UUID owner=UUID.fromString(fixture.student().get("/me").data().path("id").asText());
+        jdbc.update("DELETE FROM user_daily_activity");
+        jdbc.update("INSERT INTO user_daily_activity(user_id,day) VALUES (?,DATE '2026-11-01') ON CONFLICT DO NOTHING",owner);
+        jdbc.update("INSERT INTO user_daily_activity(user_id,day) VALUES (?,DATE '2026-11-01') ON CONFLICT DO NOTHING",owner);
+        jdbc.update("UPDATE questions SET created_at=TIMESTAMPTZ '2026-10-31 15:59:59Z'");
+        jdbc.update("UPDATE questions SET created_at=TIMESTAMPTZ '2026-10-31 16:00:00Z' WHERE id=?",UUID.fromString(fixture.questions().get(0)));
+        var stats=fixture.admin().get("/admin/statistics").data();
+        assertThat(stats.path("timeZone").asText()).isEqualTo("Asia/Hong_Kong");
+        assertThat(stats.path("activeUsers").size()).isEqualTo(7);assertThat(stats.path("activeUsers").get(6).path("count").asInt()).isEqualTo(1);
+        assertThat(stats.path("activeUsers").get(0).path("count").asInt()).isZero();
+        assertThat(stats.path("newQuestions").size()).isEqualTo(1);assertThat(stats.path("newQuestions").get(0).path("count").asInt()).isEqualTo(1);
+        jdbc.update("UPDATE questions SET archived=true WHERE id=?",UUID.fromString(fixture.questions().get(0)));
+        var archived=fixture.admin().get("/admin/statistics").data();assertThat(archived.path("questionCount").asInt()).isEqualTo(2);
+        assertThat(archived.path("newQuestions").get(0).path("count").asInt()).isEqualTo(1);
+    }
+
+    @Test
+    void alertsOnlyAfterFiveMinutesOfSustainedServiceErrors() {
+        clock.override=Instant.parse("2026-11-10T00:00:00Z");
+        var isolated=new com.onlineexam.platform.service.ObservabilityService(org.springframework.jdbc.core.simple.JdbcClient.create(dataSource),clock,dataSource);
+        isolated.record(20,503);assertThat(isolated.metrics().alerts()).doesNotContain("ERROR_RATE_HIGH");
+        clock.override=Instant.parse("2026-11-10T00:05:00Z");isolated.record(30,503);
+        assertThat(isolated.metrics().alerts()).contains("ERROR_RATE_HIGH");
+        clock.override=Instant.parse("2026-11-10T00:10:01Z");
+        assertThat(isolated.metrics().alerts()).doesNotContain("ERROR_RATE_HIGH");
+    }
+
+    @Test
+    void authorizesSnapshotImagesOnlyForTheOwnerAndHidesExplanationsUntilFrozen() throws Exception {
+        var fixture=freezingFixture(false);String subject=fixture.admin().get("/admin/papers/"+fixture.paper()).data().path("paper").path("subjectId").asText();
+        var image=new ByteArrayOutputStream();ImageIO.write(new BufferedImage(2,2,BufferedImage.TYPE_INT_RGB),"PNG",image);
+        String attachment=fixture.admin().upload("answer.png",image.toByteArray()).data().path("id").asText();
+        var question=fixture.admin().write("POST","/admin/questions",Map.of("subjectId",subject,"type","SHORT","difficulty",1,"score","1.00","stemHtml","私有解析题","options",java.util.List.of(),"answer",Map.of("text","参考"),"explanationHtml","<img data-attachment=\""+attachment+"\" alt=\"解析图片\">"));
+        String q=question.data().path("id").asText();String paper=createPublishedPaper(fixture.admin(),subject,q,"FIXED","解析图片卷");
+        String id=fixture.student().start(paper,"image-start").data().path("id").asText();String path="/me/attempts/"+id+"/questions/"+q+"/attachments/"+attachment;
+        assertThat(fixture.student().http.send(fixture.student().prepare("GET",path,null,false),HttpResponse.BodyHandlers.ofByteArray()).statusCode()).isEqualTo(404);
+        fixture.student().submit(id,"image-final",Map.of("expectedVersion",1,"answerItems",java.util.List.of()));
+        var visible=fixture.student().http.send(fixture.student().prepare("GET",path,null,false),HttpResponse.BodyHandlers.ofByteArray());
+        assertThat(visible.statusCode()).isEqualTo(200);assertThat(visible.body()).isEqualTo(image.toByteArray());
+        var other=new Browser();other.write("POST","/auth/register",Map.of("username","ImageOther","password",PASSWORD,"gradeId",GRADE));other.login("ImageOther",PASSWORD);
+        assertThat(other.http.send(other.prepare("GET",path,null,false),HttpResponse.BodyHandlers.ofByteArray()).statusCode()).isEqualTo(404);
+        assertThat(new Browser().http.send(new Browser().prepare("GET",path,null,false),HttpResponse.BodyHandlers.ofByteArray()).statusCode()).isEqualTo(401);
+    }
+
+    @Test
+    void confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores(CapturedOutput output) throws Exception {
+        var fixture=freezingFixture(true);
+        var submitted=fixture.student().submit(fixture.id(),"grade-submit",Map.of("expectedVersion",1,"answerItems",finalAnswers(fixture)));
+        assertThat(submitted.status()).isEqualTo(200);
+        String path="/me/attempts/"+fixture.id()+"/self-grade";
+        String reviewPath="/me/attempts/"+fixture.id()+"/review";
+        var valid=java.util.List.of(Map.of("questionId",fixture.questions().get(3),"score","0.50"),
+                Map.of("questionId",fixture.questions().get(4),"score","1.00"));
+        assertThat(fixture.student().get(reviewPath).data().path("items").get(3).path("referenceAnswer").has("gaps")).isTrue();
+        for(var invalid:java.util.List.of(java.util.List.of(valid.get(0)),
+                java.util.List.of(valid.get(0),Map.of("questionId",fixture.questions().get(4),"score","1.01")),
+                java.util.List.of(valid.get(0),Map.of("questionId",fixture.questions().get(4),"score","0.001")),
+                java.util.List.of(valid.get(0),Map.of("questionId",fixture.questions().get(4),"score","-1")),
+                java.util.List.of(valid.get(0),valid.get(0)),java.util.List.of(valid.get(0),Map.of("questionId",fixture.questions().get(0),"score","0.10")))) {
+            assertThat(fixture.student().keyed(path,"bad",Map.of("expectedVersion",2,"scores",invalid)).status()).isEqualTo(400);
+        }
+        assertThat(fixture.student().get(reviewPath).data().path("attempt").path("version").asInt()).isEqualTo(2);
+        jdbc.execute("CREATE FUNCTION fail_grade_test() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.status='COMPLETED' THEN RAISE EXCEPTION 'grading failure'; END IF; RETURN NEW; END $$");
+        jdbc.execute("CREATE TRIGGER fail_grade_test BEFORE UPDATE ON attempts FOR EACH ROW EXECUTE FUNCTION fail_grade_test()");
+        var body=Map.of("expectedVersion",2,"scores",valid);
+        try {
+            assertThat(fixture.student().keyed(path,"confirm",body).status()).isEqualTo(503);
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM gradings",Integer.class)).isZero();
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM mistakes",Integer.class)).isZero();
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM attempt_results WHERE score_minor IS NULL",Integer.class)).isEqualTo(2);
+        } finally { jdbc.execute("DROP TRIGGER fail_grade_test ON attempts");jdbc.execute("DROP FUNCTION fail_grade_test()"); }
+        // Fail after scores and COMPLETED have been written: task projection must roll back too.
+        jdbc.execute("CREATE FUNCTION fail_mistake_test() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'late grading failure'; END $$");
+        jdbc.execute("CREATE TRIGGER fail_mistake_test BEFORE INSERT ON mistakes FOR EACH ROW EXECUTE FUNCTION fail_mistake_test()");
+        try {
+            assertThat(fixture.student().keyed(path,"confirm",body).status()).isEqualTo(503);
+            assertThat(fixture.student().get(reviewPath).data().path("attempt").path("status").asText()).isEqualTo("WAIT_SELF_GRADE");
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM gradings",Integer.class)).isZero();
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM attempt_results WHERE score_minor IS NULL",Integer.class)).isEqualTo(2);
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM operation_keys WHERE operation='SELF_GRADE'",Integer.class)).isZero();
+        } finally { jdbc.execute("DROP TRIGGER fail_mistake_test ON mistakes");jdbc.execute("DROP FUNCTION fail_mistake_test()"); }
+        var second=new Browser();second.login("FreezeStudent",PASSWORD);
+        var gate=new java.util.concurrent.CountDownLatch(1);
+        var one=CompletableFuture.supplyAsync(()->{try {gate.await();return fixture.student().keyed(path,"confirm",body);}catch(Exception e){throw new RuntimeException(e);}});
+        var two=CompletableFuture.supplyAsync(()->{try {gate.await();return second.keyed(path,"confirm",body);}catch(Exception e){throw new RuntimeException(e);}});
+        gate.countDown();
+        assertThat(one.join().status()).isEqualTo(200);assertThat(two.join().status()).isEqualTo(200);
+        var complete=fixture.student().get(reviewPath).data();
+        assertThat(complete.path("attempt").path("finalScore").asText()).isEqualTo("1.80");
+        assertThat(complete.path("gradingSource").asText()).isEqualTo("SELF");
+        assertThat(fixture.student().keyed(path,"repeat-new-key",body).status()).isEqualTo(200);
+        assertThat(fixture.student().keyed(path,"modify-final",Map.of("expectedVersion",3,"scores",java.util.List.of(
+                Map.of("questionId",fixture.questions().get(3),"score","0.40"),valid.get(1)))).status()).isEqualTo(409);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM gradings",Integer.class)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM mistakes",Integer.class)).isEqualTo(2);
+        assertThat(fixture.student().keyed(path,"confirm",Map.of("expectedVersion",2,"scores",java.util.List.of())).status()).isEqualTo(409);
+        assertThat(fixture.student().get("/me/attempts?ownerId="+UUID.randomUUID()).status()).isEqualTo(400);
+        String owner=fixture.student().get("/me").data().path("id").asText();
+        assertThat(output.getOut()).doesNotContain("failed to append","has already been written");
+        var failureLogs=output.getOut().lines().filter(line->line.startsWith("{")&&line.contains("\"message\":\"Database request failed\"")).toList();
+        assertThat(failureLogs.size()).isGreaterThanOrEqualTo(2);
+        for(String line:failureLogs) {
+            var event=json.readTree(line);
+            assertThat(event.path("actorId").asText()).isEqualTo(owner);
+            assertThat(event.path("requestId").asText()).isNotBlank();
+            assertThat(event.path("module").asText()).isEqualTo("http");
+            assertThat(event.path("action").asText()).isEqualTo("POST");
+            assertThat(event.path("result").asText()).isEqualTo("P0001");
+            assertThat(line).doesNotContain(PASSWORD,"最终答案","SELECT ","INSERT ");
+        }
+        var adminReview=fixture.admin().get("/admin/attempts/"+fixture.id()).data();
+        assertThat(adminReview.path("attempt").path("finalScore").asText()).isEqualTo("1.80");
+        assertThat(fixture.admin().get("/admin/attempts?ownerId="+owner).data().path("total").asInt()).isEqualTo(1);
+        assertThat(fixture.student().get("/me/mistakes").data().path("total").asInt()).isEqualTo(2);
+        var other=new Browser();other.write("POST","/auth/register",Map.of("username","ReviewOther","password",PASSWORD,"gradeId",GRADE));other.login("ReviewOther",PASSWORD);
+        assertThat(other.get(reviewPath).status()).isEqualTo(404);
+        assertThat(other.keyed(path,"other",body).status()).isEqualTo(404);
+        assertThat(other.get("/me/mistakes/"+fixture.questions().get(2)).status()).isEqualTo(404);
+    }
+
+    @Test
+    void projectsTaskCompletionOnlyAfterEverySubjectiveGradeAndKeepsEmptyAnswersZero() throws Exception {
+        var fixture=freezingFixture(true);
+        String subject=fixture.admin().get("/admin/papers/"+fixture.paper()).data().path("paper").path("subjectId").asText();
+        String first=createPublishedPaper(fixture.admin(),subject,fixture.questions().get(4),"TASK","主观甲");
+        String second=createPublishedPaper(fixture.admin(),subject,fixture.questions().get(4),"TASK","主观乙");
+        var task=fixture.admin().write("POST","/admin/tasks",Map.of("gradeId",GRADE,"name","批改任务","paperIds",java.util.List.of(first,second))).data();
+        String taskId=task.path("id").asText();
+        fixture.admin().write("POST","/admin/tasks/"+taskId+"/publish",Map.of("expectedVersion",1));
+        String firstAttempt=fixture.student().startTask(taskId,first,"task-a").data().path("id").asText();
+        String secondAttempt=fixture.student().startTask(taskId,second,"task-b").data().path("id").asText();
+        fixture.student().submit(firstAttempt,"submit-a",Map.of("expectedVersion",1,"answerItems",java.util.List.of(answer(fixture,4,Map.of("text","作答")))));
+        fixture.student().submit(secondAttempt,"submit-b",Map.of("expectedVersion",1,"answerItems",java.util.List.of()));
+        String taskPath="/me/tasks/"+taskId;
+        var pending=fixture.student().get(taskPath).data();
+        assertThat(pending.path("completed").asBoolean()).isFalse();
+        assertThat(pending.path("papers").get(0).path("status").asText()).isEqualTo("WAIT_SELF_GRADE");
+        assertThat(pending.path("papers").get(0).path("attemptId").asText()).isEqualTo(firstAttempt);
+        fixture.student().keyed("/me/attempts/"+firstAttempt+"/self-grade","grade-a",Map.of("expectedVersion",2,"scores",java.util.List.of(Map.of("questionId",fixture.questions().get(4),"score","0.50"))));
+        assertThat(fixture.student().get(taskPath).data().path("completedCount").asInt()).isEqualTo(1);
+        var bad=Map.of("expectedVersion",2,"scores",java.util.List.of(Map.of("questionId",fixture.questions().get(4),"score","1.00")));
+        assertThat(fixture.student().keyed("/me/attempts/"+secondAttempt+"/self-grade","grade-b",bad).status()).isEqualTo(400);
+        assertThat(fixture.student().keyed("/me/attempts/"+secondAttempt+"/self-grade","grade-b",Map.of("expectedVersion",2,"scores",java.util.List.of(Map.of("questionId",fixture.questions().get(4),"score","0.00")))).status()).isEqualTo(200);
+        var complete=fixture.student().get(taskPath).data();
+        assertThat(complete.path("completed").asBoolean()).isTrue();assertThat(complete.path("completedCount").asInt()).isEqualTo(2);
+        assertThat(fixture.student().startTask(taskId,first,"new-start").data().path("id").asText()).isEqualTo(firstAttempt);
+    }
+
+    @Test
+    void sendsMessagesAtomicallyDeduplicatesRecipientsAndCountsFirstReadOnce() throws Exception {
+        var fixture=freezingFixture(false);
+        String owner=fixture.student().get("/me").data().path("id").asText();
+        var other=new Browser();String outsider=other.write("POST","/auth/register",Map.of("username","MessageOther","password",PASSWORD,"gradeId",GRADE)).data().path("id").asText();
+        other.login("MessageOther",PASSWORD);
+        var invalid=Map.of("title","消息","body","仅测试文本","recipientIds",java.util.List.of(owner,UUID.randomUUID().toString()));
+        assertThat(fixture.admin().keyed("/admin/messages","send",invalid).status()).isEqualTo(400);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM messages",Integer.class)).isZero();
+        String invalidUser=fixture.admin().write("POST","/admin/users",Map.of("username","InvalidRecipient","password",PASSWORD,"role","STUDENT","gradeId",GRADE)).data().path("id").asText();
+        for(String status:java.util.List.of("DISABLED","DELETED")) {
+            jdbc.update("UPDATE users SET status=? WHERE id=?",status,UUID.fromString(invalidUser));
+            assertThat(fixture.admin().keyed("/admin/messages","invalid-"+status,Map.of("title","无效收件人","body","整体拒绝","recipientIds",java.util.List.of(owner,invalidUser))).status()).isEqualTo(400);
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM messages",Integer.class)).isZero();
+        }
+        var body=Map.of("title","任务提醒","body","批改后查看记录","recipientIds",java.util.List.of(owner,owner));
+        var sent=fixture.admin().keyed("/admin/messages","send",body);assertThat(sent.status()).isEqualTo(200);
+        String id=sent.data().path("message").path("id").asText();
+        assertThat(sent.data().path("message").path("recipientCount").asInt()).isEqualTo(1);
+        assertThat(fixture.admin().keyed("/admin/messages","send",body).data().path("message").path("id").asText()).isEqualTo(id);
+        assertThat(fixture.admin().keyed("/admin/messages","send",invalid).status()).isEqualTo(409);
+        assertThat(other.get("/me/messages/"+id).status()).isEqualTo(404);
+        assertThat(other.write("PUT","/me/messages/"+id+"/read",null).status()).isEqualTo(404);
+        assertThat(fixture.student().get("/me/messages/"+id).data().has("recipientCount")).isFalse();
+        var one=fixture.student().write("PUT","/me/messages/"+id+"/read",null).data().path("readAt");
+        assertThat(fixture.student().write("PUT","/me/messages/"+id+"/read",null).data().path("readAt")).isEqualTo(one);
+        assertThat(fixture.admin().get("/admin/messages/"+id).data().path("message").path("readCount").asInt()).isEqualTo(1);
+        assertThat(fixture.student().keyed("/admin/messages","illegal",body).status()).isEqualTo(403);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM messages",Integer.class)).isEqualTo(1);
+        assertThat(fixture.student().get("/me/messages").data().path("total").asInt()).isEqualTo(1);
+        assertThat(other.get("/me/messages").data().path("total").asInt()).isZero();
+    }
+
+    @Test
+    void protectsProfilesAndAvatarsAndCorrelatesCredentialFreeAudit() throws Exception {
+        var fixture=freezingFixture(false);
+        var profile=fixture.student().get("/me/profile").data();
+        var body=Map.of("expectedVersion",profile.path("version").asInt(),"name","学生姓名","phone","+852 12345678","birthday","2000-01-01");
+        assertThat(fixture.student().write("PATCH","/me/profile",body).status()).isEqualTo(200);
+        assertThat(fixture.student().get("/me/profile").data().path("name").asText()).isEqualTo("学生姓名");
+        assertThat(fixture.student().write("PATCH","/me/profile",Map.of("expectedVersion",2,"name","非法","phone","","role","ADMIN")).status()).isEqualTo(400);
+        var image=new ByteArrayOutputStream();ImageIO.write(new BufferedImage(2,2,BufferedImage.TYPE_INT_RGB),"PNG",image);
+        assertThat(fixture.student().uploadPath("/me/avatar","avatar.png",image.toByteArray()).status()).isEqualTo(200);
+        var imageResponse=fixture.student().http.send(fixture.student().prepare("GET","/me/avatar/image",null,false),HttpResponse.BodyHandlers.ofByteArray());
+        assertThat(imageResponse.statusCode()).isEqualTo(200);assertThat(imageResponse.body()).isEqualTo(image.toByteArray());
+        assertThat(fixture.student().uploadPath("/me/avatar","bad.png",new byte[]{1,2,3}).status()).isEqualTo(400);
+        assertThat(fixture.student().get("/me/profile").data().path("avatarId").isNull()).isFalse();
+        var submitted=fixture.student().submit(fixture.id(),"audit-submit",Map.of("expectedVersion",1,"answerItems",finalAnswers(fixture)));
+        String requestId=json.readTree(submitted.response().body()).path("requestId").asText();
+        assertThat(submitted.response().headers().firstValue("X-Request-Id").orElseThrow()).isEqualTo(requestId);
+        var events=fixture.admin().get("/admin/audit-events?requestId="+requestId);
+        assertThat(events.data().path("items").toString()).contains("Attempt.submit",fixture.id());
+        assertThat(events.response().body()).doesNotContain(PASSWORD,"最终答案","correct_answer","passwordHash","token");
+        assertThat(fixture.student().get("/admin/audit-events").status()).isEqualTo(403);
+        assertThat(fixture.student().get("/me/activities?actorId="+UUID.randomUUID()).status()).isEqualTo(400);
+        assertThat(fixture.student().get("/me/activities").data().path("total").asInt()).isGreaterThan(0);
+    }
+
+    @Test
+    void concurrentManualSubmissionsReturnOneResultWithoutDuplicatingScores() throws Exception {
+        var fixture = freezingFixture(false);
+        var second = new Browser(); second.login("FreezeStudent", PASSWORD);
+        var body = Map.of("expectedVersion", 1, "answerItems", finalAnswers(fixture));
+        var gate = new java.util.concurrent.CountDownLatch(1);
+        var first = CompletableFuture.supplyAsync(() -> {
+            try { gate.await(); return fixture.student().submit(fixture.id(), "same-final", body); }
+            catch (Exception error) { throw new RuntimeException(error); }
+        });
+        var retry = CompletableFuture.supplyAsync(() -> {
+            try { gate.await(); return second.submit(fixture.id(), "same-final", body); }
+            catch (Exception error) { throw new RuntimeException(error); }
+        });
+        gate.countDown();
+        var one = first.get(10, TimeUnit.SECONDS);
+        var two = retry.get(10, TimeUnit.SECONDS);
+        assertThat(one.status()).isEqualTo(200);
+        assertThat(two.status()).isEqualTo(200);
+        assertThat(one.data().path("frozenAt")).isEqualTo(two.data().path("frozenAt"));
+        assertThat(one.data().path("version").asInt()).isEqualTo(2);
+        assertThat(two.data().path("finalScore").asText()).isEqualTo("0.30");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM attempt_results", Integer.class)).isEqualTo(3);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM attempt_submit_keys", Integer.class)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM mistakes", Integer.class)).isEqualTo(1);
+    }
+
+    @Test
+    void deadlineWorkerSkipsBusyOwnerAndUsesTheSameLockOrderAsHttp() throws Exception {
+        var fixture = freezingFixture(false);
+        clock.override = Instant.parse("2026-11-10T00:20:00Z");
+        try (var blocking = dataSource.getConnection()) {
+            blocking.setAutoCommit(false);
+            try (var lock = blocking.prepareStatement("SELECT id FROM users WHERE username_normalized = 'freezestudent' FOR UPDATE")) {
+                lock.executeQuery().close();
+            }
+            var skipped = CompletableFuture.supplyAsync(() -> lifecycle.freezeDue());
+            assertThat(skipped.get(3, TimeUnit.SECONDS)).isZero();
+            blocking.commit();
+        }
+        assertThat(lifecycle.freezeDue()).isEqualTo(1);
+        assertThat(fixture.student().get("/me/attempts/" + fixture.id()).data().path("status").asText()).isEqualTo("COMPLETED");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM mistakes", Integer.class)).isEqualTo(3);
+    }
+
+    private record FreezeFixture(Browser admin, Browser student, String paper, String id, java.util.List<String> questions) {}
+
+    private FreezeFixture freezingFixture(boolean mixed) throws Exception {
+        clock.override = Instant.parse("2026-11-10T00:00:00Z");
+        var admin = new Browser(); admin.login("MainAdmin", PASSWORD);
+        var student = new Browser();
+        student.write("POST", "/auth/register", Map.of("username", "FreezeStudent", "password", PASSWORD, "gradeId", GRADE));
+        student.login("FreezeStudent", PASSWORD);
+        String subject = admin.write("POST", "/admin/subjects", Map.of("gradeId", GRADE, "name", "冻结学科")).data().path("id").asText();
+        var options = java.util.List.of(Map.of("id", "A", "text", "甲"), Map.of("id", "B", "text", "乙"));
+        var variants = java.util.List.of(
+                Map.of("type", "SINGLE", "score", "0.10", "options", options, "answer", Map.of("optionIds", java.util.List.of("A"))),
+                Map.of("type", "MULTIPLE", "score", "0.20", "options", options, "answer", Map.of("optionIds", java.util.List.of("A", "B"))),
+                Map.of("type", "TRUE_FALSE", "score", "0.30", "options", java.util.List.of(), "answer", Map.of("optionIds", java.util.List.of("true"))),
+                Map.of("type", "GAP", "score", "1.00", "options", java.util.List.of(), "stemHtml", "<span data-gap=\"1\">___</span>",
+                        "answer", Map.of("gaps", java.util.List.of("参考"))),
+                Map.of("type", "SHORT", "score", "1.00", "options", java.util.List.of(), "answer", Map.of("text", "参考")));
+        var questions = new java.util.ArrayList<String>();
+        for (var variant : variants.subList(0, mixed ? 5 : 3)) {
+            var question = new java.util.HashMap<String, Object>(Map.of("subjectId", subject, "difficulty", 3, "stemHtml", "冻结测试题"));
+            question.putAll(variant);
+            var result = admin.write("POST", "/admin/questions", question);
+            assertThat(result.status()).isEqualTo(201);
+            questions.add(result.data().path("id").asText());
+        }
+        var created = admin.write("POST", "/admin/papers", Map.of("subjectId", subject, "type", "FIXED", "draft",
+                Map.of("name", "冻结测试卷", "durationMinutes", 20, "groups", java.util.List.of(Map.of("name", "题组", "questionIds", questions)))));
+        String paper = created.data().path("paper").path("id").asText();
+        assertThat(admin.write("POST", "/admin/papers/" + paper + "/publish", Map.of("expectedVersion", 1)).status()).isEqualTo(200);
+        String id = student.start(paper, "freeze-start").data().path("id").asText();
+        return new FreezeFixture(admin, student, paper, id, questions);
+    }
+
+    private Map<String, Object> answer(FreezeFixture fixture, int index, Object answer) {
+        return Map.of("questionId", fixture.questions().get(index), "answer", answer);
+    }
+
+    private java.util.List<Map<String, Object>> finalAnswers(FreezeFixture fixture) {
+        var result = new java.util.ArrayList<Map<String, Object>>();
+        result.add(answer(fixture, 0, Map.of("optionId", "A")));
+        result.add(answer(fixture, 1, Map.of("optionIds", java.util.List.of("B", "A"))));
+        result.add(answer(fixture, 2, Map.of("optionId", "false")));
+        if (fixture.questions().size() > 3) {
+            result.add(answer(fixture, 3, Map.of("texts", java.util.List.of("填写"))));
+            result.add(answer(fixture, 4, Map.of("text", "最终答案")));
+        }
+        return result;
+    }
+
     @TestConfiguration(proxyBeanMethods = false)
     static class TestClockConfiguration {
         @Bean @Primary AdjustableClock adjustableClock() { return new AdjustableClock(); }
@@ -982,29 +1407,32 @@ class IdentityIntegrationTest {
         @Override public Instant instant() { return override == null ? Instant.now() : override; }
     }
 
-    private void subject(String code, String openId) {
-        when(wechat.exchange(code)).thenReturn(new Subject("fixture-app", openId));
-    }
-
-    private Result wxBind(Browser browser, String code, String name) throws Exception {
-        return browser.request("POST", "/auth/wechat/bind",
-                Map.of("code", code, "username", name, "password", PASSWORD), false);
-    }
-
-    private Result bearer(String method, String path, String token) throws Exception {
-        var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/v1" + path))
-                .header("Authorization", "Bearer " + token).method(method, HttpRequest.BodyPublishers.noBody()).build();
-        var response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-        return new Result(response, json.readTree(response.body()).path("data"));
-    }
-
-    private Result bearerStart(String task, String paper, String token, String key) throws Exception {
-        var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/v1/me/tasks/"
-                + task + "/papers/" + paper + "/attempts"))
-                .header("Authorization", "Bearer " + token).header("Idempotency-Key", key)
-                .POST(HttpRequest.BodyPublishers.noBody()).build();
-        var response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-        return new Result(response, json.readTree(response.body()).path("data"));
+    @Test
+    void acceptsOnlyWebSessionsAndRevokesHistoricalCredentialsWithoutReopeningLegacyRoutes() throws Exception {
+        var fixture=freezingFixture(false);
+        String owner=fixture.student().get("/me").data().path("id").asText();
+        UUID binding=UUID.randomUUID();String legacyToken="L".repeat(43);
+        jdbc.update("INSERT INTO wechat_bindings(id,user_id,app_id,open_id) VALUES (?,?,?,?)",binding,UUID.fromString(owner),"retired-fixture","retired-subject");
+        jdbc.update("INSERT INTO wechat_tokens(binding_id,token_hash,expires_at) VALUES (?,?,?)",binding,IdentityService.digest(legacyToken),java.time.OffsetDateTime.now(clock).plusHours(1));
+        var tokenRequest=HttpRequest.newBuilder(fixture.student().prepare("GET","/me",null,false),(name,value)->true)
+                .header("Authorization","Bearer "+legacyToken).build();
+        assertThat(fixture.student().http.send(tokenRequest,HttpResponse.BodyHandlers.ofString()).statusCode()).isEqualTo(401);
+        assertThat(fixture.student().get("/me").status()).isEqualTo(200);
+        for(String action:java.util.List.of("bind","register","login"))
+            assertThat(fixture.student().write("POST","/auth/wechat/"+action,Map.of()).status()).isEqualTo(403);
+        assertThat(fixture.student().write("DELETE","/auth/wechat/binding",null).status()).isEqualTo(403);
+        assertThat(fixture.student().write("POST","/me/password",Map.of("currentPassword",PASSWORD,"newPassword","Replacement-test-secret-9217")).status()).isEqualTo(200);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM wechat_tokens",Integer.class)).isZero();
+        int version=fixture.admin().get(USERS+"/"+owner).data().path("version").asInt();
+        assertThat(fixture.admin().write("DELETE",USERS+"/"+owner,Map.of("expectedVersion",version)).status()).isEqualTo(200);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM wechat_bindings",Integer.class)).isZero();
+        for(String type:java.util.List.of("Application/JSON; charset=UTF-8","application/problem+json")) {
+            var oversized=HttpRequest.newBuilder(URI.create("http://localhost:"+port+"/api/v1/version"))
+                    .header("Content-Type",type).method("GET",HttpRequest.BodyPublishers.ofString(" ".repeat(2*1024*1024+1))).build();
+            var response=HttpClient.newHttpClient().send(oversized,HttpResponse.BodyHandlers.ofString());
+            assertThat(response.statusCode()).isEqualTo(400);
+            assertThat(json.readTree(response.body()).path("code").asText()).isEqualTo("VALIDATION_ERROR");
+        }
     }
 
     private record Result(HttpResponse<String> response, JsonNode data) {
@@ -1017,6 +1445,16 @@ class IdentityIntegrationTest {
 
         Result login(String username, String password) throws Exception {
             return write("POST", "/auth/login", Map.of("username", username, "password", password));
+        }
+
+        Result submit(String id, String key, Object body) throws Exception {
+            return keyed("/me/attempts/" + id + "/submit",key,body);
+        }
+        Result keyed(String path,String key,Object body) throws Exception {
+            var request = HttpRequest.newBuilder(prepare("POST", path, body, true), (name, value) -> true);
+            if (key != null) request.header("Idempotency-Key", key);
+            var response = http.send(request.build(), HttpResponse.BodyHandlers.ofString());
+            return new Result(response, json.readTree(response.body()).path("data"));
         }
 
         Result get(String path) throws Exception { return request("GET", path, null, false); }
@@ -1069,6 +1507,9 @@ class IdentityIntegrationTest {
         }
 
         Result upload(String name, byte[] bytes) throws Exception {
+            return uploadPath("/attachments",name,bytes);
+        }
+        Result uploadPath(String path,String name,byte[] bytes) throws Exception {
             var csrf = get("/auth/csrf");
             var cookie = csrf.response().headers().firstValue("Set-Cookie").orElseThrow().split(";", 2)[0];
             String boundary = "upload-boundary";
@@ -1078,7 +1519,7 @@ class IdentityIntegrationTest {
                             + "Content-Type: image/png\r\n\r\n"),
                     HttpRequest.BodyPublishers.ofByteArray(bytes),
                     HttpRequest.BodyPublishers.ofString("\r\n--" + boundary + "--\r\n"));
-            var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/v1/attachments"))
+            var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/v1"+path))
                     .header("Cookie", session + "; " + cookie)
                     .header(csrf.data().path("headerName").asText(), csrf.data().path("token").asText())
                     .header("Content-Type", "multipart/form-data; boundary=" + boundary).POST(body).build();

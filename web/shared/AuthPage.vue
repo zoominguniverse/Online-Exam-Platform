@@ -27,6 +27,7 @@ async function loadGrades() {
 }
 
 async function submit() {
+  if(submitting.value)return
   submitting.value = true
   message.value = ''
   try {
@@ -41,6 +42,7 @@ async function submit() {
         for (const key of Object.keys(localStorage)) if (key.startsWith(`exam-draft:${previous}:`)) localStorage.removeItem(key)
       }
       localStorage.setItem('exam-active-user', account.id)
+      localStorage.setItem('exam-auth-epoch',crypto.randomUUID())
       if (account.role !== props.role) {
         await router.replace({ name: 'denied' })
         return

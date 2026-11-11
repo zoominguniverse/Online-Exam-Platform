@@ -8,6 +8,7 @@
 | 后端直接依赖 | Spring Boot 3.5.16、MyBatis Starter 3.0.5；Boot 管理 Spring Security 6.5.11、Flyway 11.7.2、PostgreSQL JDBC 42.7.11；题库增加 jsoup 1.24.1 和 TwelveMonkeys ImageIO WebP 3.15.3 |
 | 运行 | Temurin 21.0.11、PostgreSQL 17.11 |
 | Web | Vue 3.5.45、Vue Router 4.6.4、Pinia 3.0.4、Element Plus 2.14.8、KaTeX 0.16.47、ECharts 5.6.0、TypeScript 5.9.3、Vite 7.3.8、Vue 插件 6.0.10 |
+| 浏览器验证（2026-11-11 新增） | 开发依赖 `@playwright/test`、`playwright`、`playwright-core` 均固定 1.65.0（Apache-2.0），锁文件安装共 79 个依赖包；实测 Chromium 158.0.8127.18，Node 22.22.2 / npm 10.9.7，不进入 Web 运行产物 |
 
 MyBatis Starter 3.0.5 以 Spring Boot 3.5 为基线。[MyBatis 发布说明](https://github.com/mybatis/spring-boot-starter/releases/tag/mybatis-spring-boot-3.0.5)
 
@@ -23,3 +24,9 @@ Web 使用 `web/package-lock.json` 执行 `npm ci`，安装 76 个包。实装�
 | npm 锁文件 | `npm audit --json` 返回 1 个中危、1 个低危、0 个高危和严重项，退出码为 1。见 [ECharts 公告](https://github.com/advisories/GHSA-fgmj-fm8m-jvvx) 与 [KaTeX 公告](https://github.com/advisories/GHSA-238p-pmpm-9mq7) |
 
 检查记录限于应用依赖。当前版本按已确认的规约锁定，公告的实际适用性及升级需在发布评审前处理。Spring Boot 3.5.16 是 3.5 系列最后一个开源维护版本。[Spring 发布说明](https://spring.io/blog/2026/06/25/spring-boot-3-5-16-available-now/)
+
+## 2026-11-11 Web 与服务端交付补充
+
+新增 spring-boot-starter-aop，版本由同一 Boot 3.5.16 BOM 管理，用于事务内安全审计；解析增加 Spring AOP/AspectJ（EPL-2.0，含第三方许可证），实际解析为 starter-aop 3.5.16、spring-aop 6.2.19（Apache-2.0）、aspectjweaver 1.9.25.1（EPL-2.0）。本轮重新生成 dependency tree、59 个打包 JAR 和 [逐组件许可证](maven-licenses.json)，并用官方 OSV API 核对全部59个坐标，仍有6个组件/22条既有公告；新增AOP组件未命中。没有更改旧依赖版本来掩盖既有公告。
+
+Web 运行镜像固定 nginx:1.30.6-alpine@sha256:583b7f2fce1cdb8da5ad5c39ebd3c33b98b87d493190e548bdee1fa8c619c311（BSD-2-Clause；附带模块依镜像许可证），构建镜像 Node 22.22.2 固定摘要。浏览器工具只用于开发/验收，不进入 Nginx 静态运行依赖。

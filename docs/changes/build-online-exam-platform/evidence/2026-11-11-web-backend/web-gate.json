@@ -1,0 +1,54 @@
+{
+  "scope": "web",
+  "startedAt": "2026-11-11T06:47:18.412Z",
+  "checks": [
+    {
+      "command": "E:\\Projects\\Online-Exam-Platform\\tmp\\toolchain\\node-v22.22.2-win-x64\\node.exe scripts/test.mjs",
+      "exitCode": 0
+    },
+    {
+      "command": "E:\\Projects\\Online-Exam-Platform\\tmp\\toolchain\\node-v22.22.2-win-x64\\node.exe scripts/test-browser.mjs",
+      "exitCode": 0
+    },
+    {
+      "command": "npm --prefix web run build",
+      "exitCode": 0
+    },
+    {
+      "command": "E:\\Projects\\Online-Exam-Platform\\tmp\\toolchain\\node-v22.22.2-win-x64\\node.exe scripts/check-contracts.cjs",
+      "exitCode": 0
+    },
+    {
+      "command": "openspec validate build-online-exam-platform --strict",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    },
+    {
+      "name": "operations-and-capacity",
+      "passed": true,
+      "evidence": [
+        "tmp\\exam-release-test-40cd70bf92\\report.json"
+      ]
+    },
+    {
+      "name": "paired-release-and-recovery",
+      "passed": true,
+      "evidence": [
+        "tmp\\exam-release-test-35ce8bc048\\report.json",
+        "tmp\\exam-release-test-40cd70bf92\\report.json"
+      ]
+    },
+    {
+      "name": "mutation-assertions",
+      "passed": true,
+      "evidence": [
+        "tmp\\exam-mutations-2fea10a698\\report.json"
+      ]
+    }
+  ],
+  "passed": true,
+  "finishedAt": "2026-11-11T06:49:47.399Z"
+}

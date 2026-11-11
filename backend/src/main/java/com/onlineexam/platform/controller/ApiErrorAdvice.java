@@ -14,13 +14,14 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
 class ApiErrorAdvice {
+    private static final org.slf4j.Logger log=org.slf4j.LoggerFactory.getLogger(ApiErrorAdvice.class);
     @ExceptionHandler(ApiException.class)
     ResponseEntity<ApiResponse<Void>> handle(ApiException error) {
         return ResponseEntity.status(error.status()).body(ApiResponse.error(error.code(), error.getMessage()));
     }
 
     @ExceptionHandler({HttpMessageNotReadableException.class, MissingRequestValueException.class,
-            MethodArgumentTypeMismatchException.class})
+            MethodArgumentTypeMismatchException.class,org.springframework.web.HttpMediaTypeNotSupportedException.class})
     ResponseEntity<ApiResponse<Void>> invalid() {
         return handle(ApiException.validation("请求字段缺失或格式错误。"));
     }
@@ -31,7 +32,11 @@ class ApiErrorAdvice {
     }
 
     @ExceptionHandler(DataAccessException.class)
-    ResponseEntity<ApiResponse<Void>> unavailable() {
+    ResponseEntity<ApiResponse<Void>> unavailable(DataAccessException error) {
+        var cause=error.getMostSpecificCause();
+        log.atWarn()
+            .addKeyValue("result",cause instanceof java.sql.SQLException sql?sql.getSQLState():cause.getClass().getSimpleName())
+            .log("Database request failed");
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                 .body(ApiResponse.error("DEPENDENCY_UNAVAILABLE", "数据服务暂不可用。"));
     }

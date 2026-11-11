@@ -1,0 +1,93 @@
+{
+  "project": "exam-release-test-40cd70bf92",
+  "restored": "exam-restore-test-40cd70bf92",
+  "startedAt": "2026-11-11T03:18:03.235Z",
+  "checks": [
+    {
+      "name": "previous-commit-image-built",
+      "commit": "c63f6e9de010493f8c4856189087a4fbf52ef4a6"
+    },
+    {
+      "name": "current-api-and-web-images-built",
+      "nginx": "nginx:1.30.6-alpine@sha256:583b7f2fce1cdb8da5ad5c39ebd3c33b98b87d493190e548bdee1fa8c619c311"
+    },
+    {
+      "name": "production-spa-and-health-routes"
+    },
+    {
+      "name": "blue-to-green-preserves-and-completes-existing-attempt",
+      "attemptId": "1b3ef2e5-9305-4b62-98ca-d2d125814fd1"
+    },
+    {
+      "name": "rollback-to-real-previous-api-and-web-keeps-historical-answers"
+    },
+    {
+      "name": "graceful-stop-commits-inflight-submission-once"
+    },
+    {
+      "name": "consistent-database-and-private-files-backup"
+    },
+    {
+      "name": "isolated-restore-replays-newer-deletions-revokes-sessions-and-keeps-answers-images",
+      "project": "exam-restore-test-40cd70bf92",
+      "sourceProject": "exam-release-test-40cd70bf92",
+      "startedAt": "2026-11-11T03:19:02.278Z",
+      "restoredAt": "2026-11-11T03:19:08.036Z",
+      "restoreMillis": 5758,
+      "rpoSeconds": 12.231,
+      "deletionsReplayed": 1,
+      "oldSessionsRevoked": true,
+      "recoveryMillis": 15702,
+      "recoveryIncludesRuntimeLoginAndImage": true
+    },
+    {
+      "name": "database-outage-readiness-liveness-and-recovery"
+    },
+    {
+      "name": "100-session-10-minute-capacity-budget",
+      "startedAt": "2026-11-11T03:20:03.817Z",
+      "durationSeconds": 608.1449445,
+      "activeSessions": 100,
+      "hardware": {
+        "hostCpu": "AMD Ryzen 7 9700X 8-Core Processor             ",
+        "hostLogicalCpus": 16,
+        "hostMemoryBytes": 16228810752,
+        "apiQuota": "2 CPU / 4 GiB",
+        "databaseQuota": "2 CPU / 2 GiB"
+      },
+      "data": {
+        "users": 103,
+        "attempts": 202
+      },
+      "lists": {
+        "count": 6000,
+        "p95Millis": 5.580699999991339,
+        "maxMillis": 18.233899999999267
+      },
+      "saves": {
+        "count": 12000,
+        "p95Millis": 11.471300000033807,
+        "maxMillis": 35.702799999999115
+      },
+      "submits": {
+        "count": 100,
+        "p95Millis": 335.421800000011,
+        "maxMillis": 338.33009999990463
+      },
+      "deadlines": {
+        "count": 100,
+        "p95Millis": 1588.939,
+        "maxMillis": 1600.191,
+        "controlledTestDeadlines": true,
+        "includesHttpFallback": false
+      },
+      "successRate": 1,
+      "errors": [],
+      "passed": true
+    }
+  ],
+  "lastStartupStatus": 200,
+  "lastStartupBody": "{\"status\":\"UP\"}",
+  "passed": true,
+  "finishedAt": "2026-11-11T03:30:16.193Z"
+}

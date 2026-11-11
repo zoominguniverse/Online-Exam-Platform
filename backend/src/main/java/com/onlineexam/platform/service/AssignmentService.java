@@ -99,20 +99,20 @@ public class AssignmentService {
         requireStudent(user);
         SubjectService.checkPage(page, size);
         List<StudentView> items = tasks.listForUser(user, size, (long) (page - 1) * size)
-                .stream().map(this::studentView).toList();
+                .stream().map(task -> studentView(task,user)).toList();
         return new Page<>(items, tasks.countForUser(user), page, size);
     }
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public StudentView detailForStudent(UUID user, UUID id) {
         requireStudent(user);
-        return studentView(tasks.getForUser(id, user).orElseThrow(AssignmentService::missing));
+        return studentView(tasks.getForUser(id, user).orElseThrow(AssignmentService::missing),user);
     }
 
-    private StudentView studentView(Task task) {
-        var papers = tasks.papers(task.id()).stream().map(item -> new StudentPaper(item.paperId(), item.paperVersionId(),
-                item.position(), item.name(), item.durationMinutes(), "NOT_STARTED")).toList();
-        return new StudentView(task.id(), task.name(), task.state(), papers);
+    private StudentView studentView(Task task, UUID user) {
+        var papers = tasks.studentPapers(task.id(),user);
+        long completed=papers.stream().filter(paper->"COMPLETED".equals(paper.status())).count();
+        return new StudentView(task.id(), task.name(), task.state(), papers,completed,papers.size(),!papers.isEmpty()&&completed==papers.size());
     }
 
     private Task get(UUID id) {

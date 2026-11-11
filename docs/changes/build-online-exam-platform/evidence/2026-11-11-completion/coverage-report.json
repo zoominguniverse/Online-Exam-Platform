@@ -1,0 +1,756 @@
+{
+  "requirements": 30,
+  "scenarios": 71,
+  "entries": [
+    {
+      "requirement": "CX01",
+      "scenario": "CX01-N",
+      "capability": "client-experience",
+      "references": [
+        "attempt-saving.spec.ts",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "CX01",
+      "scenario": "CX01-F",
+      "capability": "client-experience",
+      "references": [
+        "attempt-saving.spec.ts",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "CX02",
+      "scenario": "CX02-N",
+      "capability": "client-experience",
+      "references": [
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "CX02",
+      "scenario": "CX02-F",
+      "capability": "client-experience",
+      "references": [
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "CX02",
+      "scenario": "CX02-B",
+      "capability": "client-experience",
+      "references": [
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "CX03",
+      "scenario": "CX03-N",
+      "capability": "client-experience",
+      "references": [
+        "attempt-saving.spec.ts",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "CX03",
+      "scenario": "CX03-B",
+      "capability": "client-experience",
+      "references": [
+        "attempt-saving.spec.ts",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "EG01",
+      "scenario": "EG01-N",
+      "capability": "exam-grading",
+      "references": [
+        "gradesUnorderedPartialExtraAndMissingSelectionsUsingSnapshotIntegers",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "EG01",
+      "scenario": "EG01-B",
+      "capability": "exam-grading",
+      "references": [
+        "gradesUnorderedPartialExtraAndMissingSelectionsUsingSnapshotIntegers",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "EG02",
+      "scenario": "EG02-N",
+      "capability": "exam-grading",
+      "references": [
+        "confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores",
+        "projectsTaskCompletionOnlyAfterEverySubjectiveGradeAndKeepsEmptyAnswersZero",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "EG02",
+      "scenario": "EG02-F",
+      "capability": "exam-grading",
+      "references": [
+        "confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores",
+        "projectsTaskCompletionOnlyAfterEverySubjectiveGradeAndKeepsEmptyAnswersZero",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "EG03",
+      "scenario": "EG03-N",
+      "capability": "exam-grading",
+      "references": [
+        "confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores",
+        "concurrentManualSubmissionsReturnOneResultWithoutDuplicatingScores",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "EG03",
+      "scenario": "EG03-B",
+      "capability": "exam-grading",
+      "references": [
+        "confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores",
+        "concurrentManualSubmissionsReturnOneResultWithoutDuplicatingScores",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "ET01",
+      "scenario": "ET01-N",
+      "capability": "exam-taking",
+      "references": [
+        "startsOnlyEligibleOrdinaryPapersAndFreezesSafeSnapshots",
+        "attempt-saving.spec.ts",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "ET01",
+      "scenario": "ET01-B",
+      "capability": "exam-taking",
+      "references": [
+        "startsOnlyEligibleOrdinaryPapersAndFreezesSafeSnapshots",
+        "attempt-saving.spec.ts",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "ET02",
+      "scenario": "ET02-N",
+      "capability": "exam-taking",
+      "references": [
+        "savesWholeAnswerSetWithVersionAndDeadlineChecks",
+        "attempt-saving.spec.ts"
+      ]
+    },
+    {
+      "requirement": "ET02",
+      "scenario": "ET02-F",
+      "capability": "exam-taking",
+      "references": [
+        "savesWholeAnswerSetWithVersionAndDeadlineChecks",
+        "attempt-saving.spec.ts"
+      ]
+    },
+    {
+      "requirement": "ET02",
+      "scenario": "ET02-B",
+      "capability": "exam-taking",
+      "references": [
+        "savesWholeAnswerSetWithVersionAndDeadlineChecks",
+        "attempt-saving.spec.ts"
+      ]
+    },
+    {
+      "requirement": "ET03",
+      "scenario": "ET03-N",
+      "capability": "exam-taking",
+      "references": [
+        "submitsFinalAnswersAtomicallyAndRetriesTheFrozenResult",
+        "serializesManualDeadlineCompetitionAndRecoversOverdueDrafts",
+        "concurrentManualSubmissionsReturnOneResultWithoutDuplicatingScores",
+        "deadlineWorkerSkipsBusyOwnerAndUsesTheSameLockOrderAsHttp",
+        "attempt-saving.spec.ts",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "ET03",
+      "scenario": "ET03-B",
+      "capability": "exam-taking",
+      "references": [
+        "submitsFinalAnswersAtomicallyAndRetriesTheFrozenResult",
+        "serializesManualDeadlineCompetitionAndRecoversOverdueDrafts",
+        "concurrentManualSubmissionsReturnOneResultWithoutDuplicatingScores",
+        "deadlineWorkerSkipsBusyOwnerAndUsesTheSameLockOrderAsHttp",
+        "attempt-saving.spec.ts",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "ET03",
+      "scenario": "ET03-F",
+      "capability": "exam-taking",
+      "references": [
+        "submitsFinalAnswersAtomicallyAndRetriesTheFrozenResult",
+        "serializesManualDeadlineCompetitionAndRecoversOverdueDrafts",
+        "concurrentManualSubmissionsReturnOneResultWithoutDuplicatingScores",
+        "deadlineWorkerSkipsBusyOwnerAndUsesTheSameLockOrderAsHttp",
+        "attempt-saving.spec.ts",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "ET03",
+      "scenario": "ET03-F2",
+      "capability": "exam-taking",
+      "references": [
+        "submitsFinalAnswersAtomicallyAndRetriesTheFrozenResult",
+        "serializesManualDeadlineCompetitionAndRecoversOverdueDrafts",
+        "concurrentManualSubmissionsReturnOneResultWithoutDuplicatingScores",
+        "deadlineWorkerSkipsBusyOwnerAndUsesTheSameLockOrderAsHttp",
+        "attempt-saving.spec.ts",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "IA01",
+      "scenario": "IA01-N",
+      "capability": "identity-access",
+      "references": [
+        "validatesRegistrationAndKeepsCredentialsOutOfResponsesAndLogs",
+        "managesAccountsAndRevokesAllSessionsWhenDisabled",
+        "expiresIdleSessionsAndRevokesAllWebSessionsOnPasswordChange"
+      ]
+    },
+    {
+      "requirement": "IA01",
+      "scenario": "IA01-F",
+      "capability": "identity-access",
+      "references": [
+        "validatesRegistrationAndKeepsCredentialsOutOfResponsesAndLogs",
+        "managesAccountsAndRevokesAllSessionsWhenDisabled",
+        "expiresIdleSessionsAndRevokesAllWebSessionsOnPasswordChange"
+      ]
+    },
+    {
+      "requirement": "IA01",
+      "scenario": "IA01-B",
+      "capability": "identity-access",
+      "references": [
+        "validatesRegistrationAndKeepsCredentialsOutOfResponsesAndLogs",
+        "managesAccountsAndRevokesAllSessionsWhenDisabled",
+        "expiresIdleSessionsAndRevokesAllWebSessionsOnPasswordChange"
+      ]
+    },
+    {
+      "requirement": "IA02",
+      "scenario": "IA02-N",
+      "capability": "identity-access",
+      "references": [
+        "managesAccountsAndRevokesAllSessionsWhenDisabled",
+        "protectsTheLastEnabledAdministratorAcrossConcurrentHttpRequests",
+        "confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores",
+        "sendsMessagesAtomicallyDeduplicatesRecipientsAndCountsFirstReadOnce",
+        "acceptsOnlyWebSessionsAndRevokesHistoricalCredentialsWithoutReopeningLegacyRoutes"
+      ]
+    },
+    {
+      "requirement": "IA02",
+      "scenario": "IA02-F",
+      "capability": "identity-access",
+      "references": [
+        "managesAccountsAndRevokesAllSessionsWhenDisabled",
+        "protectsTheLastEnabledAdministratorAcrossConcurrentHttpRequests",
+        "confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores",
+        "sendsMessagesAtomicallyDeduplicatesRecipientsAndCountsFirstReadOnce",
+        "acceptsOnlyWebSessionsAndRevokesHistoricalCredentialsWithoutReopeningLegacyRoutes"
+      ]
+    },
+    {
+      "requirement": "IA02",
+      "scenario": "IA02-B",
+      "capability": "identity-access",
+      "references": [
+        "managesAccountsAndRevokesAllSessionsWhenDisabled",
+        "protectsTheLastEnabledAdministratorAcrossConcurrentHttpRequests",
+        "confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores",
+        "sendsMessagesAtomicallyDeduplicatesRecipientsAndCountsFirstReadOnce",
+        "acceptsOnlyWebSessionsAndRevokesHistoricalCredentialsWithoutReopeningLegacyRoutes"
+      ]
+    },
+    {
+      "requirement": "LR01",
+      "scenario": "LR01-N",
+      "capability": "learning-records",
+      "references": [
+        "confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores",
+        "authorizesSnapshotImagesOnlyForTheOwnerAndHidesExplanationsUntilFrozen",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "LR01",
+      "scenario": "LR01-F",
+      "capability": "learning-records",
+      "references": [
+        "confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores",
+        "authorizesSnapshotImagesOnlyForTheOwnerAndHidesExplanationsUntilFrozen",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "LR02",
+      "scenario": "LR02-N",
+      "capability": "learning-records",
+      "references": [
+        "freezesPersistedAnswersOnReadAndLateSaveWithoutRollingBackTheFreeze",
+        "serializesManualDeadlineCompetitionAndRecoversOverdueDrafts",
+        "confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "LR02",
+      "scenario": "LR02-B",
+      "capability": "learning-records",
+      "references": [
+        "freezesPersistedAnswersOnReadAndLateSaveWithoutRollingBackTheFreeze",
+        "serializesManualDeadlineCompetitionAndRecoversOverdueDrafts",
+        "confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "LR03",
+      "scenario": "LR03-N",
+      "capability": "learning-records",
+      "references": [
+        "protectsProfilesAndAvatarsAndCorrelatesCredentialFreeAudit",
+        "RuntimeAccessIntegrationTest",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "LR03",
+      "scenario": "LR03-F",
+      "capability": "learning-records",
+      "references": [
+        "protectsProfilesAndAvatarsAndCorrelatesCredentialFreeAudit",
+        "RuntimeAccessIntegrationTest",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "MA01",
+      "scenario": "MA01-N",
+      "capability": "messaging-activity",
+      "references": [
+        "sendsMessagesAtomicallyDeduplicatesRecipientsAndCountsFirstReadOnce",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "MA01",
+      "scenario": "MA01-F",
+      "capability": "messaging-activity",
+      "references": [
+        "sendsMessagesAtomicallyDeduplicatesRecipientsAndCountsFirstReadOnce",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "MA01",
+      "scenario": "MA01-B",
+      "capability": "messaging-activity",
+      "references": [
+        "sendsMessagesAtomicallyDeduplicatesRecipientsAndCountsFirstReadOnce",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "MA02",
+      "scenario": "MA02-N",
+      "capability": "messaging-activity",
+      "references": [
+        "protectsProfilesAndAvatarsAndCorrelatesCredentialFreeAudit",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "MA02",
+      "scenario": "MA02-F",
+      "capability": "messaging-activity",
+      "references": [
+        "protectsProfilesAndAvatarsAndCorrelatesCredentialFreeAudit",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "MA03",
+      "scenario": "MA03-N",
+      "capability": "messaging-activity",
+      "references": [
+        "reportsHongKongMonthBoundariesAndDeadlineAlertsWithoutExposingAnswers",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "MA03",
+      "scenario": "MA03-B",
+      "capability": "messaging-activity",
+      "references": [
+        "reportsHongKongMonthBoundariesAndDeadlineAlertsWithoutExposingAnswers",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "PA01",
+      "scenario": "PA01-N",
+      "capability": "paper-authoring",
+      "references": [
+        "publishesAllPaperTypesAndFiltersStudentsAtTheExactWindowBoundaries",
+        "rollsBackPublishedVersionIfUpdatingThePaperFails",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "PA01",
+      "scenario": "PA01-F",
+      "capability": "paper-authoring",
+      "references": [
+        "publishesAllPaperTypesAndFiltersStudentsAtTheExactWindowBoundaries",
+        "rollsBackPublishedVersionIfUpdatingThePaperFails",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "PA02",
+      "scenario": "PA02-N",
+      "capability": "paper-authoring",
+      "references": [
+        "publishesAllPaperTypesAndFiltersStudentsAtTheExactWindowBoundaries",
+        "startsOnlyEligibleOrdinaryPapersAndFreezesSafeSnapshots",
+        "freezesPersistedAnswersOnReadAndLateSaveWithoutRollingBackTheFreeze"
+      ]
+    },
+    {
+      "requirement": "PA02",
+      "scenario": "PA02-F",
+      "capability": "paper-authoring",
+      "references": [
+        "publishesAllPaperTypesAndFiltersStudentsAtTheExactWindowBoundaries",
+        "startsOnlyEligibleOrdinaryPapersAndFreezesSafeSnapshots",
+        "freezesPersistedAnswersOnReadAndLateSaveWithoutRollingBackTheFreeze"
+      ]
+    },
+    {
+      "requirement": "PA02",
+      "scenario": "PA02-B",
+      "capability": "paper-authoring",
+      "references": [
+        "publishesAllPaperTypesAndFiltersStudentsAtTheExactWindowBoundaries",
+        "startsOnlyEligibleOrdinaryPapersAndFreezesSafeSnapshots",
+        "freezesPersistedAnswersOnReadAndLateSaveWithoutRollingBackTheFreeze"
+      ]
+    },
+    {
+      "requirement": "PA03",
+      "scenario": "PA03-N",
+      "capability": "paper-authoring",
+      "references": [
+        "startsOnlyEligibleOrdinaryPapersAndFreezesSafeSnapshots",
+        "startsFrozenTaskPapersOnceAcrossIndependentWebSessions",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "PA03",
+      "scenario": "PA03-B",
+      "capability": "paper-authoring",
+      "references": [
+        "startsOnlyEligibleOrdinaryPapersAndFreezesSafeSnapshots",
+        "startsFrozenTaskPapersOnceAcrossIndependentWebSessions",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "PD01",
+      "scenario": "PD01-N",
+      "capability": "platform-delivery",
+      "references": [
+        "savesWholeAnswerSetWithVersionAndDeadlineChecks",
+        "confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores",
+        "sendsMessagesAtomicallyDeduplicatesRecipientsAndCountsFirstReadOnce",
+        "scripts/check-contracts.cjs"
+      ]
+    },
+    {
+      "requirement": "PD01",
+      "scenario": "PD01-F",
+      "capability": "platform-delivery",
+      "references": [
+        "savesWholeAnswerSetWithVersionAndDeadlineChecks",
+        "confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores",
+        "sendsMessagesAtomicallyDeduplicatesRecipientsAndCountsFirstReadOnce",
+        "scripts/check-contracts.cjs"
+      ]
+    },
+    {
+      "requirement": "PD02",
+      "scenario": "PD02-N",
+      "capability": "platform-delivery",
+      "references": [
+        "VersionIntegrationTest",
+        "RuntimeAccessIntegrationTest",
+        "scripts/test-operations.mjs"
+      ]
+    },
+    {
+      "requirement": "PD02",
+      "scenario": "PD02-F",
+      "capability": "platform-delivery",
+      "references": [
+        "VersionIntegrationTest",
+        "RuntimeAccessIntegrationTest",
+        "scripts/test-operations.mjs"
+      ]
+    },
+    {
+      "requirement": "PD03",
+      "scenario": "PD03-N",
+      "capability": "platform-delivery",
+      "references": [
+        "scripts/gate.mjs",
+        "scripts/check-browser-evidence.mjs",
+        "scripts/test-mutations.mjs",
+        "scenarios.md"
+      ]
+    },
+    {
+      "requirement": "PD03",
+      "scenario": "PD03-F",
+      "capability": "platform-delivery",
+      "references": [
+        "scripts/gate.mjs",
+        "scripts/test-mutations.mjs",
+        "scenarios.md"
+      ]
+    },
+    {
+      "requirement": "PD04",
+      "scenario": "PD04-N",
+      "capability": "platform-delivery",
+      "references": [
+        "reportsHongKongMonthBoundariesAndDeadlineAlertsWithoutExposingAnswers",
+        "alertsOnlyAfterFiveMinutesOfSustainedServiceErrors",
+        "scripts/test-operations.mjs"
+      ]
+    },
+    {
+      "requirement": "PD04",
+      "scenario": "PD04-F",
+      "capability": "platform-delivery",
+      "references": [
+        "reportsHongKongMonthBoundariesAndDeadlineAlertsWithoutExposingAnswers",
+        "alertsOnlyAfterFiveMinutesOfSustainedServiceErrors",
+        "scripts/test-operations.mjs"
+      ]
+    },
+    {
+      "requirement": "QB01",
+      "scenario": "QB01-N",
+      "capability": "question-bank",
+      "references": [
+        "createsAllQuestionTypesAndPreservesVersionsWhenArchived"
+      ]
+    },
+    {
+      "requirement": "QB01",
+      "scenario": "QB01-F",
+      "capability": "question-bank",
+      "references": [
+        "createsAllQuestionTypesAndPreservesVersionsWhenArchived"
+      ]
+    },
+    {
+      "requirement": "QB02",
+      "scenario": "QB02-N",
+      "capability": "question-bank",
+      "references": [
+        "createsAllQuestionTypesAndPreservesVersionsWhenArchived",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "QB02",
+      "scenario": "QB02-F",
+      "capability": "question-bank",
+      "references": [
+        "createsAllQuestionTypesAndPreservesVersionsWhenArchived",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "QB02",
+      "scenario": "QB02-B",
+      "capability": "question-bank",
+      "references": [
+        "createsAllQuestionTypesAndPreservesVersionsWhenArchived",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "QB03",
+      "scenario": "QB03-N",
+      "capability": "question-bank",
+      "references": [
+        "validatesPrivateImagesAndCleansRolledBackReferences",
+        "authorizesSnapshotImagesOnlyForTheOwnerAndHidesExplanationsUntilFrozen",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "QB03",
+      "scenario": "QB03-F",
+      "capability": "question-bank",
+      "references": [
+        "validatesPrivateImagesAndCleansRolledBackReferences",
+        "authorizesSnapshotImagesOnlyForTheOwnerAndHidesExplanationsUntilFrozen",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "QB03",
+      "scenario": "QB03-B",
+      "capability": "question-bank",
+      "references": [
+        "validatesPrivateImagesAndCleansRolledBackReferences",
+        "authorizesSnapshotImagesOnlyForTheOwnerAndHidesExplanationsUntilFrozen",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "TA01",
+      "scenario": "TA01-N",
+      "capability": "task-assignment",
+      "references": [
+        "freezesAssignmentPapersAndEligibilityAndRollsBackIfOnePaperIsAlreadyBound",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "TA01",
+      "scenario": "TA01-F",
+      "capability": "task-assignment",
+      "references": [
+        "freezesAssignmentPapersAndEligibilityAndRollsBackIfOnePaperIsAlreadyBound",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "TA01",
+      "scenario": "TA01-B",
+      "capability": "task-assignment",
+      "references": [
+        "freezesAssignmentPapersAndEligibilityAndRollsBackIfOnePaperIsAlreadyBound",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "TA02",
+      "scenario": "TA02-N",
+      "capability": "task-assignment",
+      "references": [
+        "startsFrozenTaskPapersOnceAcrossIndependentWebSessions",
+        "projectsTaskCompletionOnlyAfterEverySubjectiveGradeAndKeepsEmptyAnswersZero",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "TA02",
+      "scenario": "TA02-B",
+      "capability": "task-assignment",
+      "references": [
+        "startsFrozenTaskPapersOnceAcrossIndependentWebSessions",
+        "projectsTaskCompletionOnlyAfterEverySubjectiveGradeAndKeepsEmptyAnswersZero",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "TA03",
+      "scenario": "TA03-N",
+      "capability": "task-assignment",
+      "references": [
+        "freezesAssignmentPapersAndEligibilityAndRollsBackIfOnePaperIsAlreadyBound",
+        "projectsTaskCompletionOnlyAfterEverySubjectiveGradeAndKeepsEmptyAnswersZero",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    },
+    {
+      "requirement": "TA03",
+      "scenario": "TA03-F",
+      "capability": "task-assignment",
+      "references": [
+        "freezesAssignmentPapersAndEligibilityAndRollsBackIfOnePaperIsAlreadyBound",
+        "projectsTaskCompletionOnlyAfterEverySubjectiveGradeAndKeepsEmptyAnswersZero",
+        "platform-workflow.spec.ts",
+        "00-acceptance.spec.ts"
+      ]
+    }
+  ]
+}

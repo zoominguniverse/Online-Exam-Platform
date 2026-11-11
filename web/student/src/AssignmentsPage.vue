@@ -2,10 +2,12 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ApiError, read, write } from '../../shared/api'
+import { statuses } from '../../shared/exam'
 
 type Task = {
   id: string; name: string; state: 'PUBLISHED' | 'ARCHIVED'
-  papers: { paperId: string; name: string; durationMinutes: number; status: string }[]
+  completedCount: number; totalCount: number; completed: boolean
+  papers: { paperId: string; name: string; durationMinutes: number; status: string; attemptId: string | null }[]
 }
 const props = defineProps<{ id?: string }>()
 const router = useRouter()
@@ -14,12 +16,16 @@ const page = ref(1)
 const total = ref(0)
 const busy = ref(false)
 const error = ref('')
+const starting = ref(false)
 async function start(taskId: string, paperId: string) {
+  if(starting.value)return
+  starting.value=true
   error.value = ''
   try {
     const attempt = await write<{ id: string }>('POST', `/me/tasks/${taskId}/papers/${paperId}/attempts`)
     await router.push('/attempts/' + attempt.id)
   } catch (cause) { error.value = (cause as Error).message }
+  finally {starting.value=false}
 }
 
 async function load(next = page.value) {
@@ -55,10 +61,12 @@ onMounted(() => load())
     <article v-for="task in items" :key="task.id">
       <h2><RouterLink v-if="!id" :to="'/tasks/' + task.id">{{ task.name }}</RouterLink><template v-else>{{ task.name }}</template></h2>
       <p v-if="task.state === 'ARCHIVED'">已归档</p>
+      <p>已完成 {{ task.completedCount }} / {{ task.totalCount }} 卷{{ task.completed ? ' · 任务已完成' : '' }}</p>
       <ol v-if="id">
         <li v-for="paper in task.papers" :key="paper.paperId">
-          {{ paper.name }} · {{ paper.durationMinutes }} 分钟 · {{ paper.status === 'NOT_STARTED' ? '未开始' : paper.status }}
-          <button type="button" @click="start(task.id, paper.paperId)">进入答卷</button>
+          {{ paper.name }} · {{ paper.durationMinutes }} 分钟 · {{ statuses[paper.status] }}
+          <RouterLink v-if="paper.attemptId&&paper.status!=='IN_PROGRESS'" :to="'/attempts/'+paper.attemptId+'/review'">查看答卷</RouterLink>
+          <button v-else type="button" :disabled="starting || (task.state==='ARCHIVED'&&!paper.attemptId)" @click="start(task.id, paper.paperId)">进入答卷</button>
         </li>
       </ol>
     </article>

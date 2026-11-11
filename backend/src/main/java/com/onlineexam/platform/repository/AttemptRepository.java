@@ -16,13 +16,18 @@ public class AttemptRepository {
     public record Eligible(UUID versionId, Type type, int durationMinutes,
                            OffsetDateTime opensAt, OffsetDateTime closesAt) {}
     public record Attempt(UUID id, UUID paperId, UUID versionId, String status,
-                          OffsetDateTime startedAt, OffsetDateTime deadlineAt, int version) {}
+                          OffsetDateTime startedAt, OffsetDateTime deadlineAt, int version,
+                          OffsetDateTime frozenAt, String freezeReason, Integer automaticScoreMinor, Integer finalScoreMinor) {}
     public record StartKey(UUID paperId, UUID attemptId, OffsetDateTime expiresAt) {}
     public record TaskPaper(UUID versionId, int durationMinutes) {}
     public record Question(int position, int groupPosition, String groupName, UUID questionId,
                            int questionVersion, int scoreMinor, String type, String stemHtml, JsonNode options,
                            int gapCount) {}
     public record SavedAnswer(UUID questionId, JsonNode answer) {}
+    public record Result(UUID questionId, Integer scoreMinor) {}
+    public record GradingQuestion(UUID questionId, int questionVersion, int scoreMinor, String type,
+                                  JsonNode correctAnswer, JsonNode answer) {}
+    public record SubmitKey(UUID attemptId, String requestHash, OffsetDateTime expiresAt) {}
 
     private final JdbcClient jdbc;
     private final ObjectMapper json;
@@ -86,13 +91,16 @@ public class AttemptRepository {
 
     public Optional<Attempt> taskAttempt(UUID owner, UUID task, UUID paper) {
         return jdbc.sql("""
-                SELECT id, paper_id, paper_version_id, status, started_at, deadline_at, version
+                SELECT id, paper_id, paper_version_id, status, started_at, deadline_at, version,
+                       frozen_at, freeze_reason, automatic_score_minor, final_score_minor
                 FROM attempts WHERE owner_id = :owner AND task_id = :task AND paper_id = :paper
                 """).param("owner", owner).param("task", task).param("paper", paper)
                 .query((row, index) -> new Attempt(row.getObject("id", UUID.class),
                         row.getObject("paper_id", UUID.class), row.getObject("paper_version_id", UUID.class),
                         row.getString("status"), row.getObject("started_at", OffsetDateTime.class),
-                        row.getObject("deadline_at", OffsetDateTime.class), row.getInt("version"))).optional();
+                        row.getObject("deadline_at", OffsetDateTime.class), row.getInt("version"),
+                        row.getObject("frozen_at", OffsetDateTime.class), row.getString("freeze_reason"),
+                        row.getObject("automatic_score_minor", Integer.class), row.getObject("final_score_minor", Integer.class))).optional();
     }
 
     public Optional<TaskPaper> eligibleTaskPaper(UUID owner, UUID task, UUID paper) {
@@ -135,13 +143,100 @@ public class AttemptRepository {
 
     public Optional<Attempt> owned(UUID owner, UUID attempt, boolean lock) {
         return jdbc.sql("""
-                SELECT id, paper_id, paper_version_id, status, started_at, deadline_at, version
+                SELECT id, paper_id, paper_version_id, status, started_at, deadline_at, version,
+                       frozen_at, freeze_reason, automatic_score_minor, final_score_minor
                 FROM attempts WHERE id = :attempt AND owner_id = :owner
                 """ + (lock ? " FOR UPDATE" : "")).param("owner", owner).param("attempt", attempt).query((row, index) -> new Attempt(
                     row.getObject("id", UUID.class), row.getObject("paper_id", UUID.class),
                     row.getObject("paper_version_id", UUID.class), row.getString("status"),
                     row.getObject("started_at", OffsetDateTime.class),
-                    row.getObject("deadline_at", OffsetDateTime.class), row.getInt("version"))).optional();
+                    row.getObject("deadline_at", OffsetDateTime.class), row.getInt("version"),
+                    row.getObject("frozen_at", OffsetDateTime.class), row.getString("freeze_reason"),
+                    row.getObject("automatic_score_minor", Integer.class), row.getObject("final_score_minor", Integer.class))).optional();
+    }
+
+    public List<UUID> due(OffsetDateTime now) {
+        return jdbc.sql("SELECT id FROM attempts WHERE status = 'IN_PROGRESS' AND deadline_at <= :now "
+                + "ORDER BY deadline_at, id LIMIT 100").param("now", now).query(UUID.class).list();
+    }
+    public UUID owner(UUID id) { return jdbc.sql("SELECT owner_id FROM attempts WHERE id=:id").param("id",id).query(UUID.class).single(); }
+
+    public Optional<UUID> lockDue(UUID id) {
+        return jdbc.sql("SELECT id FROM attempts WHERE id = :id AND status = 'IN_PROGRESS' FOR UPDATE SKIP LOCKED")
+                .param("id", id).query(UUID.class).optional();
+    }
+
+    public Optional<UUID> lockOwnerForDeadline(UUID id) {
+        return jdbc.sql("""
+                SELECT u.id FROM users u JOIN attempts a ON a.owner_id = u.id
+                WHERE a.id = :id FOR UPDATE OF u SKIP LOCKED
+                """).param("id", id).query(UUID.class).optional();
+    }
+
+    public List<GradingQuestion> gradingQuestions(UUID attempt) {
+        return jdbc.sql("""
+                SELECT i.question_id, i.question_version, i.score_minor, i.type, i.correct_answer, a.answer
+                FROM attempt_items i LEFT JOIN attempt_answers a
+                  ON a.attempt_id = i.attempt_id AND a.question_id = i.question_id
+                WHERE i.attempt_id = :attempt ORDER BY i.position
+                """).param("attempt", attempt).query((row, index) -> new GradingQuestion(
+                    row.getObject("question_id", UUID.class), row.getInt("question_version"), row.getInt("score_minor"),
+                    row.getString("type"), decode(row.getString("correct_answer")),
+                    row.getString("answer") == null ? null : decode(row.getString("answer")))).list();
+    }
+
+    public void insertResult(UUID attempt, UUID question, Integer score) {
+        jdbc.sql("INSERT INTO attempt_results(attempt_id, question_id, score_minor) VALUES (:attempt, :question, :score)")
+                .param("attempt", attempt).param("question", question).param("score", score).update();
+    }
+
+    public List<Result> results(UUID attempt) {
+        return jdbc.sql("SELECT question_id, score_minor FROM attempt_results WHERE attempt_id = :attempt ORDER BY question_id")
+                .param("attempt", attempt).query((row, index) -> new Result(row.getObject("question_id", UUID.class),
+                        row.getObject("score_minor", Integer.class))).list();
+    }
+
+    public void freeze(UUID attempt, OffsetDateTime now, String reason, boolean subjective, int automaticScore) {
+        jdbc.sql("""
+                UPDATE attempts SET status = :status, frozen_at = :now, freeze_reason = :reason,
+                    automatic_score_minor = :score, final_score_minor = :finalScore, version = version + 1
+                WHERE id = :attempt AND status = 'IN_PROGRESS'
+                """).param("attempt", attempt).param("now", now).param("reason", reason)
+                .param("status", subjective ? "WAIT_SELF_GRADE" : "COMPLETED").param("score", automaticScore)
+                .param("finalScore", subjective ? null : automaticScore).update();
+    }
+
+    public void recordMistakes(UUID attempt, OffsetDateTime now) {
+        jdbc.sql("""
+                INSERT INTO mistakes(owner_id, question_id, attempt_id, question_version, last_error_at)
+                SELECT a.owner_id, i.question_id, a.id, i.question_version, :now
+                FROM attempts a JOIN attempt_items i ON i.attempt_id = a.id
+                JOIN attempt_results r ON r.attempt_id = a.id AND r.question_id = i.question_id
+                WHERE a.id = :attempt AND r.score_minor < i.score_minor
+                ON CONFLICT (owner_id, question_id) DO UPDATE SET attempt_id = EXCLUDED.attempt_id,
+                    question_version = EXCLUDED.question_version, last_error_at = EXCLUDED.last_error_at
+                WHERE (mistakes.last_error_at, mistakes.attempt_id) < (EXCLUDED.last_error_at, EXCLUDED.attempt_id)
+                """).param("attempt", attempt).param("now", now).update();
+    }
+
+    public Optional<SubmitKey> submitKey(UUID owner, String key) {
+        return jdbc.sql("SELECT attempt_id, request_hash, expires_at FROM attempt_submit_keys "
+                + "WHERE owner_id = :owner AND key = :key").param("owner", owner).param("key", key)
+                .query((row, index) -> new SubmitKey(row.getObject("attempt_id", UUID.class), row.getString("request_hash"),
+                        row.getObject("expires_at", OffsetDateTime.class))).optional();
+    }
+
+    public void deleteSubmitKey(UUID owner, String key) {
+        jdbc.sql("DELETE FROM attempt_submit_keys WHERE owner_id = :owner AND key = :key")
+                .param("owner", owner).param("key", key).update();
+    }
+
+    public void insertSubmitKey(UUID owner, String key, UUID attempt, String hash, OffsetDateTime now) {
+        jdbc.sql("""
+                INSERT INTO attempt_submit_keys(owner_id, key, attempt_id, request_hash, expires_at)
+                VALUES (:owner, :key, :attempt, :hash, :expiry)
+                """).param("owner", owner).param("key", key).param("attempt", attempt).param("hash", hash)
+                .param("expiry", now.plusHours(24)).update();
     }
 
     public List<Question> questions(UUID attempt) {
@@ -164,6 +259,10 @@ public class AttemptRepository {
     }
 
     public void replaceAnswers(UUID attempt, List<SavedAnswer> answers) {
+        replaceAnswers(attempt, answers, true);
+    }
+
+    public void replaceAnswers(UUID attempt, List<SavedAnswer> answers, boolean incrementVersion) {
         jdbc.sql("DELETE FROM attempt_answers WHERE attempt_id = :attempt").param("attempt", attempt).update();
         for (SavedAnswer item : answers) {
             jdbc.sql("INSERT INTO attempt_answers(attempt_id, question_id, answer) "
@@ -171,8 +270,8 @@ public class AttemptRepository {
                     .param("attempt", attempt).param("question", item.questionId())
                     .param("answer", item.answer().toString()).update();
         }
-        jdbc.sql("UPDATE attempts SET version = version + 1 WHERE id = :attempt")
-                .param("attempt", attempt).update();
+        if (incrementVersion) jdbc.sql("UPDATE attempts SET version = version + 1 WHERE id = :attempt")
+            .param("attempt", attempt).update();
     }
 
     private JsonNode decode(String value) {

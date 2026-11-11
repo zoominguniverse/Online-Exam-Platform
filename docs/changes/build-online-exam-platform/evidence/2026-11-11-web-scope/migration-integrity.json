@@ -1,0 +1,67 @@
+[
+  {
+    "name": "V10__attempt_answers.sql",
+    "sha256": "bf07041ed37d4fc8e4ea9fe20e21fef8cc0a0ecfb6372fd0830edf308111094d",
+    "unchangedSinceEarlierApply": true
+  },
+  {
+    "name": "V11__attempt_freezing.sql",
+    "sha256": "ca70f096cc0108e0b34e890a641b3b6bcb7a5266e08b3c1b85b9188f72f6bc2d",
+    "unchangedSinceEarlierApply": true
+  },
+  {
+    "name": "V12__learning_and_communication.sql",
+    "sha256": "8e92bd14dc47fde65f0579cb764cc6c0a170673ab1b82528811ac6e6f241e719",
+    "unchangedSinceEarlierApply": true
+  },
+  {
+    "name": "V13__deletion_ledger_compatibility.sql",
+    "sha256": "54363726d30b1a051f3d20d645b9328f9b2d44b475afe9b996a4b743511777b5",
+    "unchangedSinceEarlierApply": true
+  },
+  {
+    "name": "V1__create_grades.sql",
+    "sha256": "f7cf7fb66292df71fabfe06be5f34adff522fe50a1cecaaaa2511664d838a89c",
+    "unchangedSinceEarlierApply": true
+  },
+  {
+    "name": "V2__identity.sql",
+    "sha256": "c6f6327e72209b480b17ab26723ff8a631ca12f808d165f456ad106f241af1ab",
+    "unchangedSinceEarlierApply": true
+  },
+  {
+    "name": "V3__wechat_identity.sql",
+    "sha256": "5f9bbaa96158fa278106e4376b078a2fa4ee3881b243153123bd4970d6902751",
+    "unchangedSinceEarlierApply": true
+  },
+  {
+    "name": "V4__question_bank.sql",
+    "sha256": "5ac03b9372bba30de84695dad1d60307259a65cb50f59cc5a9479060ad9c00ae",
+    "unchangedSinceEarlierApply": true
+  },
+  {
+    "name": "V5__private_attachments.sql",
+    "sha256": "a998f15e7a3142530db386fa2ba645b89e767d9591318ea98aa58c891a947d8b",
+    "unchangedSinceEarlierApply": true
+  },
+  {
+    "name": "V6__paper_authoring.sql",
+    "sha256": "40faf521a028530e7630b71ce4dab840719615f8be252284ef12e8a8e0691b19",
+    "unchangedSinceEarlierApply": true
+  },
+  {
+    "name": "V7__task_assignment.sql",
+    "sha256": "63f557981537fa16abf5553066fdbb5d94483599d1cf1c4b819abe09c5db5c19",
+    "unchangedSinceEarlierApply": true
+  },
+  {
+    "name": "V8__attempt_start.sql",
+    "sha256": "b0c06eb43baf5b74a578b05d84c26642b980d8621db0d344b4ac8176d1e08462",
+    "unchangedSinceEarlierApply": true
+  },
+  {
+    "name": "V9__task_attempt_integrity.sql",
+    "sha256": "e151b9119af896d498adf6d3581b54b7f7ddc6ac66468f40da67c0a7706a31df",
+    "unchangedSinceEarlierApply": true
+  }
+]

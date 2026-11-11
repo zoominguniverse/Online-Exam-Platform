@@ -3,7 +3,6 @@ package com.onlineexam.platform.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onlineexam.platform.controller.ApiResponse;
 import com.onlineexam.platform.repository.SessionRepository;
-import com.onlineexam.platform.repository.WeChatRepository;
 import com.onlineexam.platform.service.IdentityService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -36,12 +35,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 class WebSecurityConfiguration {
-    private static final String WECHAT_AUTH = WebSecurityConfiguration.class.getName() + ".wechat";
-    private static final String WECHAT_BINDING = "/api/v1/auth/wechat/binding";
-    private static final String[] WECHAT_ENTRY = {
-        "/api/v1/auth/wechat/bind", "/api/v1/auth/wechat/login", "/api/v1/auth/wechat/register"
-    };
-
     @Bean
     CookieCsrfTokenRepository csrfTokens() {
         var tokens = new CookieCsrfTokenRepository();
@@ -51,16 +44,12 @@ class WebSecurityConfiguration {
     }
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http, SessionRepository sessions, WeChatRepository wechat, Clock clock,
+    SecurityFilterChain filterChain(HttpSecurity http, SessionRepository sessions, Clock clock,
                                     ObjectMapper json, CookieCsrfTokenRepository csrfTokens) throws Exception {
         return http.sessionManagement(config -> config.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .requestCache(cache -> cache.disable())
                 .logout(logout -> logout.disable())
-                .csrf(csrf -> csrf.csrfTokenRepository(csrfTokens)
-                        .ignoringRequestMatchers(WECHAT_ENTRY)
-                        .ignoringRequestMatchers(request -> "DELETE".equals(request.getMethod())
-                                && WECHAT_BINDING.equals(request.getServletPath()))
-                        .ignoringRequestMatchers(request -> Boolean.TRUE.equals(request.getAttribute(WECHAT_AUTH))))
+                .csrf(csrf -> csrf.csrfTokenRepository(csrfTokens))
                 .exceptionHandling(errors -> errors
                         .authenticationEntryPoint((req, res, error) ->
                                 failure(json, res, 401, "UNAUTHENTICATED", "请登录后继续。"))
@@ -78,8 +67,9 @@ class WebSecurityConfiguration {
                     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                                     FilterChain chain) throws IOException, ServletException {
                         try {
-                            principal(request, sessions, wechat, OffsetDateTime.now(clock)).ifPresent(principal -> {
-                                if (principal.bindingId() != null) request.setAttribute(WECHAT_AUTH, true);
+                            principal(request, sessions, OffsetDateTime.now(clock)).ifPresent(principal -> {
+                                request.setAttribute("exam.actor",principal.id());
+                                org.slf4j.MDC.put("actorId",principal.id().toString());
                                 var authentication = UsernamePasswordAuthenticationToken.authenticated(principal, null,
                                         List.of(new SimpleGrantedAuthority("ROLE_" + principal.role().name())));
                                 var context = SecurityContextHolder.createEmptyContext();
@@ -98,15 +88,18 @@ class WebSecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/api/v1/version", "/api/v1/auth/csrf",
                                 "/api/v1/catalog/grades").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, WECHAT_ENTRY).permitAll()
-                        .requestMatchers(HttpMethod.DELETE, WECHAT_BINDING).hasRole("STUDENT")
                         .requestMatchers(HttpMethod.POST, "/api/v1/attachments").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/attachments/*").authenticated()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/v1/me/subjects","/api/v1/me/attempts","/api/v1/me/attempts/*/review","/api/v1/me/mistakes","/api/v1/me/mistakes/*").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.POST,"/api/v1/me/attempts/*/self-grade").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.GET,"/api/v1/me/attempts/*/questions/*/attachments/*").hasRole("STUDENT")
+                        .requestMatchers("/api/v1/me/profile","/api/v1/me/avatar","/api/v1/me/avatar/image","/api/v1/me/messages","/api/v1/me/messages/*","/api/v1/me/messages/*/read","/api/v1/me/activities").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/me/papers", "/api/v1/me/papers/*").hasRole("STUDENT")
                         .requestMatchers(HttpMethod.POST, "/api/v1/me/papers/*/attempts").hasRole("STUDENT")
                         .requestMatchers(HttpMethod.GET, "/api/v1/me/attempts/*").hasRole("STUDENT")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/me/attempts/*/answers").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/me/attempts/*/submit").hasRole("STUDENT")
                         .requestMatchers(HttpMethod.GET, "/api/v1/me/tasks", "/api/v1/me/tasks/*").hasRole("STUDENT")
                         .requestMatchers(HttpMethod.POST, "/api/v1/me/tasks/*/papers/*/attempts").hasRole("STUDENT")
                         .requestMatchers("/api/v1/me", "/api/v1/me/password", "/api/v1/auth/logout").authenticated()
@@ -114,18 +107,9 @@ class WebSecurityConfiguration {
     }
 
     private static Optional<SessionRepository.Principal> principal(HttpServletRequest request,
-            SessionRepository sessions, WeChatRepository wechat, OffsetDateTime now) {
-        String path = request.getServletPath();
-        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authorization != null) {
-            boolean supportsBearer = path.equals("/api/v1/me") || path.startsWith("/api/v1/me/")
-                    || path.equals(WECHAT_BINDING);
-            if (supportsBearer && authorization.startsWith("Bearer ")) {
-                String token = authorization.substring(7);
-                if (IdentityService.validToken(token)) return wechat.findToken(IdentityService.digest(token), now);
-            }
-            return Optional.empty();
-        }
+            SessionRepository sessions, OffsetDateTime now) {
+        // Current authentication accepts only the HttpOnly Web session cookie.
+        if (request.getHeader(HttpHeaders.AUTHORIZATION) != null) return Optional.empty();
         String cookie = WebSession.token(request);
         return IdentityService.validToken(cookie) ? sessions.find(IdentityService.digest(cookie), now) : Optional.empty();
     }

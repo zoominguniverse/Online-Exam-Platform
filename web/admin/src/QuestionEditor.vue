@@ -81,6 +81,7 @@ function removeOption(id: string) {
 }
 
 async function save() {
+  if(busy.value)return
   busy.value = true
   error.value = ''
   notice.value = ''

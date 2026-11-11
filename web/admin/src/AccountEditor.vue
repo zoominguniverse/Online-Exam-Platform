@@ -45,6 +45,7 @@ async function load() {
 }
 
 async function save() {
+  if(busy.value)return
   busy.value = true
   error.value = ''
   notice.value = ''

@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "browserTests": 10,
+  "requiredScenarios": 10,
+  "routes": {
+    "admin": 28,
+    "student": 17,
+    "widths": [
+      375,
+      768,
+      1440
+    ]
+  },
+  "errorRecoveries": 35,
+  "emptyViews": 16,
+  "controlledWriteFailures": 14
+}

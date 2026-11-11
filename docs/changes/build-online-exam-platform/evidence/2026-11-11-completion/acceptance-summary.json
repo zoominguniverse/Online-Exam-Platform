@@ -1,0 +1,295 @@
+{
+  "node": "v22.22.2",
+  "browser": "158.0.8127.18",
+  "project": "exam-browser-9d690ec56b",
+  "emptyViews": [
+    "/admin/users/student",
+    "/admin/subjects",
+    "/admin/questions",
+    "/admin/papers",
+    "/admin/tasks",
+    "/admin/attempts",
+    "/admin/messages",
+    "/admin/questions/new",
+    "/admin/papers/new",
+    "/admin/logs (no matching request)",
+    "/student/papers",
+    "/student/tasks",
+    "/student/records",
+    "/student/mistakes",
+    "/student/messages",
+    "/student/activities (own fixture history removed)"
+  ],
+  "emptyNotApplicable": {
+    "adminUsers": "Last enabled administrator cannot be absent",
+    "details": "Missing identifiers use a recoverable not-found state",
+    "profile": "An authenticated account always has a profile; optional fields may be blank",
+    "dashboard": "Zero counters and date-series are the empty representation"
+  },
+  "timedWindows": [
+    {
+      "status": "UPCOMING",
+      "id": "01be3a22-d8a5-4fcd-b3c6-a44f8a4fefe2",
+      "uiMatchesApi": true,
+      "closedStartRejected": true
+    },
+    {
+      "status": "OPEN",
+      "id": "9775ac56-1494-417c-8365-bf6b12b8ee37",
+      "uiMatchesApi": true,
+      "closedStartRejected": false
+    },
+    {
+      "status": "CLOSED",
+      "id": "0a5f7b10-f818-4a0c-ac5a-507d2eee8d67",
+      "uiMatchesApi": true,
+      "closedStartRejected": true
+    }
+  ],
+  "keyboardAnswer": {
+    "attempt": "d7685236-21cf-4e8b-abbb-c02f3a9b9788",
+    "starts": 1,
+    "completed": true
+  },
+  "taskEligibility": {
+    "targetPapers": 2,
+    "outsiderHttpStatus": 404,
+    "outsiderPageRejected": true
+  },
+  "messageSessions": {
+    "recipients": 2,
+    "independentReaderSessions": 2,
+    "reads": 4,
+    "readCount": 1
+  },
+  "profiles": {
+    "newLoginAndIndependentSession": true,
+    "avatarWidth": 96,
+    "adminPhoneUpdated": true,
+    "createdAtUnchanged": true
+  },
+  "canonicalRoutes": [
+    "/admin/users/student",
+    "/admin/users/admin",
+    "/admin/logs",
+    "/admin/subjects/23309aa1-c37d-4788-9ea8-40bcee7b830c/edit",
+    "/admin/tasks/95b98806-a1f7-433e-a089-be3ba96b3eb0/edit",
+    "/student/exam/d7685236-21cf-4e8b-abbb-c02f3a9b9788",
+    "/student/attempts/d7685236-21cf-4e8b-abbb-c02f3a9b9788/grade"
+  ],
+  "result": "passed",
+  "formFields": [
+    {
+      "route": "/admin/login",
+      "fields": [
+        {
+          "label": "用户名",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "密码",
+          "type": "password",
+          "required": true
+        }
+      ]
+    },
+    {
+      "route": "/student/login",
+      "fields": [
+        {
+          "label": "用户名",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "密码",
+          "type": "password",
+          "required": true
+        }
+      ]
+    },
+    {
+      "route": "/student/login",
+      "fields": [
+        {
+          "label": "用户名",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "密码",
+          "type": "password",
+          "required": true
+        }
+      ]
+    },
+    {
+      "route": "/student/login",
+      "fields": [
+        {
+          "label": "用户名",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "密码",
+          "type": "password",
+          "required": true
+        }
+      ]
+    },
+    {
+      "route": "/student/login",
+      "fields": [
+        {
+          "label": "用户名",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "密码",
+          "type": "password",
+          "required": true
+        }
+      ]
+    },
+    {
+      "route": "/student/profile",
+      "fields": [
+        {
+          "label": "姓名",
+          "type": "text",
+          "required": false
+        },
+        {
+          "label": "手机号",
+          "type": "tel",
+          "required": false
+        },
+        {
+          "label": "生日",
+          "type": "date",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/student/login",
+      "fields": [
+        {
+          "label": "用户名",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "密码",
+          "type": "password",
+          "required": true
+        }
+      ]
+    },
+    {
+      "route": "/admin/profile",
+      "fields": [
+        {
+          "label": "姓名",
+          "type": "text",
+          "required": false
+        },
+        {
+          "label": "手机号",
+          "type": "tel",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/users/new/students",
+      "fields": [
+        {
+          "label": "用户名",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "初始密码",
+          "type": "password",
+          "required": true
+        },
+        {
+          "label": "角色 学生管理员",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "年级 选择年级演示年级",
+          "type": "select",
+          "required": true
+        }
+      ]
+    },
+    {
+      "route": "/admin/users/175d0590-9bef-4d2b-922d-e8a8d694ee4d/edit",
+      "fields": [
+        {
+          "label": "用户名",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "角色 学生管理员",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "年级 选择年级演示年级",
+          "type": "select",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "failedWrites": [
+    {
+      "route": "/admin/login",
+      "path": "/auth/login",
+      "method": "POST",
+      "requestsWhilePending": 1,
+      "repeatSuppressed": true,
+      "safeInputsPreserved": true
+    },
+    {
+      "route": "/student/profile",
+      "path": "/me/profile",
+      "method": "PATCH",
+      "requestsWhilePending": 1,
+      "repeatSuppressed": true,
+      "safeInputsPreserved": true
+    },
+    {
+      "route": "/admin/profile",
+      "path": "/me/profile",
+      "method": "PATCH",
+      "requestsWhilePending": 1,
+      "repeatSuppressed": true,
+      "safeInputsPreserved": true
+    },
+    {
+      "route": "/admin/users/new/students",
+      "path": "/admin/users",
+      "method": "POST",
+      "requestsWhilePending": 1,
+      "repeatSuppressed": true,
+      "safeInputsPreserved": true
+    },
+    {
+      "route": "/admin/users/175d0590-9bef-4d2b-922d-e8a8d694ee4d/edit",
+      "path": "/admin/users/175d0590-9bef-4d2b-922d-e8a8d694ee4d",
+      "method": "PATCH",
+      "requestsWhilePending": 1,
+      "repeatSuppressed": true,
+      "safeInputsPreserved": true
+    }
+  ]
+}

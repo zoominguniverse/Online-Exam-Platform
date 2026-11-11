@@ -1,0 +1,197 @@
+{
+  "timestamp": "2026-11-11T08:34:14.600Z",
+  "node": "v22.22.2",
+  "browser": "158.0.8127.18",
+  "project": "exam-browser-9d690ec56b",
+  "evidence": [
+    {
+      "name": "saved-refresh",
+      "attemptId": "a5e43683-e443-4b4d-8a86-9794f183e349",
+      "version": 2,
+      "answers": [
+        {
+          "questionId": "0ef4d435-56fc-4a97-9dbe-3b39a6527eb4",
+          "answer": {
+            "text": "服务器确认的简答"
+          }
+        },
+        {
+          "questionId": "2bac886f-ee50-4928-a7a5-83579e48e3db",
+          "answer": {
+            "texts": [
+              "填空输入"
+            ]
+          }
+        },
+        {
+          "questionId": "55cc76e1-80f3-4738-9252-b3b7955841fd",
+          "answer": {
+            "optionIds": [
+              "A",
+              "B"
+            ]
+          }
+        },
+        {
+          "questionId": "7e215c5d-2103-4e8a-8de3-d8c0f5737e67",
+          "answer": {
+            "optionId": "true"
+          }
+        },
+        {
+          "questionId": "e721499e-e3b1-4464-a801-945eb8642de9",
+          "answer": {
+            "optionId": "A"
+          }
+        }
+      ],
+      "database": {
+        "status": "IN_PROGRESS",
+        "version": 2,
+        "deadlineAt": "2026-11-11T08:53:49.16414+00:00",
+        "freezeReason": null,
+        "finalScoreMinor": null,
+        "answers": [
+          {
+            "questionId": "0ef4d435-56fc-4a97-9dbe-3b39a6527eb4",
+            "answer": {
+              "text": "服务器确认的简答"
+            }
+          },
+          {
+            "questionId": "2bac886f-ee50-4928-a7a5-83579e48e3db",
+            "answer": {
+              "texts": [
+                "填空输入"
+              ]
+            }
+          },
+          {
+            "questionId": "55cc76e1-80f3-4738-9252-b3b7955841fd",
+            "answer": {
+              "optionIds": [
+                "A",
+                "B"
+              ]
+            }
+          },
+          {
+            "questionId": "7e215c5d-2103-4e8a-8de3-d8c0f5737e67",
+            "answer": {
+              "optionId": "true"
+            }
+          },
+          {
+            "questionId": "e721499e-e3b1-4464-a801-945eb8642de9",
+            "answer": {
+              "optionId": "A"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "offline-pending",
+      "attemptId": "c7634661-4326-4569-a30c-96beb7893f7c",
+      "serverVersion": 1,
+      "localDraftRetained": true,
+      "database": {
+        "status": "IN_PROGRESS",
+        "version": 1,
+        "deadlineAt": "2026-11-11T08:53:52.02986+00:00",
+        "freezeReason": null,
+        "finalScoreMinor": null,
+        "answers": []
+      }
+    },
+    {
+      "name": "online-recovered",
+      "attemptId": "c7634661-4326-4569-a30c-96beb7893f7c",
+      "version": 2,
+      "database": {
+        "status": "IN_PROGRESS",
+        "version": 2,
+        "deadlineAt": "2026-11-11T08:53:52.02986+00:00",
+        "freezeReason": null,
+        "finalScoreMinor": null,
+        "answers": [
+          {
+            "questionId": "0ef4d435-56fc-4a97-9dbe-3b39a6527eb4",
+            "answer": {
+              "text": "离线保留的答案"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "version-conflict",
+      "attemptId": "30a1ea21-c3f5-47f7-ad5f-eea7ab4cff72",
+      "serverVersion": 2,
+      "localDraftRetained": true,
+      "database": {
+        "status": "IN_PROGRESS",
+        "version": 2,
+        "deadlineAt": "2026-11-11T08:53:55.546122+00:00",
+        "freezeReason": null,
+        "finalScoreMinor": null,
+        "answers": [
+          {
+            "questionId": "0ef4d435-56fc-4a97-9dbe-3b39a6527eb4",
+            "answer": {
+              "text": "先保存的服务器答案"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "lost-response-reconciled",
+      "attemptId": "b32bd231-8565-4d95-957d-a525edc52287",
+      "version": 3,
+      "database": {
+        "status": "IN_PROGRESS",
+        "version": 3,
+        "deadlineAt": "2026-11-11T08:53:58.663934+00:00",
+        "freezeReason": null,
+        "finalScoreMinor": null,
+        "answers": [
+          {
+            "questionId": "0ef4d435-56fc-4a97-9dbe-3b39a6527eb4",
+            "answer": {
+              "text": "保存期间继续编辑的答案"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "account-switch",
+      "oldAttemptId": "2aa58e71-2b14-4244-9f4c-f00baa989966",
+      "oldAnswersHidden": true,
+      "oldDraftsCleared": true
+    },
+    {
+      "name": "restart-deadline",
+      "attemptId": "edd5e66c-c030-43d9-ad2f-80b8899ad1ae",
+      "apiProcessRestarted": true,
+      "frozenBeforeClientReconnect": true,
+      "offlineAnswerExcluded": true,
+      "database": {
+        "status": "WAIT_SELF_GRADE",
+        "version": 3,
+        "deadlineAt": "2026-11-11T08:34:01.848413+00:00",
+        "freezeReason": "DEADLINE",
+        "finalScoreMinor": null,
+        "answers": [
+          {
+            "questionId": "0ef4d435-56fc-4a97-9dbe-3b39a6527eb4",
+            "answer": {
+              "text": "停机前确认的答案"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

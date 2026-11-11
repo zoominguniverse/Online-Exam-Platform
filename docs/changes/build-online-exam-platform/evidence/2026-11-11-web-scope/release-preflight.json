@@ -1,0 +1,15 @@
+{
+  "scope": "platform",
+  "startedAt": "2026-11-11T07:24:36.324Z",
+  "checks": [
+    {
+      "name": "platform-evidence-preflight",
+      "passed": false,
+      "gaps": [
+        "36 tasks await authorized review/completion"
+      ]
+    }
+  ],
+  "passed": false,
+  "finishedAt": "2026-11-11T07:24:36.325Z"
+}

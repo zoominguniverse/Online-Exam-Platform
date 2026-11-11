@@ -1,0 +1,38 @@
+{
+  "referenceCommit": "c63f6e9de010493f8c4856189087a4fbf52ef4a6",
+  "branch": "codex/build-online-exam-platform-7-2",
+  "node": "v22.22.2",
+  "browser": "158.0.8127.18",
+  "nodeTests": 3,
+  "javaTests": 28,
+  "browserTests": 9,
+  "controllerOperations": 73,
+  "requirements": 30,
+  "scenarios": 71,
+  "layouts": {
+    "admin": 23,
+    "student": 15,
+    "widths": [
+      375,
+      768,
+      1440
+    ]
+  },
+  "errorRecoveries": 32,
+  "minimumMeasuredTextContrast": 7.137706742063006,
+  "webGatePassed": true,
+  "releaseReady": false,
+  "releaseBlockers": [
+    "36 tasks await authorized review/completion"
+  ],
+  "trackedTasks": {
+    "complete": 17,
+    "total": 53,
+    "remaining": 36
+  },
+  "project": "exam-browser-412f463751",
+  "operationsProject": "exam-release-test-b88bf221cf",
+  "gateFinishedAt": "2026-11-11T07:54:15.044Z",
+  "finalReleaseProject": "exam-release-test-877c533fc3",
+  "finalReleaseFinishedAt": "2026-11-11T07:55:47.106Z"
+}

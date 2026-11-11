@@ -2,6 +2,7 @@ package com.onlineexam.platform.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.onlineexam.platform.domain.ApiException;
+import com.onlineexam.platform.domain.ExamClosedException;
 import com.onlineexam.platform.domain.Identity.Role;
 import com.onlineexam.platform.domain.Identity.Status;
 import com.onlineexam.platform.domain.Paper;
@@ -27,16 +28,21 @@ public class AttemptService {
                                int questionVersion, String score, String type, String stemHtml, JsonNode options) {}
     public record View(UUID id, UUID paperId, UUID paperVersionId, String status,
                        OffsetDateTime serverNow, OffsetDateTime deadlineAt, int version,
-                       List<QuestionView> questions, List<SavedAnswer> savedAnswers) {}
+                       List<QuestionView> questions, List<SavedAnswer> savedAnswers,
+                       OffsetDateTime frozenAt, String freezeReason, String automaticScore, String finalScore,
+                       List<ScoreView> questionScores) {}
+    public record ScoreView(UUID questionId, String score) {}
 
     private final AttemptRepository attempts;
     private final AccountRepository accounts;
     private final Clock clock;
+    private final AttemptLifecycle lifecycle;
 
-    public AttemptService(AttemptRepository attempts, AccountRepository accounts, Clock clock) {
+    public AttemptService(AttemptRepository attempts, AccountRepository accounts, Clock clock, AttemptLifecycle lifecycle) {
         this.attempts = attempts;
         this.accounts = accounts;
         this.clock = clock;
+        this.lifecycle = lifecycle;
     }
 
     @Transactional
@@ -114,27 +120,87 @@ public class AttemptService {
         return view(owner, id, now);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public View read(UUID owner, UUID id) {
+        student(owner);
         return view(owner, id, OffsetDateTime.now(clock));
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = ExamClosedException.class)
     public View save(UUID owner, UUID id, JsonNode body) {
         student(owner);
-        if (body == null || !body.isObject() || !fields(body, Set.of("expectedVersion", "answerItems"))
-                || !body.path("expectedVersion").isIntegralNumber()
-                || !body.path("answerItems").isArray()) throw ApiException.validation("保存载荷格式无效。");
+        validatePayload(body);
         int expected = body.path("expectedVersion").asInt();
+        Attempt attempt = attempts.owned(owner, id, true).orElseThrow(AttemptService::missingAttempt);
+        OffsetDateTime now = OffsetDateTime.now(clock);
+        lifecycle.freezeIfDue(attempt, now);
+        if (!"IN_PROGRESS".equals(attempt.status()) || !now.isBefore(attempt.deadlineAt())) {
+            throw new ExamClosedException();
+        }
+        if (expected != attempt.version()) throw ApiException.conflict("答卷已在其他客户端更新，请加载服务端版本。");
+        attempts.replaceAnswers(id, validatedAnswers(id, body));
+        return view(owner, id, now);
+    }
+
+    @Transactional
+    public View submit(UUID owner, UUID id, String key, JsonNode body) {
+        student(owner);
+        String normalized = validateKey(key);
+        if (normalized == null) throw ApiException.validation("交卷需要 Idempotency-Key。");
+        validatePayload(body);
+        String hash = IdentityService.digest(canonical(body));
+        Attempt attempt = attempts.owned(owner, id, true).orElseThrow(AttemptService::missingAttempt);
+        OffsetDateTime now = OffsetDateTime.now(clock);
+        var previous = attempts.submitKey(owner, normalized);
+        if (previous.isPresent()) {
+            var record = previous.get();
+            if (now.isBefore(record.expiresAt())) {
+                if (!record.attemptId().equals(id) || !record.requestHash().equals(hash)) {
+                    throw ApiException.conflict("交卷幂等键已用于不同载荷或答卷。");
+                }
+                return view(owner, id, now);
+            }
+            attempts.deleteSubmitKey(owner, normalized);
+        }
+        if ("IN_PROGRESS".equals(attempt.status()) && !lifecycle.freezeIfDue(attempt, now)) {
+            if (body.path("expectedVersion").asInt() != attempt.version()) {
+                throw ApiException.conflict("答卷已在其他客户端更新，请加载服务端版本。");
+            }
+            attempts.replaceAnswers(id, validatedAnswers(id, body), false);
+            lifecycle.freeze(attempt, now, "MANUAL");
+        }
+        // A terminal answer set wins over every later payload, including an expired-key retry.
+        attempts.insertSubmitKey(owner, normalized, id, hash, now);
+        return view(owner, id, now);
+    }
+
+    private static String canonical(JsonNode node) {
+        if (node.isObject()) {
+            var fields = new java.util.TreeMap<String, String>();
+            node.fields().forEachRemaining(field -> fields.put(field.getKey(), canonical(field.getValue())));
+            return "{" + fields.entrySet().stream().map(field ->
+                com.fasterxml.jackson.databind.node.TextNode.valueOf(field.getKey()).toString()
+                    + ":" + field.getValue()).collect(java.util.stream.Collectors.joining(",")) + "}";
+        }
+        if (node.isArray()) {
+            var items = new ArrayList<String>();
+            node.forEach(item -> items.add(canonical(item)));
+            return "[" + String.join(",", items) + "]";
+        }
+        return node.toString();
+    }
+
+    private static void validatePayload(JsonNode body) {
+        if (body == null || !body.isObject() || !fields(body, Set.of("expectedVersion", "answerItems"))
+                || !body.path("expectedVersion").isIntegralNumber() || !body.path("expectedVersion").canConvertToInt()
+                || body.path("expectedVersion").asInt() < 1
+                || !body.path("answerItems").isArray()) throw ApiException.validation("保存载荷格式无效。");
         if (body.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 2 * 1024 * 1024) {
             throw ApiException.validation("整份答案不得超过 2 MiB。");
         }
-        Attempt attempt = attempts.owned(owner, id, true).orElseThrow(AttemptService::missingAttempt);
-        OffsetDateTime now = OffsetDateTime.now(clock);
-        if (!"IN_PROGRESS".equals(attempt.status()) || !now.isBefore(attempt.deadlineAt())) {
-            throw new ApiException(HttpStatus.CONFLICT, "EXAM_CLOSED", "答卷已截止或不可编辑。");
-        }
-        if (expected != attempt.version()) throw ApiException.conflict("答卷已在其他客户端更新，请加载服务端版本。");
+    }
+
+    private List<SavedAnswer> validatedAnswers(UUID id, JsonNode body) {
         var questions = attempts.questions(id);
         var byId = new java.util.HashMap<UUID, AttemptRepository.Question>();
         for (var question : questions) byId.put(question.questionId(), question);
@@ -155,8 +221,7 @@ public class AttemptService {
                 saved.add(new SavedAnswer(questionId, answer));
             }
         }
-        attempts.replaceAnswers(id, saved);
-        return view(owner, id, now);
+        return saved;
     }
 
     private static boolean fields(JsonNode node, Set<String> allowed) {
@@ -208,14 +273,21 @@ public class AttemptService {
         return ids;
     }
 
-    private View view(UUID owner, UUID id, OffsetDateTime now) {
-        Attempt attempt = attempts.owned(owner, id).orElseThrow(AttemptService::missingAttempt);
+    View view(UUID owner, UUID id, OffsetDateTime now) {
+        Attempt attempt = attempts.owned(owner, id, true).orElseThrow(AttemptService::missingAttempt);
+        now = OffsetDateTime.now(clock);
+        if (lifecycle.freezeIfDue(attempt, now)) attempt = attempts.owned(owner, id).orElseThrow();
         var questions = attempts.questions(id).stream().map(item -> new QuestionView(
                 item.position(), item.groupPosition(), item.groupName(), item.questionId(),
                 item.questionVersion(), Paper.score(item.scoreMinor()), item.type(),
                 item.stemHtml(), item.options())).toList();
         return new View(attempt.id(), attempt.paperId(), attempt.versionId(), attempt.status(),
-                now, attempt.deadlineAt(), attempt.version(), questions, attempts.answers(id));
+                now, attempt.deadlineAt(), attempt.version(), questions, attempts.answers(id),
+                attempt.frozenAt(), attempt.freezeReason(),
+                attempt.automaticScoreMinor() == null ? null : Paper.score(attempt.automaticScoreMinor()),
+                attempt.finalScoreMinor() == null ? null : Paper.score(attempt.finalScoreMinor()),
+                attempts.results(id).stream().map(result -> new ScoreView(result.questionId(),
+                    result.scoreMinor() == null ? null : Paper.score(result.scoreMinor()))).toList());
     }
 
     private com.onlineexam.platform.domain.Identity.Account student(UUID owner) {

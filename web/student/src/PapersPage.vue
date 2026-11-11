@@ -18,12 +18,16 @@ const page = ref(1)
 const total = ref(0)
 const busy = ref(false)
 const error = ref('')
+const starting = ref(false)
 async function start(id: string) {
+  if(starting.value)return
+  starting.value=true
   error.value = ''
   try {
     const attempt = await write<{ id: string }>('POST', `/me/papers/${id}/attempts`)
     await router.push('/attempts/' + attempt.id)
   } catch (cause) { error.value = (cause as Error).message }
+  finally {starting.value=false}
 }
 
 async function load(next = page.value) {
@@ -60,7 +64,7 @@ onMounted(() => load())
         <p v-if="item.opensAt && item.closesAt">
           {{ time.format(new Date(item.opensAt)) }} 至 {{ time.format(new Date(item.closesAt)) }}（香港时间）
         </p>
-        <button type="button" :disabled="item.status !== 'OPEN'" @click="start(item.id)">开始作答</button>
+        <button type="button" :disabled="starting || item.status !== 'OPEN'" @click="start(item.id)">开始作答</button>
       </li>
     </ul>
     <nav aria-label="试卷分页">

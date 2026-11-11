@@ -1,5 +1,7 @@
 {
-  "scanned": 58,
+  "checkedAt": "2026-11-11T03:20:58.231Z",
+  "scanned": 59,
+  "runtimeJars": 59,
   "findings": [
     {
       "package": "org.apache.logging.log4j:log4j-api",

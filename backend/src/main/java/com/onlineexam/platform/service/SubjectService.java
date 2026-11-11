@@ -38,6 +38,7 @@ public class SubjectService {
                 new ApiException(HttpStatus.NOT_FOUND, "NOT_FOUND", "学科不存在。"));
     }
 
+    @Transactional
     public Subject create(UUID gradeId, String input) {
         if (gradeId == null || !accounts.gradeEnabled(gradeId)) throw ApiException.validation("gradeId 必须是启用年级。");
         String name = clean(input);
@@ -48,6 +49,7 @@ public class SubjectService {
         }
     }
 
+    @Transactional
     public Subject edit(UUID id, int version, String input) {
         requireVersion(version);
         String name = clean(input);
@@ -58,6 +60,7 @@ public class SubjectService {
         }
     }
 
+    @Transactional
     public void delete(UUID id, int version) {
         requireVersion(version);
         try {

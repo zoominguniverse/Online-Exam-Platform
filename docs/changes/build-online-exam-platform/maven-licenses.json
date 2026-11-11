@@ -1,0 +1,744 @@
+{
+  "checkedAt": "2026-11-11T03:20:58.231Z",
+  "components": [
+    {
+      "group": "org.springframework.boot",
+      "name": "spring-boot",
+      "version": "3.5.16",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.springframework.boot",
+      "name": "spring-boot-autoconfigure",
+      "version": "3.5.16",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "ch.qos.logback",
+      "name": "logback-classic",
+      "version": "1.5.34",
+      "licenses": [
+        {
+          "license": {
+            "id": "EPL-2.0",
+            "url": "https://www.eclipse.org/legal/epl-2.0"
+          }
+        },
+        {
+          "license": {
+            "id": "LGPL-2.1-only",
+            "url": "https://www.gnu.org/licenses/old-licenses/lgpl-2.1-standalone.html"
+          }
+        }
+      ]
+    },
+    {
+      "group": "ch.qos.logback",
+      "name": "logback-core",
+      "version": "1.5.34",
+      "licenses": [
+        {
+          "license": {
+            "id": "EPL-2.0",
+            "url": "https://www.eclipse.org/legal/epl-2.0"
+          }
+        },
+        {
+          "license": {
+            "id": "LGPL-2.1-only",
+            "url": "https://www.gnu.org/licenses/old-licenses/lgpl-2.1-standalone.html"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.apache.logging.log4j",
+      "name": "log4j-to-slf4j",
+      "version": "2.24.3",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0",
+            "url": "https://www.apache.org/licenses/LICENSE-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.apache.logging.log4j",
+      "name": "log4j-api",
+      "version": "2.24.3",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0",
+            "url": "https://www.apache.org/licenses/LICENSE-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.slf4j",
+      "name": "jul-to-slf4j",
+      "version": "2.0.18",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "url": "https://opensource.org/license/mit/"
+          }
+        }
+      ]
+    },
+    {
+      "group": "jakarta.annotation",
+      "name": "jakarta.annotation-api",
+      "version": "2.1.1",
+      "licenses": [
+        {
+          "license": {
+            "id": "EPL-2.0"
+          }
+        },
+        {
+          "license": {
+            "id": "GPL-2.0-with-classpath-exception"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.yaml",
+      "name": "snakeyaml",
+      "version": "2.4",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.springframework",
+      "name": "spring-aop",
+      "version": "6.2.19",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.springframework",
+      "name": "spring-beans",
+      "version": "6.2.19",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.aspectj",
+      "name": "aspectjweaver",
+      "version": "1.9.25.1",
+      "licenses": [
+        {
+          "license": {
+            "id": "EPL-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "com.twelvemonkeys.imageio",
+      "name": "imageio-webp",
+      "version": "3.15.3",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-4-Clause"
+          }
+        }
+      ]
+    },
+    {
+      "group": "com.twelvemonkeys.imageio",
+      "name": "imageio-core",
+      "version": "3.15.3",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-4-Clause"
+          }
+        }
+      ]
+    },
+    {
+      "group": "com.twelvemonkeys.imageio",
+      "name": "imageio-metadata",
+      "version": "3.15.3",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-4-Clause"
+          }
+        }
+      ]
+    },
+    {
+      "group": "com.twelvemonkeys.common",
+      "name": "common-lang",
+      "version": "3.15.3",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-4-Clause"
+          }
+        }
+      ]
+    },
+    {
+      "group": "com.twelvemonkeys.common",
+      "name": "common-io",
+      "version": "3.15.3",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-4-Clause"
+          }
+        }
+      ]
+    },
+    {
+      "group": "com.twelvemonkeys.common",
+      "name": "common-image",
+      "version": "3.15.3",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-4-Clause"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.jsoup",
+      "name": "jsoup",
+      "version": "1.24.1",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    },
+    {
+      "group": "com.fasterxml.jackson.core",
+      "name": "jackson-databind",
+      "version": "2.21.4",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "com.fasterxml.jackson.datatype",
+      "name": "jackson-datatype-jdk8",
+      "version": "2.21.4",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "com.fasterxml.jackson.module",
+      "name": "jackson-module-parameter-names",
+      "version": "2.21.4",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.apache.tomcat.embed",
+      "name": "tomcat-embed-core",
+      "version": "10.1.55",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.apache.tomcat.embed",
+      "name": "tomcat-embed-el",
+      "version": "10.1.55",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.apache.tomcat.embed",
+      "name": "tomcat-embed-websocket",
+      "version": "10.1.55",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.springframework",
+      "name": "spring-web",
+      "version": "6.2.19",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.springframework",
+      "name": "spring-webmvc",
+      "version": "6.2.19",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.springframework",
+      "name": "spring-context",
+      "version": "6.2.19",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.springframework",
+      "name": "spring-expression",
+      "version": "6.2.19",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.springframework.boot",
+      "name": "spring-boot-actuator-autoconfigure",
+      "version": "3.5.16",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.springframework.boot",
+      "name": "spring-boot-actuator",
+      "version": "3.5.16",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "io.micrometer",
+      "name": "micrometer-observation",
+      "version": "1.15.12",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "io.micrometer",
+      "name": "micrometer-commons",
+      "version": "1.15.12",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "io.micrometer",
+      "name": "micrometer-jakarta9",
+      "version": "1.15.12",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "io.micrometer",
+      "name": "micrometer-core",
+      "version": "1.15.12",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.hdrhistogram",
+      "name": "HdrHistogram",
+      "version": "2.2.2",
+      "licenses": [
+        {
+          "license": {
+            "id": "CC0-1.0"
+          }
+        },
+        {
+          "license": {
+            "id": "BSD-2-Clause",
+            "url": "https://opensource.org/licenses/BSD-2-Clause"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.latencyutils",
+      "name": "LatencyUtils",
+      "version": "2.0.3",
+      "licenses": [
+        {
+          "license": {
+            "id": "CC0-1.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.springframework.security",
+      "name": "spring-security-config",
+      "version": "6.5.11",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.springframework.security",
+      "name": "spring-security-core",
+      "version": "6.5.11",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.springframework.security",
+      "name": "spring-security-crypto",
+      "version": "6.5.11",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.springframework.security",
+      "name": "spring-security-web",
+      "version": "6.5.11",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.mybatis.spring.boot",
+      "name": "mybatis-spring-boot-starter",
+      "version": "3.0.5",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "com.zaxxer",
+      "name": "HikariCP",
+      "version": "6.3.3",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.springframework",
+      "name": "spring-jdbc",
+      "version": "6.2.19",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.springframework",
+      "name": "spring-tx",
+      "version": "6.2.19",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.mybatis.spring.boot",
+      "name": "mybatis-spring-boot-autoconfigure",
+      "version": "3.0.5",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.mybatis",
+      "name": "mybatis",
+      "version": "3.5.19",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.mybatis",
+      "name": "mybatis-spring",
+      "version": "3.0.5",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.flywaydb",
+      "name": "flyway-core",
+      "version": "11.7.2",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "com.fasterxml.jackson.dataformat",
+      "name": "jackson-dataformat-toml",
+      "version": "2.21.4",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "com.fasterxml.jackson.core",
+      "name": "jackson-core",
+      "version": "2.21.4",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "com.fasterxml.jackson.datatype",
+      "name": "jackson-datatype-jsr310",
+      "version": "2.21.4",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "com.fasterxml.jackson.core",
+      "name": "jackson-annotations",
+      "version": "2.21",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.flywaydb",
+      "name": "flyway-database-postgresql",
+      "version": "11.7.2",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.postgresql",
+      "name": "postgresql",
+      "version": "42.7.11",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-2-Clause",
+            "url": "https://opensource.org/licenses/BSD-2-Clause"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.slf4j",
+      "name": "slf4j-api",
+      "version": "2.0.18",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "url": "https://opensource.org/license/mit/"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.springframework",
+      "name": "spring-core",
+      "version": "6.2.19",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.springframework",
+      "name": "spring-jcl",
+      "version": "6.2.19",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "group": "org.springframework.boot",
+      "name": "spring-boot-jarmode-tools",
+      "version": "3.5.16",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "source": "Boot repackaged runtime JAR"
+    }
+  ]
+}

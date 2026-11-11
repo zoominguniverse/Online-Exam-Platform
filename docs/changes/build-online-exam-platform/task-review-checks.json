@@ -1,0 +1,39 @@
+{
+  "reviewedAt": "2026-11-11T08:05:30.894Z",
+  "change": "build-online-exam-platform",
+  "schema": "spec-driven",
+  "state": "ready",
+  "progress": {
+    "total": 53,
+    "complete": 43,
+    "remaining": 10
+  },
+  "checks": {
+    "contract": {
+      "passed": true,
+      "operations": 73,
+      "controllerMappings": 73,
+      "requirements": 30,
+      "scenarios": 71
+    },
+    "strictSpecValidation": true,
+    "diffWhitespace": true
+  },
+  "platformPreflight": {
+    "scope": "platform",
+    "startedAt": "2026-11-11T08:05:02.211Z",
+    "checks": [
+      {
+        "name": "platform-evidence-preflight",
+        "passed": false,
+        "gaps": [
+          "10 tasks await authorized review/completion"
+        ]
+      }
+    ],
+    "passed": false,
+    "finishedAt": "2026-11-11T08:05:02.213Z"
+  },
+  "implementationTestsRerunThisReview": false,
+  "previousTechnicalEvidence": "evidence/2026-11-11-web-scope/README.md"
+}

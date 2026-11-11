@@ -1,0 +1,51 @@
+{
+  "project": "exam-release-test-877c533fc3",
+  "restored": "exam-restore-test-877c533fc3",
+  "startedAt": "2026-11-11T07:54:08.381Z",
+  "checks": [
+    {
+      "name": "previous-commit-image-built",
+      "commit": "c63f6e9de010493f8c4856189087a4fbf52ef4a6"
+    },
+    {
+      "name": "current-api-and-web-images-built",
+      "nginx": "nginx:1.30.6-alpine@sha256:583b7f2fce1cdb8da5ad5c39ebd3c33b98b87d493190e548bdee1fa8c619c311"
+    },
+    {
+      "name": "production-spa-and-health-routes"
+    },
+    {
+      "name": "blue-to-green-preserves-and-completes-existing-attempt",
+      "attemptId": "19a7a0ae-d239-43d3-b573-9eccd0cfb91e"
+    },
+    {
+      "name": "rollback-to-real-previous-api-and-web-keeps-historical-answers"
+    },
+    {
+      "name": "graceful-stop-commits-inflight-submission-once"
+    },
+    {
+      "name": "consistent-database-and-private-files-backup"
+    },
+    {
+      "name": "isolated-restore-replays-newer-deletions-revokes-sessions-and-keeps-answers-images",
+      "project": "exam-restore-test-877c533fc3",
+      "sourceProject": "exam-release-test-877c533fc3",
+      "startedAt": "2026-11-11T07:55:19.400Z",
+      "restoredAt": "2026-11-11T07:55:25.168Z",
+      "restoreMillis": 5768,
+      "rpoSeconds": 14.263,
+      "deletionsReplayed": 1,
+      "oldSessionsRevoked": true,
+      "recoveryMillis": 14658,
+      "recoveryIncludesRuntimeLoginAndImage": true
+    },
+    {
+      "name": "database-outage-readiness-liveness-and-recovery"
+    }
+  ],
+  "lastStartupStatus": 200,
+  "lastStartupBody": "{\"status\":\"UP\"}",
+  "passed": true,
+  "finishedAt": "2026-11-11T07:55:47.106Z"
+}

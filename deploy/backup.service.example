@@ -1,0 +1,12 @@
+[Unit]
+Description=Consistent exam database and attachment backup
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=exam-operator
+WorkingDirectory=/srv/exam
+EnvironmentFile=/srv/exam/deploy/.env.prod
+ExecStart=/usr/bin/node /srv/exam/scripts/backup.mjs --project online-exam --env-file /srv/exam/deploy/.env.prod
+UMask=0077

@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "name": "missing-acceptance",
+      "expectedExitCode": 1,
+      "actualExitCode": 1,
+      "reason": "Required real browser evidence missing",
+      "productionFilesUnchanged": true
+    },
+    {
+      "name": "one-reader-session",
+      "expectedExitCode": 1,
+      "actualExitCode": 1,
+      "reason": "Independent reader sessions reduced from two to one",
+      "productionFilesUnchanged": true
+    }
+  ]
+}

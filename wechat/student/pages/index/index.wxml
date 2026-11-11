@@ -1,8 +1,0 @@
-<view class="page">
-  <view class="title">在线考试 · 学生端</view>
-  <view wx:if="{{loading}}">正在连接考试服务…</view>
-  <view wx:elif="{{error}}">{{error}}</view>
-  <view wx:elif="{{version}}">API 版本 {{version}}</view>
-  <button bindtap="openStudent">进入学生中心</button>
-  <button wx:if="{{error}}" bindtap="loadVersion">重试</button>
-</view>

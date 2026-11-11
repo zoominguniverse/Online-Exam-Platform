@@ -19,13 +19,16 @@ async function load() {
 }
 
 async function logout() {
+  const generation=localStorage.getItem('exam-auth-epoch')
   busy.value = true
   error.value = ''
   try {
     await write('POST', '/auth/logout')
+    if(generation!==localStorage.getItem('exam-auth-epoch'))return
     if (account.value) {
       for (const key of Object.keys(localStorage)) if (key.startsWith(`exam-draft:${account.value.id}:`)) localStorage.removeItem(key)
       localStorage.removeItem('exam-active-user')
+      localStorage.removeItem('exam-auth-epoch')
     }
     await router.replace({ name: 'login' })
   } catch (cause) {

@@ -64,6 +64,7 @@ public class AttachmentRepository {
                 DELETE FROM attachments WHERE id IN (
                     SELECT a.id FROM attachments a WHERE a.created_at < :cutoff
                     AND NOT EXISTS (SELECT 1 FROM attachment_links l WHERE l.attachment_id = a.id)
+                    AND NOT EXISTS (SELECT 1 FROM profiles p WHERE p.avatar_id = a.id)
                     LIMIT 500 FOR UPDATE SKIP LOCKED
                 ) RETURNING storage_key
                 """).param("cutoff", cutoff).query(UUID.class).list();
@@ -72,5 +73,20 @@ public class AttachmentRepository {
     public boolean hasStorageKey(UUID key) {
         return jdbc.sql("SELECT EXISTS(SELECT 1 FROM attachments WHERE storage_key = :key)")
                 .param("key", key).query(Boolean.class).single();
+    }
+
+    public Optional<PrivateImage> avatar(UUID owner) {
+        return jdbc.sql("SELECT a.storage_key,a.media_type FROM profiles p JOIN attachments a ON a.id=p.avatar_id WHERE p.user_id=:owner")
+                .param("owner",owner).query((row,index)->new PrivateImage(row.getObject("storage_key",UUID.class),row.getString("media_type"))).optional();
+    }
+    public Optional<PrivateImage> attemptImage(UUID id,UUID attempt,UUID question,UUID owner,boolean admin) {
+        return jdbc.sql("""
+                SELECT a.storage_key,a.media_type FROM attachments a JOIN attachment_links l ON l.attachment_id=a.id
+                JOIN attempt_items i ON i.question_id=l.question_id AND i.question_version=l.question_version
+                JOIN attempts t ON t.id=i.attempt_id WHERE a.id=:id AND t.id=:attempt AND i.question_id=:question
+                AND (CAST(:owner AS uuid) IS NULL OR t.owner_id=CAST(:owner AS uuid))
+                AND (:admin OR l.part='STEM' OR t.status<>'IN_PROGRESS') LIMIT 1
+                """).param("id",id).param("attempt",attempt).param("question",question).param("owner",owner).param("admin",admin)
+                .query((row,index)->new PrivateImage(row.getObject("storage_key",UUID.class),row.getString("media_type"))).optional();
     }
 }

@@ -1,0 +1,256 @@
+{
+  "reviewedAt": "2026-11-11T08:04:35.839Z",
+  "previousComplete": 17,
+  "currentComplete": 43,
+  "total": 53,
+  "checks": [
+    {
+      "task": "1.3",
+      "completed": 18
+    },
+    {
+      "task": "4.5",
+      "completed": 19
+    },
+    {
+      "task": "5.5",
+      "completed": 20
+    },
+    {
+      "task": "6.4",
+      "completed": 21
+    },
+    {
+      "task": "7.1",
+      "completed": 22
+    },
+    {
+      "task": "7.2",
+      "completed": 23
+    },
+    {
+      "task": "7.3",
+      "completed": 24
+    },
+    {
+      "task": "7.4",
+      "completed": 25
+    },
+    {
+      "task": "7.6",
+      "completed": 26
+    },
+    {
+      "task": "8.1",
+      "completed": 27
+    },
+    {
+      "task": "8.2",
+      "completed": 28
+    },
+    {
+      "task": "8.3",
+      "completed": 29
+    },
+    {
+      "task": "8.4",
+      "completed": 30
+    },
+    {
+      "task": "8.5",
+      "completed": 31
+    },
+    {
+      "task": "9.1",
+      "completed": 32
+    },
+    {
+      "task": "9.2",
+      "completed": 33
+    },
+    {
+      "task": "9.4",
+      "completed": 34
+    },
+    {
+      "task": "10.3",
+      "completed": 35
+    },
+    {
+      "task": "10.4",
+      "completed": 36
+    },
+    {
+      "task": "11.2",
+      "completed": 37
+    },
+    {
+      "task": "11.3",
+      "completed": 38
+    },
+    {
+      "task": "11.4",
+      "completed": 39
+    },
+    {
+      "task": "11.5",
+      "completed": 40
+    },
+    {
+      "task": "11.6",
+      "completed": 41
+    },
+    {
+      "task": "12.1",
+      "completed": 42
+    },
+    {
+      "task": "12.3",
+      "completed": 43
+    }
+  ],
+  "completed": {
+    "1.3": [
+      "web/shared/StatusPage.vue",
+      "web/e2e/platform-workflow.spec.ts",
+      "两个入口真实API版本/请求阻断/重试通过。"
+    ],
+    "4.5": [
+      "docs/changes/build-online-exam-platform/catalog-api.md",
+      "backend/src/test/java/com/onlineexam/platform/IdentityIntegrationTest.java",
+      "题型/附件限制与示例；题目版本归档、私有图片归属和答案不泄露测试通过。"
+    ],
+    "5.5": [
+      "docs/changes/build-online-exam-platform/data-dictionary.md",
+      "backend/src/test/java/com/onlineexam/platform/IdentityIntegrationTest.java",
+      "发布版本、并发冲突、冻结引用与归档后原答案回看已通过。"
+    ],
+    "6.4": [
+      "web/student/src/AssignmentsPage.vue",
+      "backend/src/test/java/com/onlineexam/platform/IdentityIntegrationTest.java",
+      "逐卷进度、待批改不算完成、归档阻止新开始、最终两卷完成投影通过。"
+    ],
+    "7.1": [
+      "backend/src/main/java/com/onlineexam/platform/service/AttemptService.java",
+      "backend/src/test/java/com/onlineexam/platform/IdentityIntegrationTest.java",
+      "普通/任务开始与恢复、快照/时段截止/安全DTO通过。"
+    ],
+    "7.2": [
+      "web/e2e/attempt-saving.spec.ts",
+      "web/student/src/AttemptPage.vue",
+      "全量保存、离线草稿、冲突、未知响应、换账号隔离均有真实浏览器成功记录。"
+    ],
+    "7.3": [
+      "backend/src/main/java/com/onlineexam/platform/service/AttemptLifecycle.java",
+      "web/e2e/attempt-saving.spec.ts",
+      "原子交卷、截止竞争/补处理、worker锁与真实API停机恢复通过。"
+    ],
+    "7.4": [
+      "web/e2e/platform-workflow.spec.ts",
+      "web/student/src/AttemptPage.vue",
+      "题号、标记、保存状态、实际未答确认及可信隐藏/显示后的取时通过。"
+    ],
+    "7.6": [
+      "docs/changes/build-online-exam-platform/catalog-api.md",
+      "backend/src/test/java/com/onlineexam/platform/IdentityIntegrationTest.java",
+      "状态与提交载荷文档齐；卷外/重复/非法选项/超限载荷整体拒绝通过。"
+    ],
+    "8.1": [
+      "backend/src/main/java/com/onlineexam/platform/service/AttemptLifecycle.java",
+      "backend/src/test/java/com/onlineexam/platform/IdentityIntegrationTest.java",
+      "整数快照计分、乱序、少选/多选/未答及小数精度通过；计分变异被断言拒绝。"
+    ],
+    "8.2": [
+      "backend/src/main/java/com/onlineexam/platform/service/LearningService.java",
+      "backend/src/test/java/com/onlineexam/platform/IdentityIntegrationTest.java",
+      "本人全套主观分、空答案零分、非法整体拒绝、幂等/并发终态通过。"
+    ],
+    "8.3": [
+      "web/shared/ReviewPage.vue",
+      "web/e2e/platform-workflow.spec.ts",
+      "提交前参考内容不可读，提交后可评分，客观不可改/SELF/最终成绩通过。"
+    ],
+    "8.4": [
+      "backend/src/main/java/com/onlineexam/platform/service/LearningService.java",
+      "backend/src/test/java/com/onlineexam/platform/IdentityIntegrationTest.java",
+      "分数与错题失败注入整笔回滚；最终成绩一致后任务投影通过。"
+    ],
+    "8.5": [
+      "docs/changes/build-online-exam-platform/scenarios.md",
+      "backend/src/test/java/com/onlineexam/platform/IdentityIntegrationTest.java",
+      "两独立Web会话并发确认、终态重试不重复加分及规则/接口索引通过。"
+    ],
+    "9.1": [
+      "web/shared/RecordsPage.vue",
+      "web/shared/ReviewPage.vue",
+      "本人/管理成绩列表详情、待批改暂定标识、筛选/归属拒绝通过。"
+    ],
+    "9.2": [
+      "web/student/src/MistakesPage.vue",
+      "backend/src/test/java/com/onlineexam/platform/IdentityIntegrationTest.java",
+      "低于满分/未答收录、最近错误去重、后来答对保留及页面通过。"
+    ],
+    "9.4": [
+      "web/e2e/platform-workflow.spec.ts",
+      "docs/changes/build-online-exam-platform/data-dictionary.md",
+      "题目修改归档、试卷归档后旧题分值/答案/原图和成绩保持，通过真实Web回看。"
+    ],
+    "10.3": [
+      "backend/src/main/java/com/onlineexam/platform/configuration/AuditConfiguration.java",
+      "web/shared/ActivityPage.vue",
+      "事务审计、本人动态、管理筛选、requestId关联和日志脱敏通过。"
+    ],
+    "10.4": [
+      "backend/src/main/java/com/onlineexam/platform/service/CommunityService.java",
+      "web/admin/src/DashboardPage.vue",
+      "香港自然日去重/补零/月初测试和真实管理图表路由通过。"
+    ],
+    "11.2": [
+      "backend/src/main/java/com/onlineexam/platform/domain/Contracts.java",
+      "backend/src/test/java/com/onlineexam/platform/IdentityIntegrationTest.java",
+      "分页/查询白名单、幂等键冲突、Cookie/CSRF、撤销、资源归属与JSON边界通过。"
+    ],
+    "11.3": [
+      "web/Dockerfile",
+      "docs/changes/build-online-exam-platform/evidence/2026-11-11-web-scope/final-release-report.json",
+      "最终API/Web镜像、Nginx空库启动/健康与在途提交优雅停止通过。"
+    ],
+    "11.4": [
+      "backend/src/main/java/com/onlineexam/platform/service/ObservabilityService.java",
+      "docs/changes/build-online-exam-platform/operations.md",
+      "指标/连接池、脱敏JSON、限流、断库/截止/持续5xx告警及值班运维处置材料齐。"
+    ],
+    "11.5": [
+      "scripts/restore.mjs",
+      "docs/changes/build-online-exam-platform/evidence/2026-11-11-web-scope/final-release-report.json",
+      "一致性DB/文件备份及隔离恢复、较新删除清单、撤销旧会话及实测RPO/RTO通过。"
+    ],
+    "11.6": [
+      "scripts/release.mjs",
+      "docs/changes/build-online-exam-platform/evidence/2026-11-11-web-scope/final-release-report.json",
+      "真实c63f6e9配对API/Web回退、原答案原图与路由切换通过。"
+    ],
+    "12.1": [
+      "web/e2e/platform-workflow.spec.ts",
+      "web/e2e/attempt-saving.spec.ts",
+      "真实管理UI五题型/两任务卷、Web多会话保存恢复、提交/SELF/错题历史/管理查分全套通过。"
+    ],
+    "12.3": [
+      "scripts/capacity.mjs",
+      "docs/changes/build-online-exam-platform/evidence/2026-11-11-web-scope/capacity-report.json",
+      "100会话600秒、实际硬件/数据量、100份定时截止及指定故障恢复满足预算。"
+    ]
+  },
+  "remaining": {
+    "4.4": "共享呈现与分式/图片/长表已验证；尚无上下标和矩阵样例在管理预览与学生Web两端的呈现证据。",
+    "5.4": "学生试卷页与服务端时段边界测试存在；真实浏览器尚未断言UPCOMING/CLOSED的时间展示、禁用开始及与服务端同刻判定一致。",
+    "6.2": "目标学生两卷任务主流程已过；尚未完成非目标学生直接访问任务页面被拒绝的浏览器用例（接口拒绝已有测试）。",
+    "9.3": "资料/头像、创建时间和字段限制已有实现；缺修改后重新登录与另一独立Web会话一致、管理员改手机号及真实创建时间不变的完整LR03-N证据。",
+    "10.1": "发送事务/非法收件人/去重/幂等测试已过；MA01-N指定A、B、A群发后A/B各一份、A双会话阅读的组合场景尚未完整执行。",
+    "10.2": "管理发送/详情及学生阅读页面已过；现有浏览器只在同一会话刷新，缺两个独立Web会话多次阅读后已读人数仍为一的联调证据。",
+    "10.5": "API与时区文档已交付；design功能表与实际路由未完全对齐，例如/admin/users/student与实际students、/admin/logs与activities，学科/任务独立编辑路径也未实现（现为列表内编辑）。需统一规范路由并逐一验证。",
+    "11.1": "38路由三宽度、32数据页错误恢复及登录焦点/单字段失焦已过；尚未逐页记录空状态、全部表单校验/处理中重复操作/失败输入保留和完整键盘作答的证据。",
+    "12.4": "30项Requirement/71项Scenario有索引，两项变异被拒绝；以上场景仍缺具体证据，映射存在不等于验收完整，需补齐后复核覆盖。",
+    "12.5": "材料与Web技术门禁已过；仍有未完成任务与规范路由/验收证据缺口，完整平台门禁及发布评审交付尚未完成。"
+  }
+}

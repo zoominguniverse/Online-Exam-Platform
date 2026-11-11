@@ -1,28 +1,79 @@
-# 场景索引
+# 当前 Web 场景索引
 
-| 场景 | 证据 | 范围 |
-| --- | --- | --- |
-| PD02-F | [Docker 验证](verification.md) | PostgreSQL 停机、恢复和缺少配置 |
-| PD02-N | `scripts/test.mjs` 和 `VersionIntegrationTest` | 空库迁移、就绪及 API 版本。完整场景仍需微信登录 |
-| CX01-F | 管理端和学生端路由的浏览器验证 | 未知地址返回入口。角色和登录门禁在身份闭环验收 |
-| PD03-F | `node scripts/test.mjs --negative-control` | 在隔离接口测试中比较错误的版本，验证脚本以非零退出 |
-| IA01-N / IA01-F | `IdentityIntegrationTest.validatesRegistrationAndKeepsCredentialsOutOfResponsesAndLogs` | 规范化重复、无效年级、注入角色、CSRF、密码存储及脱敏、退出后旧 Cookie 失效 |
-| IA01-B | `IdentityIntegrationTest.managesAccountsAndRevokesAllSessionsWhenDisabled`、`handlesUpstreamFailuresAndPreventsConcurrentBindingToTwoAccounts` | Web 多会话及微信替身旧令牌均被撤销；恢复启用须重新认证。体验版双端场景待验收 |
-| IA02-N / IA02-B | `IdentityIntegrationTest.managesAccountsAndRevokesAllSessionsWhenDisabled`、`protectsTheLastEnabledAdministratorAcrossConcurrentHttpRequests` | 账号筛选、版本冲突、并发操作、保留软删除记录 UUID。历史答卷关联在答卷功能完成后验证 |
-| IA02-F | `IdentityIntegrationTest.validatesRegistrationAndKeepsCredentialsOutOfResponsesAndLogs` | 学生直接访问管理查询和写入接口返回 403。答卷、消息和资料的资源边界随对应业务实现验证 |
-| CX01-F | [Chrome 账号流程](verification.md#web-身份闭环) | 匿名重定向、双向角色拒绝、未知路由回入口 |
-| IA03-F / IA03-B | `IdentityIntegrationTest.consumesCodesAndRevokesTokensWhilePreservingWebIdentity`、`handlesUpstreamFailuresAndPreventsConcurrentBindingToTwoAccounts` | 微信替身模拟无效 code、超时和重复绑定；真实 PostgreSQL 验证唯一约束、旧令牌撤销和 code 重放拒绝 |
-| IA03-N | `IdentityIntegrationTest.consumesCodesAndRevokesTokensWhilePreservingWebIdentity`、`tests/wechat.test.cjs` | 本地验证绑定、自动登录、账号 UUID 一致、退出清理，真实体验版步骤见 [小程序体验版验收](wechat-experience.md) |
-| QB01-N / QB01-F | `IdentityIntegrationTest.createsAllQuestionTypesAndPreservesVersionsWhenArchived` 和 Chrome | 学科创编、规范化唯一、未引用删除、题目引用阻止删除 |
-| QB02-N / QB02-F | 同上 | 五题型创编与筛选、分值与答案校验、失败不落库 |
-| QB02-B | 同上 | 新版本和归档保留旧题目。发布试卷读取固定题目版本，完整历史答卷回看待验收 |
-| QB03-F / QB03-B | `IdentityIntegrationTest.validatesPrivateImagesAndCleansRolledBackReferences` | 危险属性净化、格式与大小、跨账号直读拒绝、关联失败回滚和孤立文件清理。答卷 DTO 和跨端富文本待验收 |
-| PA01-N / PA01-F | `IdentityIntegrationTest.publishesAllPaperTypesAndFiltersStudentsAtTheExactWindowBoundaries`、`rollsBackPublishedVersionIfUpdatingThePaperFails` 和 Chrome | 三类卷发布、混合组卷、总分顺序、空卷/跨学科/时段校验及中途失败回滚 |
-| PA02-F / PA02-B | `IdentityIntegrationTest.publishesAllPaperTypesAndFiltersStudentsAtTheExactWindowBoundaries`、`startsOnlyEligibleOrdinaryPapersAndFreezesSafeSnapshots`、`startsFrozenTaskPapersOnceAcrossWebAndWechat` | 隔离 PostgreSQL 17.11 实测：普通卷按年级、发布与开放时段过滤，任务卷普通入口拒绝、任务入口仅冻结成员可开始；开始时刻含、结束时刻不含。拒绝请求不产生答卷。 |
-| ET01-N / ET01-B / PA02-N | `IdentityIntegrationTest.startsOnlyEligibleOrdinaryPapersAndFreezesSafeSnapshots`、`startsFrozenTaskPapersOnceAcrossWebAndWechat`、`savesWholeAnswerSetWithVersionAndDeadlineChecks` | 普通卷与任务卷开始、按答卷 ID 跨认证读取、服务端截止和不可变快照有后端证据；保存后微信令牌读取同一答案与版本。访问时截止冻结、真实客户端跨端恢复及完成后的重练仍待验证，7.1 未完成。 |
-| ET02-N / ET02-B | `IdentityIntegrationTest.savesWholeAnswerSetWithVersionAndDeadlineChecks` | 2026-11-11 隔离 PostgreSQL 17.11：五题型全量保存、遗漏清空、旧版本与非法选项拒绝、同版本双会话并发仅一次成功、截止时拒绝及保存后另一认证路径读取。客户端真实页面证据仍待补齐。 |
-| ET02-F | `tests/attempt-draft.test.cjs` | Node 22 模拟小程序保存中再次编辑、响应丢失后先核对服务端、待同步草稿按账号与答卷存储及退出清理；Web 和微信真实客户端断网验收尚未执行。 |
-| PA03-N / PA03-B | 同上 | 新草稿不覆盖发布版本，旧版本可读取，过期编辑返回 409。已开始答卷的历史保持待验收 |
-| TA01-N / TA01-F / TA01-B | `IdentityIntegrationTest.freezesAssignmentPapersAndEligibilityAndRollsBackIfOnePaperIsAlreadyBound`、Chrome 和 `tests/wechat.test.cjs` | 两卷发布、目标学生可见、名单冻结、禁用撤销和整批回滚。Chrome 验证非目标学生直接访问失败，小程序页面逻辑由替身验证 |
-| TA02-B | `IdentityIntegrationTest.startsFrozenTaskPapersOnceAcrossWebAndWechat` | 2026-11-11：Web Cookie 与微信令牌经真实服务端认证链路，同键及不同键各以同步闸门并发开始；响应均为同一答卷 ID，数据库每成员每任务卷仅一份答卷与一组快照。测试直接插入重复答卷确认唯一约束，且发布后试卷换版仍使用任务冻结版本。微信身份提供器为替身，未进行小程序真机验收。 |
-| TA03-F | 同上 | 修改已发布任务返回 409，归档保留卷和成员。答卷进度联动待实现 |
+当前范围为管理端、学生 Web 和共用 Java 后端。正式任务已完成53/53；此表映射当前30项Requirement/71项Scenario。历史报告按原生成时间保留，不改写为本轮结果。最新实测见verification顶部与当前验收证据。测试方法默认位于IdentityIntegrationTest。映射不代表场景已完整验收；原复核缺口已逐项补充，新结果以[续实施验收](completion-acceptance.md)为准。
+
+| Requirement | Scenario | 可复跑证据 | 验证范围 |
+| --- | --- | --- | --- |
+| CX01 | CX01-N 全流程可达 | `attempt-saving.spec.ts`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 管理/学生Web完整主路径、38个路由、角色/匿名/未知/换账号门禁。 |
+| CX01 | CX01-F 路由与权限 | `attempt-saving.spec.ts`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 管理/学生Web完整主路径、38个路由、角色/匿名/未知/换账号门禁。 |
+| CX02 | CX02-N 空状态与恢复 | `platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 45路由三宽度、完整键盘作答、字段标签/失焦校验、16种空视图、35数据页故障恢复及处理中重复抑制/安全输入保留。 |
+| CX02 | CX02-F 重复操作 | `platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 三宽度、键盘及可见焦点、正文对比度、32个数据页故障恢复及原操作重试。 |
+| CX02 | CX02-B 可达性与窄屏 | `platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 三宽度、键盘及可见焦点、正文对比度、32个数据页故障恢复及原操作重试。 |
+| CX03 | CX03-N 导航与确认 | `attempt-saving.spec.ts`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 学生Web题号/标记/确认未答数、服务端锚定计时、到期与账号隔离。 |
+| CX03 | CX03-B 到时与账号切换 | `attempt-saving.spec.ts`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 学生Web题号/标记/确认未答数、服务端锚定计时、到期与账号隔离。 |
+| EG01 | EG01-N 客观题计分 | `gradesUnorderedPartialExtraAndMissingSelectionsUsingSnapshotIntegers`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 快照整数计分、乱序集合、少选/多选/未答零分及小数精度。 |
+| EG01 | EG01-B 少选多选未答 | `gradesUnorderedPartialExtraAndMissingSelectionsUsingSnapshotIntegers`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 快照整数计分、乱序集合、少选/多选/未答零分及小数精度。 |
+| EG02 | EG02-N 混合卷确认 | `confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores`、`projectsTaskCompletionOnlyAfterEverySubjectiveGradeAndKeepsEmptyAnswersZero`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 全套本人主观评分、空题固定零、客观不可改、非法整体拒绝和SELF。 |
+| EG02 | EG02-F 非法批改 | `confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores`、`projectsTaskCompletionOnlyAfterEverySubjectiveGradeAndKeepsEmptyAnswersZero`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 全套本人主观评分、空题固定零、客观不可改、非法整体拒绝和SELF。 |
+| EG03 | EG03-N 成绩闭环 | `confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores`、`concurrentManualSubmissionsReturnOneResultWithoutDuplicatingScores`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 并发确认及末尾错题失败整笔回滚；终态同分重试、改分409及任务投影。 |
+| EG03 | EG03-B 并发确认 | `confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores`、`concurrentManualSubmissionsReturnOneResultWithoutDuplicatingScores`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 并发确认及末尾错题失败整笔回滚；终态同分重试、改分409及任务投影。 |
+| ET01 | ET01-N 刷新与多会话恢复 | `startsOnlyEligibleOrdinaryPapersAndFreezesSafeSnapshots`、`attempt-saving.spec.ts`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | Web刷新与另一会话恢复同一答卷；客户端日期变化及后台恢复不延长截止。 |
+| ET01 | ET01-B 客户端时间变化 | `startsOnlyEligibleOrdinaryPapersAndFreezesSafeSnapshots`、`attempt-saving.spec.ts`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | Web刷新与另一会话恢复同一答卷；客户端日期变化及后台恢复不延长截止。 |
+| ET02 | ET02-N 保存确认 | `savesWholeAnswerSetWithVersionAndDeadlineChecks`、`attempt-saving.spec.ts` | 真实浏览器离线/重连、保存丢失响应、双会话冲突及账号草稿隔离。 |
+| ET02 | ET02-F 离线未保存 | `savesWholeAnswerSetWithVersionAndDeadlineChecks`、`attempt-saving.spec.ts` | 真实浏览器离线/重连、保存丢失响应、双会话冲突及账号草稿隔离。 |
+| ET02 | ET02-B 旧版本写入 | `savesWholeAnswerSetWithVersionAndDeadlineChecks`、`attempt-saving.spec.ts` | 真实浏览器离线/重连、保存丢失响应、双会话冲突及账号草稿隔离。 |
+| ET03 | ET03-N 手动交卷 | `submitsFinalAnswersAtomicallyAndRetriesTheFrozenResult`、`serializesManualDeadlineCompetitionAndRecoversOverdueDrafts`、`concurrentManualSubmissionsReturnOneResultWithoutDuplicatingScores`、`deadlineWorkerSkipsBusyOwnerAndUsesTheSameLockOrderAsHttp`、`attempt-saving.spec.ts`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 完整提交原子性、非法载荷、截止竞争及真实API重启后的原截止补冻结。 |
+| ET03 | ET03-B 截止和重试并发 | `submitsFinalAnswersAtomicallyAndRetriesTheFrozenResult`、`serializesManualDeadlineCompetitionAndRecoversOverdueDrafts`、`concurrentManualSubmissionsReturnOneResultWithoutDuplicatingScores`、`deadlineWorkerSkipsBusyOwnerAndUsesTheSameLockOrderAsHttp`、`attempt-saving.spec.ts`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 完整提交原子性、非法载荷、截止竞争及真实API重启后的原截止补冻结。 |
+| ET03 | ET03-F 断网跨过截止 | `submitsFinalAnswersAtomicallyAndRetriesTheFrozenResult`、`serializesManualDeadlineCompetitionAndRecoversOverdueDrafts`、`concurrentManualSubmissionsReturnOneResultWithoutDuplicatingScores`、`deadlineWorkerSkipsBusyOwnerAndUsesTheSameLockOrderAsHttp`、`attempt-saving.spec.ts`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 完整提交原子性、非法载荷、截止竞争及真实API重启后的原截止补冻结。 |
+| ET03 | ET03-F2 非法题目载荷 | `submitsFinalAnswersAtomicallyAndRetriesTheFrozenResult`、`serializesManualDeadlineCompetitionAndRecoversOverdueDrafts`、`concurrentManualSubmissionsReturnOneResultWithoutDuplicatingScores`、`deadlineWorkerSkipsBusyOwnerAndUsesTheSameLockOrderAsHttp`、`attempt-saving.spec.ts`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 完整提交原子性、非法载荷、截止竞争及真实API重启后的原截止补冻结。 |
+| IA01 | IA01-N 注册登录退出 | `validatesRegistrationAndKeepsCredentialsOutOfResponsesAndLogs`、`managesAccountsAndRevokesAllSessionsWhenDisabled`、`expiresIdleSessionsAndRevokesAllWebSessionsOnPasswordChange` | Web注册/登录/退出、多会话即时禁用、闲置与绝对过期、改密撤销。 |
+| IA01 | IA01-F 非法注册和凭据 | `validatesRegistrationAndKeepsCredentialsOutOfResponsesAndLogs`、`managesAccountsAndRevokesAllSessionsWhenDisabled`、`expiresIdleSessionsAndRevokesAllWebSessionsOnPasswordChange` | Web注册/登录/退出、多会话即时禁用、闲置与绝对过期、改密撤销。 |
+| IA01 | IA01-B 账号即时禁用 | `validatesRegistrationAndKeepsCredentialsOutOfResponsesAndLogs`、`managesAccountsAndRevokesAllSessionsWhenDisabled`、`expiresIdleSessionsAndRevokesAllWebSessionsOnPasswordChange` | Web注册/登录/退出、多会话即时禁用、闲置与绝对过期、改密撤销。 |
+| IA02 | IA02-N 账号管理 | `managesAccountsAndRevokesAllSessionsWhenDisabled`、`protectsTheLastEnabledAdministratorAcrossConcurrentHttpRequests`、`confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores`、`sendsMessagesAtomicallyDeduplicatesRecipientsAndCountsFirstReadOnce`、`acceptsOnlyWebSessionsAndRevokesHistoricalCredentialsWithoutReopeningLegacyRoutes` | 账号并发保护、本人资源/管理角色边界、旧令牌拒绝与历史凭据清理。 |
+| IA02 | IA02-F 跨用户访问 | `managesAccountsAndRevokesAllSessionsWhenDisabled`、`protectsTheLastEnabledAdministratorAcrossConcurrentHttpRequests`、`confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores`、`sendsMessagesAtomicallyDeduplicatesRecipientsAndCountsFirstReadOnce`、`acceptsOnlyWebSessionsAndRevokesHistoricalCredentialsWithoutReopeningLegacyRoutes` | 账号并发保护、本人资源/管理角色边界、旧令牌拒绝与历史凭据清理。 |
+| IA02 | IA02-B 最后管理员并发删除 | `managesAccountsAndRevokesAllSessionsWhenDisabled`、`protectsTheLastEnabledAdministratorAcrossConcurrentHttpRequests`、`confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores`、`sendsMessagesAtomicallyDeduplicatesRecipientsAndCountsFirstReadOnce`、`acceptsOnlyWebSessionsAndRevokesHistoricalCredentialsWithoutReopeningLegacyRoutes` | 账号并发保护、本人资源/管理角色边界、旧令牌拒绝与历史凭据清理。 |
+| LR01 | LR01-N 历史版本 | `confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores`、`authorizesSnapshotImagesOnlyForTheOwnerAndHidesExplanationsUntilFrozen`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 本人/管理记录与原题、答案、分值、图片、用时和来源；越权拒绝。 |
+| LR01 | LR01-F 他人答卷 | `confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores`、`authorizesSnapshotImagesOnlyForTheOwnerAndHidesExplanationsUntilFrozen`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 本人/管理记录与原题、答案、分值、图片、用时和来源；越权拒绝。 |
+| LR02 | LR02-N 自动收录 | `freezesPersistedAnswersOnReadAndLateSaveWithoutRollingBackTheFreeze`、`serializesManualDeadlineCompetitionAndRecoversOverdueDrafts`、`confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 客观错误/部分分/未答收录，最近错误去重，后来答对保留。 |
+| LR02 | LR02-B 重复错误与后来答对 | `freezesPersistedAnswersOnReadAndLateSaveWithoutRollingBackTheFreeze`、`serializesManualDeadlineCompetitionAndRecoversOverdueDrafts`、`confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 客观错误/部分分/未答收录，最近错误去重，后来答对保留。 |
+| LR03 | LR03-N 更新与时间线 | `protectsProfilesAndAvatarsAndCorrelatesCredentialFreeAudit`、`RuntimeAccessIntegrationTest`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 重新登录/另一Web会话资料一致、头像授权、创建时间、越权字段整体拒绝。 |
+| LR03 | LR03-F 越权字段与非法头像 | `protectsProfilesAndAvatarsAndCorrelatesCredentialFreeAudit`、`RuntimeAccessIntegrationTest`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 重新登录/另一Web会话资料一致、头像授权、创建时间、越权字段整体拒绝。 |
+| MA01 | MA01-N 群发阅读 | `sendsMessagesAtomicallyDeduplicatesRecipientsAndCountsFirstReadOnce`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 收件人去重及无效整批拒绝、Web重复阅读只记首次、发送幂等与越权。 |
+| MA01 | MA01-F 无效收件人 | `sendsMessagesAtomicallyDeduplicatesRecipientsAndCountsFirstReadOnce`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 收件人去重及无效整批拒绝、Web重复阅读只记首次、发送幂等与越权。 |
+| MA01 | MA01-B 重试与越权 | `sendsMessagesAtomicallyDeduplicatesRecipientsAndCountsFirstReadOnce`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 收件人去重及无效整批拒绝、Web重复阅读只记首次、发送幂等与越权。 |
+| MA02 | MA02-N 操作追踪 | `protectsProfilesAndAvatarsAndCorrelatesCredentialFreeAudit`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 真实请求标识关联业务审计及本人动态，解析JSON故障日志验证脱敏。 |
+| MA02 | MA02-F 动态与日志泄露 | `protectsProfilesAndAvatarsAndCorrelatesCredentialFreeAudit`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 真实请求标识关联业务审计及本人动态，解析JSON故障日志验证脱敏。 |
+| MA03 | MA03-N 去重和补零 | `reportsHongKongMonthBoundariesAndDeadlineAlertsWithoutExposingAnswers`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 香港自然日七日活跃去重、整月补零/月初边界与管理图表。 |
+| MA03 | MA03-B 月日边界 | `reportsHongKongMonthBoundariesAndDeadlineAlertsWithoutExposingAnswers`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 香港自然日七日活跃去重、整月补零/月初边界与管理图表。 |
+| PA01 | PA01-N 三类组卷 | `publishesAllPaperTypesAndFiltersStudentsAtTheExactWindowBoundaries`、`rollsBackPublishedVersionIfUpdatingThePaperFails`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 三卷型组卷、发布校验、混合题型和中途失败回滚。 |
+| PA01 | PA01-F 无效试卷 | `publishesAllPaperTypesAndFiltersStudentsAtTheExactWindowBoundaries`、`rollsBackPublishedVersionIfUpdatingThePaperFails`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 三卷型组卷、发布校验、混合题型和中途失败回滚。 |
+| PA02 | PA02-N 固定与时段重练 | `publishesAllPaperTypesAndFiltersStudentsAtTheExactWindowBoundaries`、`startsOnlyEligibleOrdinaryPapersAndFreezesSafeSnapshots`、`freezesPersistedAnswersOnReadAndLateSaveWithoutRollingBackTheFreeze` | 学生Web可见性与服务端时段左闭右开，固定/时段卷独立重练。 |
+| PA02 | PA02-F 绕过入口 | `publishesAllPaperTypesAndFiltersStudentsAtTheExactWindowBoundaries`、`startsOnlyEligibleOrdinaryPapersAndFreezesSafeSnapshots`、`freezesPersistedAnswersOnReadAndLateSaveWithoutRollingBackTheFreeze` | 学生Web可见性与服务端时段左闭右开，固定/时段卷独立重练。 |
+| PA02 | PA02-B 时段边界 | `publishesAllPaperTypesAndFiltersStudentsAtTheExactWindowBoundaries`、`startsOnlyEligibleOrdinaryPapersAndFreezesSafeSnapshots`、`freezesPersistedAnswersOnReadAndLateSaveWithoutRollingBackTheFreeze` | 学生Web可见性与服务端时段左闭右开，固定/时段卷独立重练。 |
+| PA03 | PA03-N 更新版本 | `startsOnlyEligibleOrdinaryPapersAndFreezesSafeSnapshots`、`startsFrozenTaskPapersOnceAcrossIndependentWebSessions`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 原发布版本冻结、并发版本冲突、归档阻止新开始及历史保持。 |
+| PA03 | PA03-B 并发编辑与归档 | `startsOnlyEligibleOrdinaryPapersAndFreezesSafeSnapshots`、`startsFrozenTaskPapersOnceAcrossIndependentWebSessions`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 原发布版本冻结、并发版本冲突、归档阻止新开始及历史保持。 |
+| PD01 | PD01-N 分页与重试 | `savesWholeAnswerSetWithVersionAndDeadlineChecks`、`confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores`、`sendsMessagesAtomicallyDeduplicatesRecipientsAndCountsFirstReadOnce`、`scripts/check-contracts.cjs` | Cookie/CSRF、稳定分页、非法筛选、同键异载荷及全部当前接口契约。 |
+| PD01 | PD01-F 非法查询与键冲突 | `savesWholeAnswerSetWithVersionAndDeadlineChecks`、`confirmsSelfGradesWithAtomicMistakesAndRejectsIllegalScores`、`sendsMessagesAtomicallyDeduplicatesRecipientsAndCountsFirstReadOnce`、`scripts/check-contracts.cjs` | Cookie/CSRF、稳定分页、非法筛选、同键异载荷及全部当前接口契约。 |
+| PD02 | PD02-N 可复现启动 | `VersionIntegrationTest`、`RuntimeAccessIntegrationTest`、`scripts/test-operations.mjs` | 两个Web版本入口及故障重试、Java21/PostgreSQL空库启动、优雅停止与断库恢复。 |
+| PD02 | PD02-F 数据库不可用 | `VersionIntegrationTest`、`RuntimeAccessIntegrationTest`、`scripts/test-operations.mjs` | 两个Web版本入口及故障重试、Java21/PostgreSQL空库启动、优雅停止与断库恢复。 |
+| PD03 | PD03-N 验收证据 | `scripts/gate.mjs`、`scripts/check-browser-evidence.mjs`、`scripts/test-mutations.mjs`、`scenarios.md` | 技术门禁传播失败，任务审阅独立；关键计分/归属变异必须被拒绝，无外部客户端前置要求。 |
+| PD03 | PD03-F 缺失与失效断言 | `scripts/gate.mjs`、`scripts/test-mutations.mjs`、`scenarios.md` | 技术门禁传播失败，任务审阅独立；关键计分/归属变异必须被拒绝，无外部客户端前置要求。 |
+| PD04 | PD04-N 恢复演练 | `reportsHongKongMonthBoundariesAndDeadlineAlertsWithoutExposingAnswers`、`alertsOnlyAfterFiveMinutesOfSustainedServiceErrors`、`scripts/test-operations.mjs` | 数据库/截止/高错误率告警，实际旧版回退、备份及隔离恢复，记录RPO/RTO。 |
+| PD04 | PD04-F 截止任务延迟 | `reportsHongKongMonthBoundariesAndDeadlineAlertsWithoutExposingAnswers`、`alertsOnlyAfterFiveMinutesOfSustainedServiceErrors`、`scripts/test-operations.mjs` | 数据库/截止/高错误率告警，实际旧版回退、备份及隔离恢复，记录RPO/RTO。 |
+| QB01 | QB01-N 学科生命周期 | `createsAllQuestionTypesAndPreservesVersionsWhenArchived` | 真实数据库学科唯一、有效年级和引用删除约束。 |
+| QB01 | QB01-F 非法和被引用学科 | `createsAllQuestionTypesAndPreservesVersionsWhenArchived` | 真实数据库学科唯一、有效年级和引用删除约束。 |
+| QB02 | QB02-N 五题型创编 | `createsAllQuestionTypesAndPreservesVersionsWhenArchived`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 五题型创编、非法载荷整体拒绝、版本归档和历史保持。 |
+| QB02 | QB02-F 内容校验 | `createsAllQuestionTypesAndPreservesVersionsWhenArchived`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 五题型创编、非法载荷整体拒绝、版本归档和历史保持。 |
+| QB02 | QB02-B 已引用题目编辑删除 | `createsAllQuestionTypesAndPreservesVersionsWhenArchived`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 五题型创编、非法载荷整体拒绝、版本归档和历史保持。 |
+| QB03 | QB03-N Web 内容呈现 | `validatesPrivateImagesAndCleansRolledBackReferences`、`authorizesSnapshotImagesOnlyForTheOwnerAndHidesExplanationsUntilFrozen`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 管理预览及学生Web的私有图片、净化、分式/上下标/矩阵MathML、长表；作答不泄露参考内容。 |
+| QB03 | QB03-F 不可信内容 | `validatesPrivateImagesAndCleansRolledBackReferences`、`authorizesSnapshotImagesOnlyForTheOwnerAndHidesExplanationsUntilFrozen`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 管理预览及学生Web的私有图片、净化、公式、长表；作答不泄露参考内容。 |
+| QB03 | QB03-B 答案与图片授权 | `validatesPrivateImagesAndCleansRolledBackReferences`、`authorizesSnapshotImagesOnlyForTheOwnerAndHidesExplanationsUntilFrozen`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 管理预览及学生Web的私有图片、净化、公式、长表；作答不泄露参考内容。 |
+| TA01 | TA01-N 发布两张试卷 | `freezesAssignmentPapersAndEligibilityAndRollsBackIfOnePaperIsAlreadyBound`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 两卷任务、发布成员/卷冻结、非成员拒绝与整批回滚。 |
+| TA01 | TA01-F 错误成员 | `freezesAssignmentPapersAndEligibilityAndRollsBackIfOnePaperIsAlreadyBound`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 两卷任务、发布成员/卷冻结、非成员拒绝与整批回滚。 |
+| TA01 | TA01-B 发布后的资格 | `freezesAssignmentPapersAndEligibilityAndRollsBackIfOnePaperIsAlreadyBound`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 两卷任务、发布成员/卷冻结、非成员拒绝与整批回滚。 |
+| TA02 | TA02-N 分别完成 | `startsFrozenTaskPapersOnceAcrossIndependentWebSessions`、`projectsTaskCompletionOnlyAfterEverySubjectiveGradeAndKeepsEmptyAnswersZero`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 两个独立Web会话同时开始同键/异键均同一答卷，分别完成两卷。 |
+| TA02 | TA02-B Web 多会话并发开始 | `startsFrozenTaskPapersOnceAcrossIndependentWebSessions`、`projectsTaskCompletionOnlyAfterEverySubjectiveGradeAndKeepsEmptyAnswersZero`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 两个独立Web会话同时开始同键/异键均同一答卷，分别完成两卷。 |
+| TA03 | TA03-N 待批改进度 | `freezesAssignmentPapersAndEligibilityAndRollsBackIfOnePaperIsAlreadyBound`、`projectsTaskCompletionOnlyAfterEverySubjectiveGradeAndKeepsEmptyAnswersZero`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 待批改不算完成，全部最终成绩确认后完成；归档保留已有答卷。 |
+| TA03 | TA03-F 修改已发布任务 | `freezesAssignmentPapersAndEligibilityAndRollsBackIfOnePaperIsAlreadyBound`、`projectsTaskCompletionOnlyAfterEverySubjectiveGradeAndKeepsEmptyAnswersZero`、`platform-workflow.spec.ts`、`00-acceptance.spec.ts` | 待批改不算完成，全部最终成绩确认后完成；归档保留已有答卷。 |
+
+共30项Requirement/71项Scenario均有映射；存在映射不代替实际执行或任务审阅。

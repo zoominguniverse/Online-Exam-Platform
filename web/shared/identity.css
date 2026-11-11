@@ -8,6 +8,34 @@ button, input, select { box-sizing: border-box; font: inherit; padding: .5rem .7
 button { cursor: pointer; }
 button:disabled { cursor: default; }
 [role="alert"] { color: #8d1c25; }
+.field-error { color:#8d1c25; font-size:.875rem; }
+[aria-invalid=true] { border-color:#8d1c25; }
 .table-scroll { overflow: auto; }
 table { width: 100%; border-collapse: collapse; background: white; }
 th, td { padding: .75rem; text-align: left; border-bottom: 1px solid #d5dde8; }
+* { box-sizing: border-box; }
+body { margin:0; }
+:focus-visible { outline:3px solid #12549b; outline-offset:3px; }
+button { border:1px solid #6c7d90; border-radius:.35rem; background:white; color:#182634; }
+button:hover:not(:disabled) { background:#e4edf8; }
+button:disabled { color:#596879; background:#e8edf4; }
+input:not([type=checkbox]):not([type=radio]),select,textarea { max-width:100%; min-width:0; border:1px solid #6c7d90; border-radius:.25rem; }
+input[type=checkbox],input[type=radio] { width:1.15rem; height:1.15rem; flex:none; }
+textarea { font:inherit; width:100%; padding:.6rem; }
+fieldset { min-width:0; border:1px solid #c0ccdb; padding:1rem; }
+fieldset label,fieldset button { margin-block:.45rem; }
+section { margin-block:1.5rem; }
+.check-label { display:flex; align-items:center; gap:.5rem; }
+.site-nav { padding:1rem; border-bottom:1px solid #d5dde8; background:white; }
+.site-nav nav { max-width:75rem; margin:auto; gap:.8rem; }
+.review-form { max-width:none; }
+.message-body { white-space:pre-wrap; overflow-wrap:anywhere; }
+.avatar { width:7rem; height:7rem; object-fit:cover; border-radius:50%; }
+.chart { height:20rem; width:100%; }
+.stat-cards { display:flex; flex-wrap:wrap; gap:1rem; }
+.stat-cards p { flex:1; background:white; padding:1.5rem; border:1px solid #d5dde8; border-radius:.5rem; }
+.stat-cards strong { display:block; font-size:2rem; }
+.question-nav { position:sticky; top:0; max-height:35vh; overflow:auto; align-content:flex-start; background:#f6f8fc; padding:.75rem; z-index:1; }
+.question-nav button[aria-current=true] { background:#12549b; color:white; }
+.answer-option { display:flex; align-items:center; gap:.5rem; margin-block:.5rem; }
+@media(max-width:480px) { main{margin-block:1rem;padding-inline:.75rem}.site-nav{padding:.75rem}th,td{padding:.5rem}button{min-height:2.5rem} }

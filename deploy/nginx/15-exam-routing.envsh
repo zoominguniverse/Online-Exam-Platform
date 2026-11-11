@@ -1,0 +1,8 @@
+#!/bin/sh
+if [ -r /var/lib/exam-routing/active-upstream ]; then
+    read -r EXAM_UPSTREAM < /var/lib/exam-routing/active-upstream
+    case "$EXAM_UPSTREAM" in
+        api-blue:8080|api-green:8080) export EXAM_UPSTREAM ;;
+        *) echo "Invalid persisted exam upstream" >&2; exit 1 ;;
+    esac
+fi

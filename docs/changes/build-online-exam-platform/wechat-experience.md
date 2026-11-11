@@ -1,6 +1,12 @@
+# 历史材料（已取消）
+
+用户已取消本能力，当前 change、门禁和发布评审不再要求执行本文步骤。本文件只保留既往规划与记录，不是当前实施输入。
+
 # 小程序体验版验收
 
 当前环境尚无已配置的真实 AppID、HTTPS 合法请求域名或体验账号。微信接口已使用替身及真实 PostgreSQL 验证，本机尚未执行体验版或微信开发者工具渲染。实际基础库版本待真机验收填写。
+
+2026-11-11 本轮复核：`project.config.json` 仍为 `appid=touristappid`、`urlCheck=false`，`api-origin.js` 仍为 `http://127.0.0.1:8081`；未取得体验成员、真机及实际基础库版本。ET02 的保存、断网重连、冲突和账号切换不能在此配置下登记为体验版通过。新增 Chromium 证据只证明 Web；小程序未知响应处理及多选清空仅有 Node 运行时替身回归。7.1、7.2、7.3、7.5 均保持未勾选。
 
 1. 在微信平台登记测试 AppID、体验成员、HTTPS 请求域名。在服务端环境配置 `WECHAT_APP_ID` 和 `WECHAT_APP_SECRET`，确保两者属于同一个小程序。密钥由服务端保管。
 2. 在微信开发者工具导入 `wechat/student`，将 `project.config.json` 的游客 ID 换成测试 AppID，将 `urlCheck` 设为 `true`，把 `api-origin.js` 设为已登记的 HTTPS 域名。构建体验版，在记录中填入构建标识、基础库实际版本、机型和系统版本。

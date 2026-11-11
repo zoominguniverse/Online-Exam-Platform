@@ -17,6 +17,7 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const epoch=localStorage.getItem('exam-auth-epoch')
   let response: Response
   try {
     const timeout = AbortSignal.timeout(5000)
@@ -31,8 +32,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new ApiError(response.status, '考试服务暂不可用，请稍后重试。')
   }
   if (!response.ok || body.code !== 0) {
+    if(response.status===401&&epoch===localStorage.getItem('exam-auth-epoch'))window.dispatchEvent(new Event('exam-session-expired'))
     throw new ApiError(response.status, body.message || '操作失败，请稍后重试。', body.code)
   }
+  if(epoch!==localStorage.getItem('exam-auth-epoch'))throw new ApiError(0,'账号已切换，请重新加载。')
   return body.data
 }
 
@@ -40,10 +43,15 @@ export function read<T>(path: string, signal?: AbortSignal) {
   return request<T>(path, { signal })
 }
 
-export async function write<T>(method: string, path: string, data?: object, signal?: AbortSignal) {
+export async function write<T>(method: string, path: string, data?: object, signal?: AbortSignal, extraHeaders?: Record<string,string>) {
+  const epoch=localStorage.getItem('exam-auth-epoch')
   const csrf = await read<{ token: string; headerName: string }>('/auth/csrf', signal)
+  if(epoch!==localStorage.getItem('exam-auth-epoch'))throw new ApiError(0,'账号已切换，操作已取消。')
   if (data instanceof FormData) return request<T>(path, { method, headers: { [csrf.headerName]: csrf.token }, body: data, signal })
-  const headers: Record<string, string> = { [csrf.headerName]: csrf.token }
+  const headers: Record<string, string> = { ...extraHeaders, [csrf.headerName]: csrf.token }
   if (data) headers['Content-Type'] = 'application/json'
   return request<T>(path, { method, headers, body: data && JSON.stringify(data), signal })
+}
+export function operation<T>(path: string, key: string, data: object, signal?: AbortSignal) {
+  return write<T>('POST',path,data,signal,{ 'Idempotency-Key': key })
 }

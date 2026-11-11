@@ -1,0 +1,41 @@
+{
+  "startedAt": "2026-11-11T07:13:27.324Z",
+  "durationSeconds": 609.0517825,
+  "activeSessions": 100,
+  "hardware": {
+    "hostCpu": "AMD Ryzen 7 9700X 8-Core Processor             ",
+    "hostLogicalCpus": 16,
+    "hostMemoryBytes": 16228810752,
+    "apiQuota": "2 CPU / 4 GiB",
+    "databaseQuota": "2 CPU / 2 GiB"
+  },
+  "data": {
+    "users": 103,
+    "attempts": 202
+  },
+  "lists": {
+    "count": 6000,
+    "p95Millis": 6.628399999986868,
+    "maxMillis": 19.044100000013714
+  },
+  "saves": {
+    "count": 12000,
+    "p95Millis": 13.286099999997532,
+    "maxMillis": 111.35140000004321
+  },
+  "submits": {
+    "count": 100,
+    "p95Millis": 467.64199999999255,
+    "maxMillis": 469.779499999946
+  },
+  "deadlines": {
+    "count": 100,
+    "p95Millis": 1561.561,
+    "maxMillis": 1573.764,
+    "controlledTestDeadlines": true,
+    "includesHttpFallback": false
+  },
+  "successRate": 1,
+  "errors": [],
+  "passed": true
+}

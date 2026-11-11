@@ -1,0 +1,6 @@
+{
+  "expectedExitCode": 1,
+  "assertionFailed": true,
+  "expectedVersion": "deliberately-invalid",
+  "actualVersion": "v1"
+}

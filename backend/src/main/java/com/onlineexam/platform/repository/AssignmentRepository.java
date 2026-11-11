@@ -4,6 +4,7 @@ import com.onlineexam.platform.domain.Assignment.Draft;
 import com.onlineexam.platform.domain.Assignment.PaperItem;
 import com.onlineexam.platform.domain.Assignment.State;
 import com.onlineexam.platform.domain.Assignment.Task;
+import com.onlineexam.platform.domain.Assignment.StudentPaper;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -117,6 +118,18 @@ public class AssignmentRepository {
     public long recipients(UUID task) {
         return jdbc.sql("SELECT count(*) FROM task_recipients WHERE task_id = :task")
                 .param("task", task).query(Long.class).single();
+    }
+
+    public List<StudentPaper> studentPapers(UUID task, UUID user) {
+        return jdbc.sql("""
+                SELECT tp.paper_id,tp.paper_version_id,tp.position,v.name,v.duration_minutes,a.id,
+                       COALESCE(a.status,'NOT_STARTED') AS status FROM task_papers tp
+                JOIN paper_versions v ON v.id=tp.paper_version_id
+                LEFT JOIN attempts a ON a.task_id=tp.task_id AND a.paper_id=tp.paper_id AND a.owner_id=:user
+                WHERE tp.task_id=:task ORDER BY tp.position
+                """).param("user",user).param("task",task).query((row,index)->new StudentPaper(
+                        row.getObject("paper_id",UUID.class),row.getObject("paper_version_id",UUID.class),row.getInt("position"),
+                        row.getString("name"),row.getInt("duration_minutes"),row.getString("status"),row.getObject("id",UUID.class))).list();
     }
 
     public List<Task> listForUser(UUID user, int size, long offset) {

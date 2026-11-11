@@ -1,0 +1,32 @@
+server {
+    listen 80;
+    server_tokens off;
+    root /usr/share/nginx/html;
+    resolver 127.0.0.11 valid=1s ipv6=off;
+    set $exam_backend "${EXAM_UPSTREAM}";
+    client_max_body_size 6m;
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Exam-Upstream ${EXAM_UPSTREAM} always;
+    add_header Referrer-Policy same-origin always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'" always;
+    location = / { return 302 /student/; }
+    location = /readyz { proxy_pass http://$exam_backend/actuator/health/readiness; }
+    location = /livez { proxy_pass http://$exam_backend/actuator/health/liveness; }
+    location /api/ {
+        proxy_pass http://$exam_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_connect_timeout 3s;
+        proxy_read_timeout 35s;
+    }
+    location /admin/ { try_files $uri $uri/ /admin/index.html; }
+    location /student/ { try_files $uri $uri/ /student/index.html; }
+    location ~ ^/(admin|student)/assets/ {
+        try_files $uri =404;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+    location / { return 404; }
+}

@@ -8,7 +8,6 @@ import com.onlineexam.platform.domain.Identity.Session;
 import com.onlineexam.platform.domain.Identity.Status;
 import com.onlineexam.platform.repository.AccountRepository;
 import com.onlineexam.platform.repository.SessionRepository;
-import com.onlineexam.platform.repository.WeChatRepository;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -32,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class IdentityService {
     private final AccountRepository accounts;
     private final SessionRepository sessions;
-    private final WeChatRepository wechat;
     private final Clock clock;
     private final SecureRandom random = new SecureRandom();
     private final BCryptPasswordEncoder passwords = new BCryptPasswordEncoder(12);
@@ -40,10 +38,9 @@ public class IdentityService {
 
     public record Page(List<AccountView> items, long total, int page, int pageSize) {}
 
-    public IdentityService(AccountRepository accounts, SessionRepository sessions, WeChatRepository wechat, Clock clock) {
+    public IdentityService(AccountRepository accounts, SessionRepository sessions, Clock clock) {
         this.accounts = accounts;
         this.sessions = sessions;
-        this.wechat = wechat;
         this.clock = clock;
     }
 
@@ -65,13 +62,6 @@ public class IdentityService {
         String token = newToken();
         sessions.create(digest(token), account.id(), OffsetDateTime.now(clock));
         return new Session(token, account.view());
-    }
-
-    @Transactional(noRollbackFor = LoginRejected.class)
-    public AccountView authenticateStudent(String name, String password, String ip) {
-        Account account = verifyCredentials(name, password, ip);
-        if (account.role() != Role.STUDENT) throw ApiException.forbidden();
-        return account.view();
     }
 
     private Account verifyCredentials(String name, String password, String ip) {
@@ -121,7 +111,7 @@ public class IdentityService {
         }
         accounts.updatePassword(id, passwords.encode(replacement));
         sessions.revokeUser(id);
-        wechat.revokeUser(id);
+        sessions.revokeLegacyCredentials(id, false);
     }
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
@@ -157,7 +147,7 @@ public class IdentityService {
         Account updated = update(before, username, role, before.status(), grade);
         if (before.role() != role) {
             sessions.revokeUser(id);
-            wechat.removeBinding(id);
+            sessions.revokeLegacyCredentials(id, true);
         }
         return updated.view();
     }
@@ -174,8 +164,8 @@ public class IdentityService {
         Account updated = update(before, username, before.role(), desired, desired == Status.DELETED ? null : before.gradeId());
         if (desired != Status.ENABLED) {
             sessions.revokeUser(id);
-            if (desired == Status.DELETED) wechat.removeBinding(id);
-            else wechat.revokeUser(id);
+            if (desired == Status.DELETED) sessions.revokeLegacyCredentials(id, true);
+            else sessions.revokeLegacyCredentials(id, false);
         }
         return updated.view();
     }

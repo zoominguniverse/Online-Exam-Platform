@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class SessionRepository {
     private final JdbcClient jdbc;
-    public record Principal(UUID id, Role role, UUID bindingId) {}
+    public record Principal(UUID id, Role role) {}
 
     public SessionRepository(JdbcClient jdbc) { this.jdbc = jdbc; }
 
@@ -30,7 +30,7 @@ public class SessionRepository {
                 RETURNING u.id, u.role
                 """).param("hash", hash).param("now", now).param("idle", now.minusMinutes(30))
                 .query((row, index) -> new Principal(row.getObject("id", UUID.class),
-                        Role.valueOf(row.getString("role")), null)).optional();
+                        Role.valueOf(row.getString("role")))).optional();
     }
 
     public void revoke(String hash) {
@@ -39,6 +39,14 @@ public class SessionRepository {
 
     public void revokeUser(UUID id) {
         jdbc.sql("DELETE FROM web_sessions WHERE user_id = :id").param("id", id).update();
+    }
+
+    // Old migrations and previous application versions retain these tables.
+    // Never authenticate with their contents; only revoke them during account lifecycle changes.
+    public void revokeLegacyCredentials(UUID user, boolean removeBinding) {
+        jdbc.sql("DELETE FROM wechat_tokens WHERE binding_id IN (SELECT id FROM wechat_bindings WHERE user_id=:user)")
+                .param("user",user).update();
+        if(removeBinding) jdbc.sql("DELETE FROM wechat_bindings WHERE user_id=:user").param("user",user).update();
     }
 
     public int lockFailures(String key, OffsetDateTime now) {

@@ -1,0 +1,42 @@
+{
+  "stats": {
+    "startTime": "2026-11-11T01:28:19.012Z",
+    "duration": 26560.389,
+    "expected": 6,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "tests": [
+    {
+      "title": "ET02-N five types persist and restore after refresh",
+      "outcome": "passed",
+      "durationMs": 2933
+    },
+    {
+      "title": "ET02-F offline draft retries before deadline and logout clears owner cache",
+      "outcome": "passed",
+      "durationMs": 3372
+    },
+    {
+      "title": "ET02-B independent browser sessions preserve losing draft and server winner",
+      "outcome": "passed",
+      "durationMs": 3101
+    },
+    {
+      "title": "edit during save and response loss reconciles without losing later changes",
+      "outcome": "passed",
+      "durationMs": 1458
+    },
+    {
+      "title": "switching account in another tab hides old answers while a save response is delayed",
+      "outcome": "passed",
+      "durationMs": 1490
+    },
+    {
+      "title": "ET03-F real API restart freezes only confirmed answers before offline retry",
+      "outcome": "passed",
+      "durationMs": 12304
+    }
+  ]
+}

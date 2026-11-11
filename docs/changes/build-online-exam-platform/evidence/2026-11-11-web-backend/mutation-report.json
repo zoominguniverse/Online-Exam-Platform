@@ -1,0 +1,23 @@
+{
+  "startedAt": "2026-11-11T03:10:36.544Z",
+  "cases": [
+    {
+      "name": "objective-score",
+      "test": "gradesUnorderedPartialExtraAndMissingSelectionsUsingSnapshotIntegers",
+      "killed": true,
+      "exitCode": 1,
+      "log": "E:\\Projects\\Online-Exam-Platform\\tmp\\exam-mutations-2fea10a698\\objective-score.log",
+      "originalSha256": "effdbb22dbe56d13fe2facdd78a1638f7cf80db74b87bf9327faf9a232f3295e"
+    },
+    {
+      "name": "attempt-owner",
+      "test": "savesWholeAnswerSetWithVersionAndDeadlineChecks",
+      "killed": true,
+      "exitCode": 1,
+      "log": "E:\\Projects\\Online-Exam-Platform\\tmp\\exam-mutations-2fea10a698\\attempt-owner.log",
+      "originalSha256": "5e80245a8d667bcbb1bb5e499d0db68db8cd0a815c4b723ddfeb9e4c0f7abebd"
+    }
+  ],
+  "passed": true,
+  "finishedAt": "2026-11-11T03:11:29.503Z"
+}

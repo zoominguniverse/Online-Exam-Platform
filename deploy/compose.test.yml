@@ -9,6 +9,7 @@ services:
       DATABASE_PASSWORD: ${EXAM_MIGRATION_PASSWORD:?Set EXAM_MIGRATION_PASSWORD}
       PRIVATE_STORAGE_ROOT: /tmp/exam-platform-test-attachments
       EXAM_TEST_EXPECTED_VERSION: ${EXAM_TEST_EXPECTED_VERSION:-v1}
+      EXAM_TEST_APP_PASSWORD: ${EXAM_APP_PASSWORD:?Set EXAM_APP_PASSWORD}
     command: ["mvn", "-B", "-ntp", "-Dmaven.repo.local=/opt/maven-repository", "test"]
     depends_on:
       db:

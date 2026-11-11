@@ -1,9 +1,11 @@
 # Online-Exam-Platform
 在线考试平台
 
-Java API、管理端、学生端和小程序按[新规约任务](openspec/changes/build-online-exam-platform/tasks.md)推进。[开发启动说明](deploy/README.md)包含 Docker、两个 Web 入口、小程序开发入口和测试命令。[构建依赖清单](docs/changes/build-online-exam-platform/dependencies.md)记录固定版本、许可证和安全公告。
+Java API、管理端和学生 Web按[新规约任务](openspec/changes/build-online-exam-platform/tasks.md)推进。[开发启动说明](deploy/README.md)包含 Docker、两个 Web 入口和测试命令。[构建依赖清单](docs/changes/build-online-exam-platform/dependencies.md)记录固定版本、许可证和安全公告。
 
 接续开发先读[当前 change 交接](docs/changes/build-online-exam-platform/handoff.md)，其中区分已实现、待验收和外部条件。
+
+当前 [Web与共用后端交付范围](docs/changes/build-online-exam-platform/web-backend-delivery.md)、[成功验收证据](docs/changes/build-online-exam-platform/evidence/2026-11-11-completion/README.md)及[生产运行/回退/恢复手册](docs/changes/build-online-exam-platform/operations.md)已整理；当前交付仅含 Web 与后端，任务已完成53/53，[收尾实现和验收记录](docs/changes/build-online-exam-platform/completion-acceptance.md)及完整平台门禁结果已整理。
 
 `build-online-exam-platform` 是当前实施规约。[旧五项规划](openspec/changes/planning-overview.md)保留作历史参考。下文的考试演示及其测试继续独立保留，演示的浏览器本地成绩不作为平台成绩导入。功能表为项目目标，实施进度以任务清单为准。
 

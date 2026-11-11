@@ -72,6 +72,10 @@ public class AttachmentService {
     public Image readQuestionImage(UUID id, UUID question, int version) {
         return read(attachments.questionImage(id, question, version).orElseThrow(AttachmentService::missing));
     }
+    public Image avatar(UUID owner) { return read(attachments.avatar(owner).orElseThrow(AttachmentService::missing)); }
+    public Image attemptImage(UUID id,UUID attempt,UUID question,UUID owner,boolean admin) {
+        return read(attachments.attemptImage(id,attempt,question,owner,admin).orElseThrow(AttachmentService::missing));
+    }
 
     private Image read(PrivateImage image) {
         try {

@@ -1,0 +1,2192 @@
+{
+  "node": "v22.22.2",
+  "project": "exam-browser-9d690ec56b",
+  "browser": "158.0.8127.18",
+  "flow": "Real admin UI -> student Web -> PostgreSQL",
+  "adminFormulas": [
+    "\\frac{1}{2}",
+    "x_i^2",
+    "\\begin{bmatrix}1&2\\\\3&4\\end{bmatrix}"
+  ],
+  "studentFormulas": [
+    "\\frac{1}{2}",
+    "x_i^2",
+    "\\begin{bmatrix}1&2\\\\3&4\\end{bmatrix}"
+  ],
+  "browserLifecycle": {
+    "headed": true,
+    "focusEmulation": false,
+    "backgroundMillis": 1200,
+    "events": [
+      {
+        "event": "visibilitychange",
+        "trusted": true,
+        "visibility": "hidden"
+      },
+      {
+        "event": "visibilitychange",
+        "trusted": true,
+        "visibility": "visible"
+      }
+    ],
+    "serverResynchronized": true,
+    "remaining": "19:58"
+  },
+  "failureRecoveries": [
+    {
+      "role": "/admin",
+      "route": "/dashboard"
+    },
+    {
+      "role": "/admin",
+      "route": "/users/students"
+    },
+    {
+      "role": "/admin",
+      "route": "/users/admins"
+    },
+    {
+      "role": "/admin",
+      "route": "/users/new/students"
+    },
+    {
+      "role": "/admin",
+      "route": "/users/new/admins"
+    },
+    {
+      "role": "/admin",
+      "route": "/users/a568e121-9361-4188-aadb-1243d299041b/edit"
+    },
+    {
+      "role": "/admin",
+      "route": "/subjects"
+    },
+    {
+      "role": "/admin",
+      "route": "/questions"
+    },
+    {
+      "role": "/admin",
+      "route": "/questions/new"
+    },
+    {
+      "role": "/admin",
+      "route": "/questions/fb502e9e-d6de-41ff-a745-fb7eb8128c86/edit"
+    },
+    {
+      "role": "/admin",
+      "route": "/papers"
+    },
+    {
+      "role": "/admin",
+      "route": "/papers/new"
+    },
+    {
+      "role": "/admin",
+      "route": "/papers/8dcd53b1-0d6a-4f28-abe0-5a7f8c23b1ae/edit"
+    },
+    {
+      "role": "/admin",
+      "route": "/tasks"
+    },
+    {
+      "role": "/admin",
+      "route": "/attempts"
+    },
+    {
+      "role": "/admin",
+      "route": "/attempts/b8a1310f-402a-4e36-a3b4-bfca373db6b6"
+    },
+    {
+      "role": "/admin",
+      "route": "/messages"
+    },
+    {
+      "role": "/admin",
+      "route": "/messages/f17e692a-dc8a-4cbf-b80c-bee1d255d34b"
+    },
+    {
+      "role": "/admin",
+      "route": "/messages/new"
+    },
+    {
+      "role": "/admin",
+      "route": "/profile"
+    },
+    {
+      "role": "/admin",
+      "route": "/activities"
+    },
+    {
+      "role": "/student",
+      "route": "/papers"
+    },
+    {
+      "role": "/student",
+      "route": "/tasks"
+    },
+    {
+      "role": "/student",
+      "route": "/tasks/654701ec-b1c6-472a-9ff8-5661ac02e306"
+    },
+    {
+      "role": "/student",
+      "route": "/records"
+    },
+    {
+      "role": "/student",
+      "route": "/attempts/b8a1310f-402a-4e36-a3b4-bfca373db6b6/review"
+    },
+    {
+      "role": "/student",
+      "route": "/mistakes"
+    },
+    {
+      "role": "/student",
+      "route": "/mistakes/b9473854-2843-4ed0-945a-d7c4872fa850"
+    },
+    {
+      "role": "/student",
+      "route": "/profile"
+    },
+    {
+      "role": "/student",
+      "route": "/messages"
+    },
+    {
+      "role": "/student",
+      "route": "/messages/f17e692a-dc8a-4cbf-b80c-bee1d255d34b"
+    },
+    {
+      "role": "/student",
+      "route": "/activities"
+    },
+    {
+      "role": "/admin",
+      "route": "/subjects/bf992809-c6ff-4301-9fbd-15b8d7a19fe6/edit"
+    },
+    {
+      "role": "/admin",
+      "route": "/tasks/654701ec-b1c6-472a-9ff8-5661ac02e306/edit"
+    },
+    {
+      "role": "/admin",
+      "route": "/logs"
+    }
+  ],
+  "formFields": [
+    {
+      "route": "/admin/subjects",
+      "fields": [
+        {
+          "label": "筛选年级 全部演示年级",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "学科名称",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "所属年级 选择年级演示年级",
+          "type": "select",
+          "required": true
+        }
+      ]
+    },
+    {
+      "route": "/admin/questions/new",
+      "fields": [
+        {
+          "label": "学科 选择学科Web闭环学科-4cd96faa浏览器保存验证-6597e85e验收学科-7bd6266b",
+          "type": "select",
+          "required": true
+        },
+        {
+          "label": "题型 单选题多选题判断题填空题简答题",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "难度（1–5）",
+          "type": "number",
+          "required": true
+        },
+        {
+          "label": "分值（两位小数）",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "题干",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "label": "选项 1",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "正确选项 1",
+          "type": "radio",
+          "required": true
+        },
+        {
+          "label": "选项 2",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "正确选项 2",
+          "type": "radio",
+          "required": true
+        },
+        {
+          "label": "解析",
+          "type": "textarea",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/questions/new",
+      "fields": [
+        {
+          "label": "学科 选择学科Web闭环学科-4cd96faa浏览器保存验证-6597e85e验收学科-7bd6266b",
+          "type": "select",
+          "required": true
+        },
+        {
+          "label": "题型 单选题多选题判断题填空题简答题",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "难度（1–5）",
+          "type": "number",
+          "required": true
+        },
+        {
+          "label": "分值（两位小数）",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "题干",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "label": "选项 1",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "正确选项 1",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "label": "选项 2",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "正确选项 2",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "label": "解析",
+          "type": "textarea",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/questions/new",
+      "fields": [
+        {
+          "label": "学科 选择学科Web闭环学科-4cd96faa浏览器保存验证-6597e85e验收学科-7bd6266b",
+          "type": "select",
+          "required": true
+        },
+        {
+          "label": "题型 单选题多选题判断题填空题简答题",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "难度（1–5）",
+          "type": "number",
+          "required": true
+        },
+        {
+          "label": "分值（两位小数）",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "题干",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "label": "正确答案 正确错误",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "解析",
+          "type": "textarea",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/questions/new",
+      "fields": [
+        {
+          "label": "学科 选择学科Web闭环学科-4cd96faa浏览器保存验证-6597e85e验收学科-7bd6266b",
+          "type": "select",
+          "required": true
+        },
+        {
+          "label": "题型 单选题多选题判断题填空题简答题",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "难度（1–5）",
+          "type": "number",
+          "required": true
+        },
+        {
+          "label": "分值（两位小数）",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "题干",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "label": "每行一个参考答案",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "label": "解析",
+          "type": "textarea",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/questions/new",
+      "fields": [
+        {
+          "label": "学科 选择学科Web闭环学科-4cd96faa浏览器保存验证-6597e85e验收学科-7bd6266b",
+          "type": "select",
+          "required": true
+        },
+        {
+          "label": "题型 单选题多选题判断题填空题简答题",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "难度（1–5）",
+          "type": "number",
+          "required": true
+        },
+        {
+          "label": "分值（两位小数）",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "题干",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "label": "参考答案",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "label": "解析",
+          "type": "textarea",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/papers/new",
+      "fields": [
+        {
+          "label": "试卷名称",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "学科 选择学科Web闭环学科-4cd96faa浏览器保存验证-6597e85e验收学科-7bd6266b",
+          "type": "select",
+          "required": true
+        },
+        {
+          "label": "卷型 固定卷时段卷任务卷",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "时长（分钟）",
+          "type": "number",
+          "required": true
+        },
+        {
+          "label": "分组名称",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "从题库选择题目 选择题目简答题 · Web SHORT 原始题干 4cd96faa 长表格列 0 长表格列 1 长表格列 2 长表格列 3 长表格列 4 长表格列 5 长表格列 6 长表格列 7 …填空题 · Web GAP 原始题干 4cd96faa ____判断题 · Web TRUE_FALSE 原始题干 4cd96faa多选题 · Web MULTIPLE 原始题干 4cd96faa单选题 · Web SINGLE 原始题干 4cd96faa",
+          "type": "select",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/papers/new",
+      "fields": [
+        {
+          "label": "试卷名称",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "学科 选择学科Web闭环学科-4cd96faa浏览器保存验证-6597e85e验收学科-7bd6266b",
+          "type": "select",
+          "required": true
+        },
+        {
+          "label": "卷型 固定卷时段卷任务卷",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "时长（分钟）",
+          "type": "number",
+          "required": true
+        },
+        {
+          "label": "分组名称",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "从题库选择题目 选择题目简答题 · Web SHORT 原始题干 4cd96faa 长表格列 0 长表格列 1 长表格列 2 长表格列 3 长表格列 4 长表格列 5 长表格列 6 长表格列 7 …填空题 · Web GAP 原始题干 4cd96faa ____判断题 · Web TRUE_FALSE 原始题干 4cd96faa多选题 · Web MULTIPLE 原始题干 4cd96faa单选题 · Web SINGLE 原始题干 4cd96faa",
+          "type": "select",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/tasks",
+      "fields": [
+        {
+          "label": "任务名称",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "目标年级 选择年级演示年级",
+          "type": "select",
+          "required": true
+        },
+        {
+          "label": "添加已发布任务卷 选择试卷Web闭环卷乙-4cd96faaWeb闭环卷甲-4cd96faa资格卷乙-7bd6266b资格卷甲-7bd6266b",
+          "type": "select",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/dashboard",
+      "fields": []
+    },
+    {
+      "route": "/admin/users/students",
+      "fields": [
+        {
+          "label": "年级 全部演示年级",
+          "type": "select",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/users/admins",
+      "fields": []
+    },
+    {
+      "route": "/admin/users/student",
+      "fields": [
+        {
+          "label": "年级 全部演示年级",
+          "type": "select",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/users/admin",
+      "fields": []
+    },
+    {
+      "route": "/admin/users/new/students",
+      "fields": [
+        {
+          "label": "用户名",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "初始密码",
+          "type": "password",
+          "required": true
+        },
+        {
+          "label": "角色 学生管理员",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "年级 选择年级演示年级",
+          "type": "select",
+          "required": true
+        }
+      ]
+    },
+    {
+      "route": "/admin/users/new/admins",
+      "fields": [
+        {
+          "label": "用户名",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "初始密码",
+          "type": "password",
+          "required": true
+        },
+        {
+          "label": "角色 学生管理员",
+          "type": "select",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/users/a568e121-9361-4188-aadb-1243d299041b/edit",
+      "fields": [
+        {
+          "label": "用户名",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "角色 学生管理员",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "年级 选择年级演示年级",
+          "type": "select",
+          "required": true
+        }
+      ]
+    },
+    {
+      "route": "/admin/subjects",
+      "fields": [
+        {
+          "label": "筛选年级 全部演示年级",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "学科名称",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "所属年级 选择年级演示年级",
+          "type": "select",
+          "required": true
+        }
+      ]
+    },
+    {
+      "route": "/admin/subjects/bf992809-c6ff-4301-9fbd-15b8d7a19fe6/edit",
+      "fields": [
+        {
+          "label": "筛选年级 全部演示年级",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "学科名称",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "route": "/admin/questions",
+      "fields": [
+        {
+          "label": "筛选学科 全部Web闭环学科-4cd96faa浏览器保存验证-6597e85e验收学科-7bd6266b",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "筛选题型 全部单选题多选题判断题填空题简答题",
+          "type": "select",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/questions/new",
+      "fields": [
+        {
+          "label": "学科 选择学科Web闭环学科-4cd96faa浏览器保存验证-6597e85e验收学科-7bd6266b",
+          "type": "select",
+          "required": true
+        },
+        {
+          "label": "题型 单选题多选题判断题填空题简答题",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "难度（1–5）",
+          "type": "number",
+          "required": true
+        },
+        {
+          "label": "分值（两位小数）",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "题干",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "label": "选项 1",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "正确选项 1",
+          "type": "radio",
+          "required": true
+        },
+        {
+          "label": "选项 2",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "正确选项 2",
+          "type": "radio",
+          "required": true
+        },
+        {
+          "label": "解析",
+          "type": "textarea",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/questions/fb502e9e-d6de-41ff-a745-fb7eb8128c86/edit",
+      "fields": [
+        {
+          "label": "学科 选择学科Web闭环学科-4cd96faa浏览器保存验证-6597e85e验收学科-7bd6266b",
+          "type": "select",
+          "required": true
+        },
+        {
+          "label": "题型 单选题多选题判断题填空题简答题",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "难度（1–5）",
+          "type": "number",
+          "required": true
+        },
+        {
+          "label": "分值（两位小数）",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "题干",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "label": "选项 1",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "正确选项 1",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "label": "选项 2",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "正确选项 2",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "label": "解析",
+          "type": "textarea",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/papers",
+      "fields": [
+        {
+          "label": "试卷类型 全部固定卷时段卷任务卷",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "包含已归档试卷",
+          "type": "checkbox",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/papers/new",
+      "fields": [
+        {
+          "label": "试卷名称",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "学科 选择学科Web闭环学科-4cd96faa浏览器保存验证-6597e85e验收学科-7bd6266b",
+          "type": "select",
+          "required": true
+        },
+        {
+          "label": "卷型 固定卷时段卷任务卷",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "时长（分钟）",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "route": "/admin/papers/8dcd53b1-0d6a-4f28-abe0-5a7f8c23b1ae/edit",
+      "fields": [
+        {
+          "label": "试卷名称",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "时长（分钟）",
+          "type": "number",
+          "required": true
+        },
+        {
+          "label": "分组名称",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "从题库选择题目 选择题目简答题 · Web SHORT 原始题干 4cd96faa 长表格列 0 长表格列 1 长表格列 2 长表格列 3 长表格列 4 长表格列 5 长表格列 6 长表格列 7 …填空题 · Web GAP 原始题干 4cd96faa ____判断题 · Web TRUE_FALSE 原始题干 4cd96faa多选题 · Web MULTIPLE 原始题干 4cd96faa单选题 · 修改后的新题干",
+          "type": "select",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/tasks",
+      "fields": [
+        {
+          "label": "任务名称",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "目标年级 选择年级演示年级",
+          "type": "select",
+          "required": true
+        }
+      ]
+    },
+    {
+      "route": "/admin/tasks/654701ec-b1c6-472a-9ff8-5661ac02e306/edit",
+      "fields": []
+    },
+    {
+      "route": "/admin/attempts",
+      "fields": [
+        {
+          "label": "学科全部学科Web闭环学科-4cd96faa浏览器保存验证-6597e85e验收学科-7bd6266b",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "状态全部状态作答中待自行批改已完成未开始",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "学生标识",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/attempts/b8a1310f-402a-4e36-a3b4-bfca373db6b6",
+      "fields": []
+    },
+    {
+      "route": "/admin/messages",
+      "fields": []
+    },
+    {
+      "route": "/admin/messages/f17e692a-dc8a-4cbf-b80c-bee1d255d34b",
+      "fields": []
+    },
+    {
+      "route": "/admin/messages/new",
+      "fields": [
+        {
+          "label": "标题",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "正文",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "label": "账号类别学生管理员",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "AcceptanceA-7bd6266b",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "label": "AcceptanceB-7bd6266b",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "label": "AcceptanceOut-7bd6266b",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "label": "FormStudent-7bd6266b",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "label": "BrowserStudent-6597e85e",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "label": "BrowserOther-6597e85e",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "label": "WebWorkflow-4cd96faa",
+          "type": "checkbox",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/profile",
+      "fields": [
+        {
+          "label": "姓名",
+          "type": "text",
+          "required": false
+        },
+        {
+          "label": "手机号",
+          "type": "tel",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/activities",
+      "fields": [
+        {
+          "label": "请求标识",
+          "type": "text",
+          "required": false
+        },
+        {
+          "label": "用户标识",
+          "type": "text",
+          "required": false
+        },
+        {
+          "label": "操作",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/logs",
+      "fields": [
+        {
+          "label": "请求标识",
+          "type": "text",
+          "required": false
+        },
+        {
+          "label": "用户标识",
+          "type": "text",
+          "required": false
+        },
+        {
+          "label": "操作",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/admin/",
+      "fields": []
+    },
+    {
+      "route": "/admin/login",
+      "fields": [
+        {
+          "label": "用户名",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "密码",
+          "type": "password",
+          "required": true
+        }
+      ]
+    },
+    {
+      "route": "/student/home",
+      "fields": []
+    },
+    {
+      "route": "/student/papers",
+      "fields": []
+    },
+    {
+      "route": "/student/tasks",
+      "fields": []
+    },
+    {
+      "route": "/student/tasks/654701ec-b1c6-472a-9ff8-5661ac02e306",
+      "fields": []
+    },
+    {
+      "route": "/student/records",
+      "fields": [
+        {
+          "label": "学科全部学科Web闭环学科-4cd96faa浏览器保存验证-6597e85e验收学科-7bd6266b",
+          "type": "select",
+          "required": false
+        },
+        {
+          "label": "状态全部状态作答中待自行批改已完成未开始",
+          "type": "select",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/student/attempts/b8a1310f-402a-4e36-a3b4-bfca373db6b6/review",
+      "fields": []
+    },
+    {
+      "route": "/student/attempts/b8a1310f-402a-4e36-a3b4-bfca373db6b6/grade",
+      "fields": []
+    },
+    {
+      "route": "/student/attempts/b8a1310f-402a-4e36-a3b4-bfca373db6b6/review",
+      "fields": []
+    },
+    {
+      "route": "/student/mistakes",
+      "fields": [
+        {
+          "label": "学科全部学科Web闭环学科-4cd96faa浏览器保存验证-6597e85e验收学科-7bd6266b",
+          "type": "select",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/student/mistakes/b9473854-2843-4ed0-945a-d7c4872fa850",
+      "fields": []
+    },
+    {
+      "route": "/student/profile",
+      "fields": [
+        {
+          "label": "姓名",
+          "type": "text",
+          "required": false
+        },
+        {
+          "label": "手机号",
+          "type": "tel",
+          "required": false
+        },
+        {
+          "label": "生日",
+          "type": "date",
+          "required": false
+        }
+      ]
+    },
+    {
+      "route": "/student/messages",
+      "fields": []
+    },
+    {
+      "route": "/student/messages/f17e692a-dc8a-4cbf-b80c-bee1d255d34b",
+      "fields": []
+    },
+    {
+      "route": "/student/activities",
+      "fields": []
+    },
+    {
+      "route": "/student/",
+      "fields": []
+    },
+    {
+      "route": "/student/login",
+      "fields": [
+        {
+          "label": "用户名",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "密码",
+          "type": "password",
+          "required": true
+        }
+      ]
+    },
+    {
+      "route": "/student/register",
+      "fields": [
+        {
+          "label": "用户名",
+          "type": "text",
+          "required": true
+        },
+        {
+          "label": "密码",
+          "type": "password",
+          "required": true
+        },
+        {
+          "label": "年级 选择年级演示年级",
+          "type": "select",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "failedWrites": [
+    {
+      "route": "/admin/subjects",
+      "path": "/admin/subjects",
+      "method": "POST",
+      "requestsWhilePending": 1,
+      "repeatSuppressed": true,
+      "safeInputsPreserved": true
+    },
+    {
+      "route": "/admin/questions/new",
+      "path": "/admin/questions",
+      "method": "POST",
+      "requestsWhilePending": 1,
+      "repeatSuppressed": true,
+      "safeInputsPreserved": true
+    },
+    {
+      "route": "/admin/questions/new",
+      "path": "/admin/questions",
+      "method": "POST",
+      "requestsWhilePending": 1,
+      "repeatSuppressed": true,
+      "safeInputsPreserved": true
+    },
+    {
+      "route": "/admin/questions/new",
+      "path": "/admin/questions",
+      "method": "POST",
+      "requestsWhilePending": 1,
+      "repeatSuppressed": true,
+      "safeInputsPreserved": true
+    },
+    {
+      "route": "/admin/questions/new",
+      "path": "/admin/questions",
+      "method": "POST",
+      "requestsWhilePending": 1,
+      "repeatSuppressed": true,
+      "safeInputsPreserved": true
+    },
+    {
+      "route": "/admin/questions/new",
+      "path": "/admin/questions",
+      "method": "POST",
+      "requestsWhilePending": 1,
+      "repeatSuppressed": true,
+      "safeInputsPreserved": true
+    },
+    {
+      "route": "/admin/papers/new",
+      "path": "/admin/papers",
+      "method": "POST",
+      "requestsWhilePending": 1,
+      "repeatSuppressed": true,
+      "safeInputsPreserved": true
+    },
+    {
+      "route": "/admin/papers/new",
+      "path": "/admin/papers",
+      "method": "POST",
+      "requestsWhilePending": 1,
+      "repeatSuppressed": true,
+      "safeInputsPreserved": true
+    },
+    {
+      "route": "/admin/tasks",
+      "path": "/admin/tasks",
+      "method": "POST",
+      "requestsWhilePending": 1,
+      "repeatSuppressed": true,
+      "safeInputsPreserved": true
+    }
+  ],
+  "attemptId": "b8a1310f-402a-4e36-a3b4-bfca373db6b6",
+  "taskId": "654701ec-b1c6-472a-9ff8-5661ac02e306",
+  "requestId": "4d23d156-9d8f-4dd4-b2de-0e6da94a36e2",
+  "messageId": "f17e692a-dc8a-4cbf-b80c-bee1d255d34b",
+  "finalScore": "2.50",
+  "routesChecked": {
+    "admin": 28,
+    "student": 17,
+    "widths": [
+      375,
+      768,
+      1440
+    ]
+  },
+  "contrast": [
+    {
+      "route": "/admin/dashboard",
+      "width": 375,
+      "checked": 10,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/students",
+      "width": 375,
+      "checked": 43,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/admins",
+      "width": 375,
+      "checked": 17,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/student",
+      "width": 375,
+      "checked": 43,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/admin",
+      "width": 375,
+      "checked": 17,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/new/students",
+      "width": 375,
+      "checked": 7,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/new/admins",
+      "width": 375,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/a568e121-9361-4188-aadb-1243d299041b/edit",
+      "width": 375,
+      "checked": 8,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/subjects",
+      "width": 375,
+      "checked": 15,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/subjects/bf992809-c6ff-4301-9fbd-15b8d7a19fe6/edit",
+      "width": 375,
+      "checked": 18,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/questions",
+      "width": 375,
+      "checked": 70,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/questions/new",
+      "width": 375,
+      "checked": 21,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/questions/fb502e9e-d6de-41ff-a745-fb7eb8128c86/edit",
+      "width": 375,
+      "checked": 27,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/papers",
+      "width": 375,
+      "checked": 50,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/papers/new",
+      "width": 375,
+      "checked": 11,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/papers/8dcd53b1-0d6a-4f28-abe0-5a7f8c23b1ae/edit",
+      "width": 375,
+      "checked": 37,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/tasks",
+      "width": 375,
+      "checked": 13,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/tasks/654701ec-b1c6-472a-9ff8-5661ac02e306/edit",
+      "width": 375,
+      "checked": 13,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/attempts",
+      "width": 375,
+      "checked": 5,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/attempts/b8a1310f-402a-4e36-a3b4-bfca373db6b6",
+      "width": 375,
+      "checked": 58,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/messages",
+      "width": 375,
+      "checked": 4,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/messages/f17e692a-dc8a-4cbf-b80c-bee1d255d34b",
+      "width": 375,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/messages/new",
+      "width": 375,
+      "checked": 13,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/profile",
+      "width": 375,
+      "checked": 8,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/activities",
+      "width": 375,
+      "checked": 132,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/logs",
+      "width": 375,
+      "checked": 132,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/",
+      "width": 375,
+      "checked": 4,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/login",
+      "width": 375,
+      "checked": 4,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/home",
+      "width": 375,
+      "checked": 7,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/papers",
+      "width": 375,
+      "checked": 15,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/tasks",
+      "width": 375,
+      "checked": 5,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/tasks/654701ec-b1c6-472a-9ff8-5661ac02e306",
+      "width": 375,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/records",
+      "width": 375,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/attempts/b8a1310f-402a-4e36-a3b4-bfca373db6b6/review",
+      "width": 375,
+      "checked": 57,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/attempts/b8a1310f-402a-4e36-a3b4-bfca373db6b6/grade",
+      "width": 375,
+      "checked": 57,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/exam/b8a1310f-402a-4e36-a3b4-bfca373db6b6",
+      "width": 375,
+      "checked": 57,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/mistakes",
+      "width": 375,
+      "checked": 3,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/mistakes/b9473854-2843-4ed0-945a-d7c4872fa850",
+      "width": 375,
+      "checked": 2,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/profile",
+      "width": 375,
+      "checked": 9,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/messages",
+      "width": 375,
+      "checked": 2,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/messages/f17e692a-dc8a-4cbf-b80c-bee1d255d34b",
+      "width": 375,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/activities",
+      "width": 375,
+      "checked": 81,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/",
+      "width": 375,
+      "checked": 4,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/login",
+      "width": 375,
+      "checked": 5,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/register",
+      "width": 375,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/dashboard",
+      "width": 768,
+      "checked": 10,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/students",
+      "width": 768,
+      "checked": 43,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/admins",
+      "width": 768,
+      "checked": 17,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/student",
+      "width": 768,
+      "checked": 43,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/admin",
+      "width": 768,
+      "checked": 17,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/new/students",
+      "width": 768,
+      "checked": 7,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/new/admins",
+      "width": 768,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/a568e121-9361-4188-aadb-1243d299041b/edit",
+      "width": 768,
+      "checked": 8,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/subjects",
+      "width": 768,
+      "checked": 15,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/subjects/bf992809-c6ff-4301-9fbd-15b8d7a19fe6/edit",
+      "width": 768,
+      "checked": 18,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/questions",
+      "width": 768,
+      "checked": 70,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/questions/new",
+      "width": 768,
+      "checked": 21,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/questions/fb502e9e-d6de-41ff-a745-fb7eb8128c86/edit",
+      "width": 768,
+      "checked": 27,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/papers",
+      "width": 768,
+      "checked": 50,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/papers/new",
+      "width": 768,
+      "checked": 11,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/papers/8dcd53b1-0d6a-4f28-abe0-5a7f8c23b1ae/edit",
+      "width": 768,
+      "checked": 37,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/tasks",
+      "width": 768,
+      "checked": 13,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/tasks/654701ec-b1c6-472a-9ff8-5661ac02e306/edit",
+      "width": 768,
+      "checked": 13,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/attempts",
+      "width": 768,
+      "checked": 5,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/attempts/b8a1310f-402a-4e36-a3b4-bfca373db6b6",
+      "width": 768,
+      "checked": 58,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/messages",
+      "width": 768,
+      "checked": 4,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/messages/f17e692a-dc8a-4cbf-b80c-bee1d255d34b",
+      "width": 768,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/messages/new",
+      "width": 768,
+      "checked": 13,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/profile",
+      "width": 768,
+      "checked": 8,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/activities",
+      "width": 768,
+      "checked": 132,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/logs",
+      "width": 768,
+      "checked": 132,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/",
+      "width": 768,
+      "checked": 4,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/login",
+      "width": 768,
+      "checked": 4,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/home",
+      "width": 768,
+      "checked": 7,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/papers",
+      "width": 768,
+      "checked": 15,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/tasks",
+      "width": 768,
+      "checked": 5,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/tasks/654701ec-b1c6-472a-9ff8-5661ac02e306",
+      "width": 768,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/records",
+      "width": 768,
+      "checked": 4,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/attempts/b8a1310f-402a-4e36-a3b4-bfca373db6b6/review",
+      "width": 768,
+      "checked": 57,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/attempts/b8a1310f-402a-4e36-a3b4-bfca373db6b6/grade",
+      "width": 768,
+      "checked": 57,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/exam/b8a1310f-402a-4e36-a3b4-bfca373db6b6",
+      "width": 768,
+      "checked": 3,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/mistakes",
+      "width": 768,
+      "checked": 3,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/mistakes/b9473854-2843-4ed0-945a-d7c4872fa850",
+      "width": 768,
+      "checked": 2,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/profile",
+      "width": 768,
+      "checked": 9,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/messages",
+      "width": 768,
+      "checked": 2,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/messages/f17e692a-dc8a-4cbf-b80c-bee1d255d34b",
+      "width": 768,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/activities",
+      "width": 768,
+      "checked": 81,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/",
+      "width": 768,
+      "checked": 4,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/login",
+      "width": 768,
+      "checked": 5,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/register",
+      "width": 768,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/dashboard",
+      "width": 1440,
+      "checked": 10,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/students",
+      "width": 1440,
+      "checked": 43,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/admins",
+      "width": 1440,
+      "checked": 17,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/student",
+      "width": 1440,
+      "checked": 43,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/admin",
+      "width": 1440,
+      "checked": 17,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/new/students",
+      "width": 1440,
+      "checked": 7,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/new/admins",
+      "width": 1440,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/users/a568e121-9361-4188-aadb-1243d299041b/edit",
+      "width": 1440,
+      "checked": 8,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/subjects",
+      "width": 1440,
+      "checked": 15,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/subjects/bf992809-c6ff-4301-9fbd-15b8d7a19fe6/edit",
+      "width": 1440,
+      "checked": 18,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/questions",
+      "width": 1440,
+      "checked": 70,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/questions/new",
+      "width": 1440,
+      "checked": 21,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/questions/fb502e9e-d6de-41ff-a745-fb7eb8128c86/edit",
+      "width": 1440,
+      "checked": 27,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/papers",
+      "width": 1440,
+      "checked": 50,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/papers/new",
+      "width": 1440,
+      "checked": 11,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/papers/8dcd53b1-0d6a-4f28-abe0-5a7f8c23b1ae/edit",
+      "width": 1440,
+      "checked": 37,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/tasks",
+      "width": 1440,
+      "checked": 13,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/tasks/654701ec-b1c6-472a-9ff8-5661ac02e306/edit",
+      "width": 1440,
+      "checked": 13,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/attempts",
+      "width": 1440,
+      "checked": 84,
+      "minimum": 7.58900625634907,
+      "failures": []
+    },
+    {
+      "route": "/admin/attempts/b8a1310f-402a-4e36-a3b4-bfca373db6b6",
+      "width": 1440,
+      "checked": 58,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/messages",
+      "width": 1440,
+      "checked": 4,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/messages/f17e692a-dc8a-4cbf-b80c-bee1d255d34b",
+      "width": 1440,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/messages/new",
+      "width": 1440,
+      "checked": 13,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/profile",
+      "width": 1440,
+      "checked": 8,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/activities",
+      "width": 1440,
+      "checked": 132,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/logs",
+      "width": 1440,
+      "checked": 132,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/admin/",
+      "width": 1440,
+      "checked": 4,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/admin/login",
+      "width": 1440,
+      "checked": 4,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/home",
+      "width": 1440,
+      "checked": 7,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/papers",
+      "width": 1440,
+      "checked": 15,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/tasks",
+      "width": 1440,
+      "checked": 5,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/tasks/654701ec-b1c6-472a-9ff8-5661ac02e306",
+      "width": 1440,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/records",
+      "width": 1440,
+      "checked": 24,
+      "minimum": 7.58900625634907,
+      "failures": []
+    },
+    {
+      "route": "/student/attempts/b8a1310f-402a-4e36-a3b4-bfca373db6b6/review",
+      "width": 1440,
+      "checked": 57,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/attempts/b8a1310f-402a-4e36-a3b4-bfca373db6b6/grade",
+      "width": 1440,
+      "checked": 57,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/exam/b8a1310f-402a-4e36-a3b4-bfca373db6b6",
+      "width": 1440,
+      "checked": 57,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/mistakes",
+      "width": 1440,
+      "checked": 53,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/mistakes/b9473854-2843-4ed0-945a-d7c4872fa850",
+      "width": 1440,
+      "checked": 2,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/profile",
+      "width": 1440,
+      "checked": 9,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/messages",
+      "width": 1440,
+      "checked": 2,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/messages/f17e692a-dc8a-4cbf-b80c-bee1d255d34b",
+      "width": 1440,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/activities",
+      "width": 1440,
+      "checked": 81,
+      "minimum": 14.462631426451756,
+      "failures": []
+    },
+    {
+      "route": "/student/",
+      "width": 1440,
+      "checked": 4,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/login",
+      "width": 1440,
+      "checked": 5,
+      "minimum": 7.137706742063006,
+      "failures": []
+    },
+    {
+      "route": "/student/register",
+      "width": 1440,
+      "checked": 6,
+      "minimum": 7.137706742063006,
+      "failures": []
+    }
+  ],
+  "lostResponseRetries": [
+    "submit",
+    "self-grade",
+    "message"
+  ],
+  "result": "passed",
+  "clientClockChanged": true,
+  "backgroundRecovery": true
+}

@@ -1,8 +1,9 @@
 openapi: 3.1.0
 info:
   title: Online Exam Platform
-  version: 0.1.0
-  description: 已实现的 v1 接口契约。所有响应使用 code、message、data、requestId。
+  version: 0.3.0
+  description: 当前交付范围：管理端、学生 Web 和 Java API。所有个人接口仅接受 HttpOnly Web 会话 Cookie，所有写入校验 CSRF；不接受 Authorization/Bearer
+    认证。响应包含code/message/data/requestId，JSON上限2MiB；未知查询字段拒绝，图片no-store。
 servers:
   - url: /api/v1
 paths:
@@ -10,119 +11,153 @@ paths:
     get:
       operationId: version
       responses:
-        '200':
+        "200":
           description: API 版本
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Envelope'
+                  - $ref: "#/components/schemas/Envelope"
                   - properties:
                       data:
                         type: object
                         properties:
-                          apiVersion: { type: string, const: v1 }
+                          apiVersion:
+                            type: string
+                            const: v1
   /catalog/grades:
     get:
       operationId: grades
       responses:
-        '200':
+        "200":
           description: 已启用的年级目录
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Envelope'
+                  - $ref: "#/components/schemas/Envelope"
                   - properties:
                       data:
                         type: array
                         items:
                           type: object
-                          required: [id, name]
+                          required:
+                            - id
+                            - name
                           properties:
-                            id: { type: string, format: uuid }
-                            name: { type: string }
-        '503': { $ref: '#/components/responses/Error' }
+                            id:
+                              type: string
+                              format: uuid
+                            name:
+                              type: string
+        "503":
+          $ref: "#/components/responses/Error"
   /auth/csrf:
     get:
       operationId: csrfToken
       responses:
-        '200':
+        "200":
           description: 返回 CSRF 请求头名称与值，并下发同源安全 Cookie
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Envelope'
+                  - $ref: "#/components/schemas/Envelope"
                   - properties:
                       data:
                         type: object
-                        required: [headerName, token]
+                        required:
+                          - headerName
+                          - token
                         properties:
-                          headerName: { type: string, const: X-XSRF-TOKEN }
-                          token: { type: string }
+                          headerName:
+                            type: string
+                            const: X-XSRF-TOKEN
+                          token:
+                            type: string
   /auth/register:
     post:
       operationId: registerStudent
       parameters:
-        - $ref: '#/components/parameters/Csrf'
+        - $ref: "#/components/parameters/Csrf"
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/StudentRegistration' }
+            schema:
+              $ref: "#/components/schemas/StudentRegistration"
       responses:
-        '201': { $ref: '#/components/responses/Account' }
-        '400': { $ref: '#/components/responses/Error' }
-        '403': { $ref: '#/components/responses/Error' }
-        '503': { $ref: '#/components/responses/Error' }
+        "201":
+          $ref: "#/components/responses/Account"
+        "400":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
   /auth/login:
     post:
       operationId: loginWeb
       parameters:
-        - $ref: '#/components/parameters/Csrf'
+        - $ref: "#/components/parameters/Csrf"
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/Credentials' }
+            schema:
+              $ref: "#/components/schemas/Credentials"
       responses:
-        '200':
+        "200":
           description: 已登录并下发 Web 会话 Cookie
           headers:
             Set-Cookie:
-              description: '__Host-exam_session; Path=/; HttpOnly; Secure; SameSite=Lax'
-              schema: { type: string }
+              description: __Host-exam_session; Path=/; HttpOnly; Secure; SameSite=Lax
+              schema:
+                type: string
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/AccountEnvelope' }
-        '400': { $ref: '#/components/responses/Error' }
-        '401': { $ref: '#/components/responses/Error' }
-        '403': { $ref: '#/components/responses/Error' }
-        '429': { $ref: '#/components/responses/Error' }
+              schema:
+                $ref: "#/components/schemas/AccountEnvelope"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
   /auth/logout:
     post:
       operationId: logoutWeb
-      security: [{ webSession: [] }]
+      security:
+        - webSession: []
       parameters:
-        - $ref: '#/components/parameters/Csrf'
+        - $ref: "#/components/parameters/Csrf"
       responses:
-        '200': { $ref: '#/components/responses/Empty' }
-        '401': { $ref: '#/components/responses/Error' }
-        '403': { $ref: '#/components/responses/Error' }
+        "200":
+          $ref: "#/components/responses/Empty"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
   /me:
     get:
       operationId: currentAccount
-      security: [{ webSession: [] }, { wechatToken: [] }]
+      security:
+        - webSession: []
       responses:
-        '200': { $ref: '#/components/responses/Account' }
-        '401': { $ref: '#/components/responses/Error' }
-        '503': { $ref: '#/components/responses/Error' }
+        "200":
+          $ref: "#/components/responses/Account"
+        "401":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
   /me/password:
     post:
       operationId: changePassword
-      security: [{ webSession: [] }, { wechatToken: [] }]
-      description: Web 请求须提供 CSRF 请求头。成功后撤销 Web 和小程序全部会话。
+      security:
+        - webSession: []
+      description: Web 请求须提供 CSRF 请求头。成功后撤销 全部 Web 会话及历史凭据。
       requestBody:
         required: true
         content:
@@ -130,78 +165,163 @@ paths:
             schema:
               type: object
               additionalProperties: false
-              required: [currentPassword, newPassword]
+              required:
+                - currentPassword
+                - newPassword
               properties:
-                currentPassword: { $ref: '#/components/schemas/Password' }
-                newPassword: { $ref: '#/components/schemas/Password' }
+                currentPassword:
+                  $ref: "#/components/schemas/Password"
+                newPassword:
+                  $ref: "#/components/schemas/Password"
       responses:
-        '200': { $ref: '#/components/responses/Empty' }
-        '400': { $ref: '#/components/responses/Error' }
-        '401': { $ref: '#/components/responses/Error' }
-        '403': { $ref: '#/components/responses/Error' }
+        "200":
+          $ref: "#/components/responses/Empty"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
   /me/papers:
     get:
       operationId: listVisiblePapers
-      security: [{ webSession: [] }, { wechatToken: [] }]
+      security:
+        - webSession: []
       description: 仅返回当前启用学生所属年级的已发布、未归档固定卷和时段卷元信息；任务卷经任务入口读取。状态取服务端时钟，开放区间左闭右开。此接口不授予开始资格。
       parameters:
-        - { in: query, name: type, description: TASK 查询始终返回空列表, schema: { type: string, enum: [FIXED, TIMED, TASK] } }
-        - { in: query, name: status, schema: { type: string, enum: [OPEN, UPCOMING, CLOSED] } }
-        - { in: query, name: page, schema: { type: integer, minimum: 1, default: 1 } }
-        - { in: query, name: pageSize, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - in: query
+          name: type
+          description: TASK 查询始终返回空列表
+          schema:
+            type: string
+            enum:
+              - FIXED
+              - TIMED
+              - TASK
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum:
+              - OPEN
+              - UPCOMING
+              - CLOSED
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
       responses:
-        '200':
-          description: 按名称和 UUID 稳定排序的分页元信息，含 items、total、page、pageSize；每项含 id、subjectId、type、name、durationMinutes、opensAt、closesAt、status、serverNow
-        '400': { $ref: '#/components/responses/Error' }
-        '401': { $ref: '#/components/responses/Error' }
-        '403': { $ref: '#/components/responses/Error' }
+        "200":
+          description: 按名称和 UUID 稳定排序的分页元信息，含 items、total、page、pageSize；每项含
+            id、subjectId、type、name、durationMinutes、opensAt、closesAt、status、serverNow
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
   /me/papers/{id}:
     get:
       operationId: visiblePaperDetail
-      security: [{ webSession: [] }, { wechatToken: [] }]
+      security:
+        - webSession: []
       description: 返回本人可见的普通卷元信息；不包含题目、答案或解析。
       parameters:
-        - { in: path, name: id, required: true, schema: { type: string, format: uuid } }
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
-        '200': { description: 试卷元信息，字段同列表项 }
-        '400': { $ref: '#/components/responses/Error' }
-        '401': { $ref: '#/components/responses/Error' }
-        '403': { $ref: '#/components/responses/Error' }
-        '404': { $ref: '#/components/responses/Error' }
+        "200":
+          description: 试卷元信息，字段同列表项
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
   /me/papers/{id}/attempts:
     post:
       operationId: startOrdinaryAttempt
-      security: [{ webSession: [] }, { wechatToken: [] }]
+      security:
+        - webSession: []
       description: 固定卷与时段卷每次新请求创建独立答卷。相同学生与幂等键在 24 小时内返回同一答卷，同键换卷返回冲突。Web 请求须提供 CSRF。时段卷使用服务端左闭右开区间，截止为开始加时长与开放结束时间的较早值。
       parameters:
-        - { in: path, name: id, required: true, schema: { type: string, format: uuid } }
-        - { in: header, name: Idempotency-Key, required: false, schema: { type: string, minLength: 1, maxLength: 128 } }
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: header
+          name: Idempotency-Key
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
       responses:
-        '201': { $ref: '#/components/responses/Attempt' }
-        '400': { $ref: '#/components/responses/Error' }
-        '401': { $ref: '#/components/responses/Error' }
-        '403': { $ref: '#/components/responses/Error' }
-        '404': { $ref: '#/components/responses/Error' }
-        '409': { $ref: '#/components/responses/Error' }
+        "201":
+          $ref: "#/components/responses/Attempt"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
   /me/attempts/{id}:
     get:
       operationId: readOwnAttempt
-      security: [{ webSession: [] }, { wechatToken: [] }]
-      description: 按答卷标识读取本人的冻结题目快照、截止时间、当前版本与已保存答案。
+      security:
+        - webSession: []
+      description: 按答卷标识读取本人的冻结题目快照、截止时间、当前版本与已保存答案。取得行锁后若到期，同一事务按已确认答案冻结、客观计分并返回终态，截止不延长。该 GET 有到期补处理效果。
       parameters:
-        - { in: path, name: id, required: true, schema: { type: string, format: uuid } }
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
-        '200': { $ref: '#/components/responses/Attempt' }
-        '401': { $ref: '#/components/responses/Error' }
-        '403': { $ref: '#/components/responses/Error' }
-        '404': { $ref: '#/components/responses/Error' }
+        "200":
+          $ref: "#/components/responses/Attempt"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
   /me/attempts/{id}/answers:
     put:
       operationId: replaceOwnAnswers
-      security: [{ webSession: [] }, { wechatToken: [] }]
-      description: 整份替换答卷已保存答案。未列题目与 answer:null 均清空；只有未截止且 IN_PROGRESS 可写。Web 请求须提供 CSRF。旧 expectedVersion 返回 VERSION_CONFLICT，截止或不可编辑返回 EXAM_CLOSED。
+      security:
+        - webSession: []
+      description: 整份替换答卷已保存答案。未列题目与 answer:null 均清空；只有未截止且 IN_PROGRESS 可写。Web 请求须提供 CSRF。旧 expectedVersion 返回
+        VERSION_CONFLICT。到期时先持久化已确认答案的冻结，再以 EXAM_CLOSED 拒绝迟到载荷；错误响应不会回滚冻结。客户端随后读取终态。
       parameters:
-        - { in: path, name: id, required: true, schema: { type: string, format: uuid } }
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -209,80 +329,203 @@ paths:
             schema:
               type: object
               additionalProperties: false
-              required: [expectedVersion, answerItems]
+              required:
+                - expectedVersion
+                - answerItems
               properties:
-                expectedVersion: { type: integer, minimum: 1 }
+                expectedVersion:
+                  type: integer
+                  minimum: 1
                 answerItems:
                   type: array
                   items:
                     type: object
                     additionalProperties: false
-                    required: [questionId, answer]
+                    required:
+                      - questionId
+                      - answer
                     properties:
-                      questionId: { type: string, format: uuid }
+                      questionId:
+                        type: string
+                        format: uuid
                       answer:
                         description: null 清空；单选与判断用 optionId，多选用 optionIds，填空用 texts，简答用 text。具体题型按答卷快照校验。
                         oneOf:
-                          - { type: 'null' }
-                          - { type: object }
+                          - type: "null"
+                          - type: object
       responses:
-        '200': { $ref: '#/components/responses/Attempt' }
-        '400': { $ref: '#/components/responses/Error' }
-        '401': { $ref: '#/components/responses/Error' }
-        '403': { $ref: '#/components/responses/Error' }
-        '404': { $ref: '#/components/responses/Error' }
-        '409': { $ref: '#/components/responses/Error' }
+        "200":
+          $ref: "#/components/responses/Attempt"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+  /me/attempts/{id}/submit:
+    post:
+      operationId: submitOwnAttempt
+      security:
+        - webSession: []
+      description: Web 请求须提供 CSRF。截止前在同一事务校验版本与整份答案、全量保存、冻结、客观计分；纯客观卷直接 COMPLETED 并写错题，混合卷 WAIT_SELF_GRADE，主观分数与最终总分为 null。
+        取得账号和答卷行锁后采样服务端时钟，截止时刻及之后仅冻结此前已确认答案，迟到 answerItems 不补写，返回 HTTP 200 的既有冻结结果。 幂等键按账号与提交动作隔离，24
+        小时内同键同载荷返回原结果，同键异答卷或异载荷为 VERSION_CONFLICT。摘要规范化 JSON 对象字段顺序，数组顺序保留。 新键或过期键重试已冻结答卷也返回原冻结答案，不再计分。读、保存和每 5
+        秒截止调度共用冻结逻辑；响应始终不含参考答案与解析，主观批改接口尚未实现。
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+            pattern: ^[!-~]+$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnswerSet"
+      responses:
+        "200":
+          $ref: "#/components/responses/Attempt"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
   /me/tasks/{taskId}/papers/{paperId}/attempts:
     post:
       operationId: startOrResumeTaskAttempt
-      security: [{ webSession: [] }, { wechatToken: [] }]
-      description: 冻结成员首次开始或恢复同一任务卷答卷。首次开始要求任务已发布、卷已关联且未归档，使用任务冻结的卷版本。已有答卷在任务或卷归档后仍可恢复，开始时间、快照及截止时间不变。Web 请求须提供 CSRF；同一学生同一任务卷只有一份答卷。
+      security:
+        - webSession: []
+      description: 冻结成员首次开始或恢复同一任务卷答卷。首次开始要求任务已发布、卷已关联且未归档，使用任务冻结的卷版本。已有答卷在任务或卷归档后仍可恢复，开始时间、快照及截止时间不变。Web 请求须提供
+        CSRF；同一学生同一任务卷只有一份答卷。
       parameters:
-        - { in: path, name: taskId, required: true, schema: { type: string, format: uuid } }
-        - { in: path, name: paperId, required: true, schema: { type: string, format: uuid } }
-        - { in: header, name: Idempotency-Key, required: false, schema: { type: string, minLength: 1, maxLength: 128 } }
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: paperId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: header
+          name: Idempotency-Key
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
       responses:
-        '201': { $ref: '#/components/responses/Attempt' }
-        '400': { $ref: '#/components/responses/Error' }
-        '401': { $ref: '#/components/responses/Error' }
-        '403': { $ref: '#/components/responses/Error' }
-        '404': { $ref: '#/components/responses/Error' }
-        '409': { $ref: '#/components/responses/Error' }
+        "201":
+          $ref: "#/components/responses/Attempt"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
   /admin/users:
     get:
       operationId: listAccounts
-      security: [{ webSession: [] }]
+      security:
+        - webSession: []
       parameters:
-        - { in: query, name: role, schema: { $ref: '#/components/schemas/Role' } }
-        - { in: query, name: gradeId, schema: { type: string, format: uuid } }
-        - { in: query, name: page, schema: { type: integer, minimum: 1, default: 1 } }
-        - { in: query, name: pageSize, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
-        - { in: query, name: sort, schema: { type: string, enum: [createdAt, username], default: createdAt } }
+        - in: query
+          name: role
+          schema:
+            $ref: "#/components/schemas/Role"
+        - in: query
+          name: gradeId
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum:
+              - createdAt
+              - username
+            default: createdAt
       responses:
-        '200':
+        "200":
           description: 账号分页列表，已删除账号不出现在列表中
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Envelope'
+                  - $ref: "#/components/schemas/Envelope"
                   - properties:
                       data:
                         type: object
-                        required: [items, total, page, pageSize]
+                        required:
+                          - items
+                          - total
+                          - page
+                          - pageSize
                         properties:
-                          items: { type: array, items: { $ref: '#/components/schemas/Account' } }
-                          total: { type: integer }
-                          page: { type: integer }
-                          pageSize: { type: integer }
-        '400': { $ref: '#/components/responses/Error' }
-        '401': { $ref: '#/components/responses/Error' }
-        '403': { $ref: '#/components/responses/Error' }
+                          items:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/Account"
+                          total:
+                            type: integer
+                          page:
+                            type: integer
+                          pageSize:
+                            type: integer
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
     post:
       operationId: createManagedAccount
-      security: [{ webSession: [] }]
+      security:
+        - webSession: []
       parameters:
-        - $ref: '#/components/parameters/Csrf'
+        - $ref: "#/components/parameters/Csrf"
       requestBody:
         required: true
         content:
@@ -290,33 +533,50 @@ paths:
             schema:
               type: object
               additionalProperties: false
-              required: [username, password, role]
+              required:
+                - username
+                - password
+                - role
               properties:
-                username: { $ref: '#/components/schemas/Username' }
-                password: { $ref: '#/components/schemas/Password' }
-                role: { $ref: '#/components/schemas/Role' }
-                gradeId: { $ref: '#/components/schemas/GradeId' }
+                username:
+                  $ref: "#/components/schemas/Username"
+                password:
+                  $ref: "#/components/schemas/Password"
+                role:
+                  $ref: "#/components/schemas/Role"
+                gradeId:
+                  $ref: "#/components/schemas/GradeId"
       responses:
-        '201': { $ref: '#/components/responses/Account' }
-        '400': { $ref: '#/components/responses/Error' }
-        '401': { $ref: '#/components/responses/Error' }
-        '403': { $ref: '#/components/responses/Error' }
+        "201":
+          $ref: "#/components/responses/Account"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
   /admin/users/{id}:
     parameters:
-      - $ref: '#/components/parameters/AccountId'
+      - $ref: "#/components/parameters/AccountId"
     get:
       operationId: accountDetail
-      security: [{ webSession: [] }]
+      security:
+        - webSession: []
       responses:
-        '200': { $ref: '#/components/responses/Account' }
-        '401': { $ref: '#/components/responses/Error' }
-        '403': { $ref: '#/components/responses/Error' }
-        '404': { $ref: '#/components/responses/Error' }
+        "200":
+          $ref: "#/components/responses/Account"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
     patch:
       operationId: editAccount
-      security: [{ webSession: [] }]
+      security:
+        - webSession: []
       parameters:
-        - $ref: '#/components/parameters/Csrf'
+        - $ref: "#/components/parameters/Csrf"
       requestBody:
         required: true
         content:
@@ -324,134 +584,2564 @@ paths:
             schema:
               type: object
               additionalProperties: false
-              required: [username, role, expectedVersion]
+              required:
+                - username
+                - role
+                - expectedVersion
               properties:
-                username: { $ref: '#/components/schemas/Username' }
-                role: { $ref: '#/components/schemas/Role' }
-                gradeId: { $ref: '#/components/schemas/GradeId' }
-                expectedVersion: { type: integer, minimum: 1 }
-      responses: &accountMutation
-        '200': { $ref: '#/components/responses/Account' }
-        '400': { $ref: '#/components/responses/Error' }
-        '401': { $ref: '#/components/responses/Error' }
-        '403': { $ref: '#/components/responses/Error' }
-        '404': { $ref: '#/components/responses/Error' }
-        '409': { $ref: '#/components/responses/Error' }
+                username:
+                  $ref: "#/components/schemas/Username"
+                role:
+                  $ref: "#/components/schemas/Role"
+                gradeId:
+                  $ref: "#/components/schemas/GradeId"
+                expectedVersion:
+                  type: integer
+                  minimum: 1
+      responses:
+        "200":
+          $ref: "#/components/responses/Account"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
     delete:
       operationId: deleteAccount
-      security: [{ webSession: [] }]
+      security:
+        - webSession: []
       parameters:
-        - $ref: '#/components/parameters/Csrf'
-      requestBody: { $ref: '#/components/requestBodies/AccountVersion' }
-      responses: *accountMutation
+        - $ref: "#/components/parameters/Csrf"
+      requestBody:
+        $ref: "#/components/requestBodies/AccountVersion"
+      responses:
+        "200":
+          $ref: "#/components/responses/Account"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
   /admin/users/{id}/enable:
     post:
       operationId: enableAccount
-      security: [{ webSession: [] }]
+      security:
+        - webSession: []
       parameters:
-        - $ref: '#/components/parameters/AccountId'
-        - $ref: '#/components/parameters/Csrf'
-      requestBody: { $ref: '#/components/requestBodies/AccountVersion' }
-      responses: *accountMutation
+        - $ref: "#/components/parameters/AccountId"
+        - $ref: "#/components/parameters/Csrf"
+      requestBody:
+        $ref: "#/components/requestBodies/AccountVersion"
+      responses:
+        "200":
+          $ref: "#/components/responses/Account"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
   /admin/users/{id}/disable:
     post:
       operationId: disableAccount
-      security: [{ webSession: [] }]
+      security:
+        - webSession: []
       parameters:
-        - $ref: '#/components/parameters/AccountId'
-        - $ref: '#/components/parameters/Csrf'
-      requestBody: { $ref: '#/components/requestBodies/AccountVersion' }
-      responses: *accountMutation
-  /auth/wechat/bind:
+        - $ref: "#/components/parameters/AccountId"
+        - $ref: "#/components/parameters/Csrf"
+      requestBody:
+        $ref: "#/components/requestBodies/AccountVersion"
+      responses:
+        "200":
+          $ref: "#/components/responses/Account"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+  /admin/subjects:
+    get:
+      operationId: listSubject
+      summary: listSubject
+      security:
+        - webSession: []
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - in: query
+          name: gradeId
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/SubjectPage"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
     post:
-      operationId: bindWeChat
+      operationId: createSubject
+      summary: createSubject
+      security:
+        - webSession: []
+      parameters:
+        - $ref: "#/components/parameters/Csrf"
+      responses:
+        "201":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Subject"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              additionalProperties: false
-              required: [code, username, password]
               properties:
-                code: { $ref: '#/components/schemas/WechatCode' }
-                username: { $ref: '#/components/schemas/Username' }
-                password: { $ref: '#/components/schemas/Password' }
+                gradeId:
+                  type: string
+                  format: uuid
+                name:
+                  type: string
+              required:
+                - gradeId
+                - name
+              additionalProperties: false
+  /admin/subjects/{id}:
+    get:
+      operationId: getSubject
+      summary: getSubject
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
-        '200': { $ref: '#/components/responses/WechatSession' }
-        '400': { $ref: '#/components/responses/Error' }
-        '401': { $ref: '#/components/responses/Error' }
-        '403': { $ref: '#/components/responses/Error' }
-        '409': { $ref: '#/components/responses/Error' }
-        '429': { $ref: '#/components/responses/Error' }
-        '503': { $ref: '#/components/responses/Error' }
-  /auth/wechat/register:
-    post:
-      operationId: registerWithWeChat
-      description: 注册学生并绑定微信。绑定失败时账号创建回滚。
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Subject"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: editSubject
+      summary: editSubject
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/Csrf"
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Subject"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              additionalProperties: false
-              required: [code, username, password, gradeId]
               properties:
-                code: { $ref: '#/components/schemas/WechatCode' }
-                username: { $ref: '#/components/schemas/Username' }
-                password: { $ref: '#/components/schemas/Password' }
-                gradeId: { type: string, format: uuid }
-      responses:
-        '201': { $ref: '#/components/responses/WechatSession' }
-        '400': { $ref: '#/components/responses/Error' }
-        '409': { $ref: '#/components/responses/Error' }
-        '429': { $ref: '#/components/responses/Error' }
-        '503': { $ref: '#/components/responses/Error' }
-  /auth/wechat/login:
-    post:
-      operationId: loginWithWeChat
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
+                expectedVersion:
+                  type: integer
+                name:
+                  type: string
+              required:
+                - expectedVersion
+                - name
               additionalProperties: false
-              required: [code]
-              properties:
-                code: { $ref: '#/components/schemas/WechatCode' }
-      responses:
-        '200': { $ref: '#/components/responses/WechatSession' }
-        '400': { $ref: '#/components/responses/Error' }
-        '401': { $ref: '#/components/responses/Error' }
-        '404': { $ref: '#/components/responses/Error' }
-        '429': { $ref: '#/components/responses/Error' }
-        '503': { $ref: '#/components/responses/Error' }
-  /auth/wechat/binding:
     delete:
-      operationId: unbindWeChat
-      security: [{ wechatToken: [] }]
+      operationId: deleteSubject
+      summary: deleteSubject
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/Csrf"
       responses:
-        '200': { $ref: '#/components/responses/Empty' }
-        '401': { $ref: '#/components/responses/Error' }
-        '403': { $ref: '#/components/responses/Error' }
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: "null"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Revision"
+  /admin/questions:
+    get:
+      operationId: listQuestion
+      summary: listQuestion
+      security:
+        - webSession: []
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - in: query
+          name: subjectId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: type
+          required: false
+          schema:
+            $ref: "#/components/schemas/QuestionType"
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/QuestionSummaryPage"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createQuestion
+      summary: createQuestion
+      security:
+        - webSession: []
+      parameters:
+        - $ref: "#/components/parameters/Csrf"
+      responses:
+        "201":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/QuestionVersion"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionDraft"
+  /admin/questions/{id}:
+    get:
+      operationId: getQuestion
+      summary: getQuestion
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: version
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/QuestionVersion"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: editQuestion
+      summary: editQuestion
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/Csrf"
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/QuestionVersion"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                expectedVersion:
+                  type: integer
+                question:
+                  $ref: "#/components/schemas/QuestionDraft"
+              required:
+                - expectedVersion
+                - question
+              additionalProperties: false
+    delete:
+      operationId: deleteQuestion
+      summary: deleteQuestion
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/Csrf"
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: "null"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Revision"
+  /admin/papers:
+    get:
+      operationId: listPaper
+      summary: listPaper
+      security:
+        - webSession: []
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - in: query
+          name: subjectId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: gradeId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: type
+          required: false
+          schema:
+            type: string
+            enum:
+              - FIXED
+              - TIMED
+              - TASK
+        - in: query
+          name: includeArchived
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/PaperSummaryPage"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createPaper
+      summary: createPaper
+      security:
+        - webSession: []
+      parameters:
+        - $ref: "#/components/parameters/Csrf"
+      responses:
+        "201":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/PaperView"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subjectId:
+                  type: string
+                  format: uuid
+                type:
+                  type: string
+                  enum:
+                    - FIXED
+                    - TIMED
+                    - TASK
+                draft:
+                  $ref: "#/components/schemas/PaperDraft"
+              required:
+                - subjectId
+                - type
+                - draft
+              additionalProperties: false
+  /admin/papers/{id}:
+    get:
+      operationId: getPaper
+      summary: getPaper
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: versionId
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/PaperView"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: editPaper
+      summary: editPaper
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/Csrf"
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/PaperView"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                expectedVersion:
+                  type: integer
+                draft:
+                  $ref: "#/components/schemas/PaperDraft"
+              required:
+                - expectedVersion
+                - draft
+              additionalProperties: false
+    delete:
+      operationId: deletePaper
+      summary: deletePaper
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/Csrf"
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: "null"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Revision"
+  /admin/papers/{id}/publish:
+    post:
+      operationId: publishPaper
+      summary: publishPaper
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/Csrf"
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/PaperView"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Revision"
+  /admin/tasks:
+    get:
+      operationId: listTask
+      summary: listTask
+      security:
+        - webSession: []
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - in: query
+          name: gradeId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: state
+          required: false
+          schema:
+            type: string
+            enum:
+              - DRAFT
+              - PUBLISHED
+              - ARCHIVED
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/TaskPage"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createTask
+      summary: createTask
+      security:
+        - webSession: []
+      parameters:
+        - $ref: "#/components/parameters/Csrf"
+      responses:
+        "201":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Task"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskDraft"
+  /admin/tasks/{id}:
+    get:
+      operationId: getTask
+      summary: getTask
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/TaskView"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: editTask
+      summary: editTask
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/Csrf"
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Task"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                expectedVersion:
+                  type: integer
+                draft:
+                  $ref: "#/components/schemas/TaskDraft"
+              required:
+                - expectedVersion
+                - draft
+              additionalProperties: false
+    delete:
+      operationId: deleteTask
+      summary: deleteTask
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/Csrf"
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: "null"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Revision"
+  /admin/tasks/{id}/publish:
+    post:
+      operationId: publishTask
+      summary: publishTask
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/Csrf"
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/TaskView"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Revision"
+  /me/tasks:
+    get:
+      operationId: myTasks
+      summary: myTasks
+      security:
+        - webSession: []
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/StudentTaskPage"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /me/tasks/{id}:
+    get:
+      operationId: myTask
+      summary: myTask
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/StudentTask"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /me/subjects:
+    get:
+      operationId: mySubjects
+      summary: mySubjects
+      security:
+        - webSession: []
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/SubjectPage"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /me/attempts:
+    get:
+      operationId: myAttempts
+      summary: myAttempts
+      security:
+        - webSession: []
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - in: query
+          name: subjectId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum:
+              - IN_PROGRESS
+              - WAIT_SELF_GRADE
+              - COMPLETED
+        - in: query
+          name: sort
+          required: false
+          schema:
+            const: startedAt
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AttemptSummaryPage"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /me/attempts/{id}/review:
+    get:
+      operationId: myReview
+      summary: myReview
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Review"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /me/messages:
+    get:
+      operationId: inbox
+      summary: inbox
+      security:
+        - webSession: []
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/InboxPage"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /me/messages/{id}:
+    get:
+      operationId: myMessage
+      summary: myMessage
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Inbox"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /me/attempts/{attempt}/questions/{question}/attachments/{id}:
+    get:
+      operationId: mySnapshotImage
+      summary: mySnapshotImage
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: attempt
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: question
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /admin/attempts:
+    get:
+      operationId: adminAttempts
+      summary: adminAttempts
+      security:
+        - webSession: []
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - in: query
+          name: subjectId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum:
+              - IN_PROGRESS
+              - WAIT_SELF_GRADE
+              - COMPLETED
+        - in: query
+          name: sort
+          required: false
+          schema:
+            const: startedAt
+        - in: query
+          name: ownerId
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AttemptSummaryPage"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /admin/attempts/{id}:
+    get:
+      operationId: adminReview
+      summary: adminReview
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Review"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /admin/messages:
+    get:
+      operationId: sentMessages
+      summary: sentMessages
+      security:
+        - webSession: []
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AdminMessagePage"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: sendMessage
+      summary: sendMessage
+      security:
+        - webSession: []
+      parameters:
+        - $ref: "#/components/parameters/Csrf"
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+            pattern: ^[!-~]+$
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/SentMessage"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendMessage"
+  /admin/messages/{id}:
+    get:
+      operationId: sentMessage
+      summary: sentMessage
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/SentMessage"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /admin/attempts/{attempt}/questions/{question}/attachments/{id}:
+    get:
+      operationId: adminSnapshotImage
+      summary: adminSnapshotImage
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: attempt
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: question
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /me/attempts/{id}/self-grade:
+    post:
+      operationId: confirmSelfGrade
+      summary: confirmSelfGrade
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/Csrf"
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+            pattern: ^[!-~]+$
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Review"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SelfGrade"
+  /me/mistakes:
+    get:
+      operationId: myMistakes
+      summary: myMistakes
+      security:
+        - webSession: []
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - in: query
+          name: subjectId
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/MistakePage"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /me/mistakes/{id}:
+    get:
+      operationId: myMistake
+      summary: myMistake
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Mistake"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /me/profile:
+    get:
+      operationId: myProfile
+      summary: myProfile
+      security:
+        - webSession: []
+      parameters: []
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Profile"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: editMyProfile
+      summary: editMyProfile
+      security:
+        - webSession: []
+      parameters:
+        - $ref: "#/components/parameters/Csrf"
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Profile"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileEdit"
+  /me/messages/{id}/read:
+    put:
+      operationId: markMessageRead
+      summary: markMessageRead
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/Csrf"
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Inbox"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /me/activities:
+    get:
+      operationId: myActivities
+      summary: myActivities
+      security:
+        - webSession: []
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AuditEventPage"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /admin/audit-events:
+    get:
+      operationId: auditEvents
+      summary: auditEvents
+      security:
+        - webSession: []
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - in: query
+          name: actorId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: requestId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: action
+          required: false
+          schema:
+            type: string
+            pattern: ^[A-Za-z.]{1,80}$
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AuditEventPage"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /admin/statistics:
+    get:
+      operationId: statistics
+      summary: statistics
+      security:
+        - webSession: []
+      parameters: []
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Statistics"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /admin/observability:
+    get:
+      operationId: observability
+      summary: observability
+      security:
+        - webSession: []
+      parameters: []
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Observability"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /attachments:
+    post:
+      operationId: stageImage
+      summary: stageImage
+      security:
+        - webSession: []
+      parameters:
+        - $ref: "#/components/parameters/Csrf"
+      responses:
+        "201":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Attachment"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: PNG/JPEG/WebP；按实际内容验证；最大 5 MiB。
+              required:
+                - file
+              additionalProperties: false
+  /me/avatar:
+    post:
+      operationId: updateAvatar
+      summary: updateAvatar
+      security:
+        - webSession: []
+      parameters:
+        - $ref: "#/components/parameters/Csrf"
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Profile"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: PNG/JPEG/WebP；按实际内容验证；最大 5 MiB。
+              required:
+                - file
+              additionalProperties: false
+  /attachments/{id}:
+    get:
+      operationId: myStagedImage
+      summary: myStagedImage
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /me/avatar/image:
+    get:
+      operationId: myAvatarImage
+      summary: myAvatarImage
+      security:
+        - webSession: []
+      parameters: []
+      responses:
+        "200":
+          description: 成功
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /admin/questions/{question}/versions/{version}/attachments/{id}:
+    get:
+      operationId: adminQuestionImage
+      summary: adminQuestionImage
+      security:
+        - webSession: []
+      parameters:
+        - in: path
+          name: question
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: version
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
 components:
   securitySchemes:
-    webSession: { type: apiKey, in: cookie, name: __Host-exam_session }
-    wechatToken: { type: http, scheme: bearer }
+    webSession:
+      type: apiKey
+      in: cookie
+      name: __Host-exam_session
   parameters:
     Csrf:
       in: header
       name: X-XSRF-TOKEN
       required: true
       description: 使用 /auth/csrf 返回的值，并携带响应设置的 Cookie
-      schema: { type: string }
+      schema:
+        type: string
     AccountId:
       in: path
       name: id
       required: true
-      schema: { type: string, format: uuid }
+      schema:
+        type: string
+        format: uuid
   requestBodies:
     AccountVersion:
       required: true
@@ -459,10 +3149,13 @@ components:
         application/json:
           schema:
             type: object
-            required: [expectedVersion]
+            required:
+              - expectedVersion
             additionalProperties: false
             properties:
-              expectedVersion: { type: integer, minimum: 1 }
+              expectedVersion:
+                type: integer
+                minimum: 1
   responses:
     Attempt:
       description: 本人答卷安全视图，题目不包含参考答案、解析或答案附件
@@ -470,122 +3163,294 @@ components:
         application/json:
           schema:
             allOf:
-              - $ref: '#/components/schemas/Envelope'
+              - $ref: "#/components/schemas/Envelope"
               - properties:
-                  data: { $ref: '#/components/schemas/Attempt' }
+                  data:
+                    $ref: "#/components/schemas/Attempt"
     Account:
       description: 安全账号视图
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/AccountEnvelope' }
-    WechatSession:
-      description: 小程序令牌及安全账号视图
-      content:
-        application/json:
           schema:
-            allOf:
-              - $ref: '#/components/schemas/Envelope'
-              - properties:
-                  data:
-                    type: object
-                    required: [token, user]
-                    properties:
-                      token: { type: string }
-                      user: { $ref: '#/components/schemas/Account' }
+            $ref: "#/components/schemas/AccountEnvelope"
     Empty:
       description: 操作成功
       content:
         application/json:
           schema:
             allOf:
-              - $ref: '#/components/schemas/Envelope'
+              - $ref: "#/components/schemas/Envelope"
               - properties:
-                  data: { type: 'null' }
+                  data:
+                    type: "null"
     Error:
       description: 业务错误
       content:
         application/json:
           schema:
             allOf:
-              - $ref: '#/components/schemas/Envelope'
+              - $ref: "#/components/schemas/Envelope"
               - properties:
                   code:
-                    enum: [VALIDATION_ERROR, UNAUTHENTICATED, FORBIDDEN, NOT_FOUND, VERSION_CONFLICT, PAPER_NOT_OPEN, EXAM_CLOSED, RATE_LIMITED, BINDING_CONFLICT, DEPENDENCY_UNAVAILABLE]
-                  data: { type: 'null' }
+                    enum:
+                      - VALIDATION_ERROR
+                      - UNAUTHENTICATED
+                      - FORBIDDEN
+                      - NOT_FOUND
+                      - VERSION_CONFLICT
+                      - PAPER_NOT_OPEN
+                      - EXAM_CLOSED
+                      - RATE_LIMITED
+                      - DEPENDENCY_UNAVAILABLE
+                  data:
+                    type: "null"
   schemas:
+    AnswerSet:
+      type: object
+      additionalProperties: false
+      required:
+        - expectedVersion
+        - answerItems
+      properties:
+        expectedVersion:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+        answerItems:
+          type: array
+          description: 全量答案，遗漏题目或 answer:null 清空；整份 JSON 最多 2 MiB，按快照校验五题型。未截止时非法内容整体拒绝。
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - questionId
+              - answer
+            properties:
+              questionId:
+                type: string
+                format: uuid
+              answer:
+                type:
+                  - object
+                  - "null"
     Attempt:
       type: object
-      required: [id, paperId, paperVersionId, status, serverNow, deadlineAt, version, questions, savedAnswers]
+      required:
+        - id
+        - paperId
+        - paperVersionId
+        - status
+        - serverNow
+        - deadlineAt
+        - version
+        - questions
+        - savedAnswers
+        - frozenAt
+        - freezeReason
+        - automaticScore
+        - finalScore
+        - questionScores
       properties:
-        id: { type: string, format: uuid }
-        paperId: { type: string, format: uuid }
-        paperVersionId: { type: string, format: uuid }
-        status: { type: string, enum: [IN_PROGRESS, WAIT_SELF_GRADE, COMPLETED] }
-        serverNow: { type: string, format: date-time }
-        deadlineAt: { type: string, format: date-time }
-        version: { type: integer }
+        id:
+          type: string
+          format: uuid
+        paperId:
+          type: string
+          format: uuid
+        paperVersionId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - IN_PROGRESS
+            - WAIT_SELF_GRADE
+            - COMPLETED
+        serverNow:
+          type: string
+          format: date-time
+        deadlineAt:
+          type: string
+          format: date-time
+        version:
+          type: integer
+        frozenAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+          description: 实际持久化冻结时刻；作答中为 null，原 deadlineAt 保持不变
+        freezeReason:
+          type:
+            - string
+            - "null"
+          enum:
+            - MANUAL
+            - DEADLINE
+            - null
+        automaticScore:
+          type:
+            - string
+            - "null"
+          description: 冻结后客观题总分，两位小数；作答中为 null
+        finalScore:
+          type:
+            - string
+            - "null"
+          description: 纯客观卷冻结后最终总分；混合卷待批改时为 null
+        questionScores:
+          type: array
+          description: 作答中为空；冻结后客观分数固定，主观待批改为 null，不含参考答案
+          items:
+            type: object
+            required:
+              - questionId
+              - score
+            properties:
+              questionId:
+                type: string
+                format: uuid
+              score:
+                type:
+                  - string
+                  - "null"
         savedAnswers:
           type: array
           items:
             type: object
-            required: [questionId, answer]
+            required:
+              - questionId
+              - answer
             properties:
-              questionId: { type: string, format: uuid }
-              answer: { type: object }
+              questionId:
+                type: string
+                format: uuid
+              answer:
+                type: object
         questions:
           type: array
           items:
             type: object
-            required: [position, groupPosition, groupName, questionId, questionVersion, score, type, stemHtml, options]
+            required:
+              - position
+              - groupPosition
+              - groupName
+              - questionId
+              - questionVersion
+              - score
+              - type
+              - stemHtml
+              - options
             properties:
-              position: { type: integer }
-              groupPosition: { type: integer }
-              groupName: { type: string }
-              questionId: { type: string, format: uuid }
-              questionVersion: { type: integer }
-              score: { type: string }
-              type: { type: string, enum: [SINGLE, MULTIPLE, TRUE_FALSE, GAP, SHORT] }
-              stemHtml: { type: string }
-              options: { type: array, items: { type: object } }
+              position:
+                type: integer
+              groupPosition:
+                type: integer
+              groupName:
+                type: string
+              questionId:
+                type: string
+                format: uuid
+              questionVersion:
+                type: integer
+              score:
+                type: string
+              type:
+                type: string
+                enum:
+                  - SINGLE
+                  - MULTIPLE
+                  - TRUE_FALSE
+                  - GAP
+                  - SHORT
+              stemHtml:
+                type: string
+              options:
+                type: array
+                items:
+                  type: object
     Envelope:
       type: object
-      required: [code, message, data, requestId]
+      required:
+        - code
+        - message
+        - data
+        - requestId
       properties:
-        code: { type: [integer, string] }
-        message: { type: string }
+        code:
+          type:
+            - integer
+            - string
+        message:
+          type: string
         data: {}
-        requestId: { type: string, format: uuid }
+        requestId:
+          type: string
+          format: uuid
     AccountEnvelope:
       allOf:
-        - $ref: '#/components/schemas/Envelope'
+        - $ref: "#/components/schemas/Envelope"
         - properties:
-            data: { $ref: '#/components/schemas/Account' }
+            data:
+              $ref: "#/components/schemas/Account"
     Account:
       type: object
-      required: [id, username, role, status, gradeId, version, createdAt]
+      required:
+        - id
+        - username
+        - role
+        - status
+        - gradeId
+        - version
+        - createdAt
       properties:
-        id: { type: string, format: uuid }
-        username: { type: string }
-        role: { $ref: '#/components/schemas/Role' }
-        status: { type: string, enum: [ENABLED, DISABLED, DELETED] }
-        gradeId: { $ref: '#/components/schemas/GradeId' }
-        version: { type: integer, minimum: 1 }
-        createdAt: { type: string, format: date-time }
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        role:
+          $ref: "#/components/schemas/Role"
+        status:
+          type: string
+          enum:
+            - ENABLED
+            - DISABLED
+            - DELETED
+        gradeId:
+          $ref: "#/components/schemas/GradeId"
+        version:
+          type: integer
+          minimum: 1
+        createdAt:
+          type: string
+          format: date-time
     Credentials:
       type: object
       additionalProperties: false
-      required: [username, password]
+      required:
+        - username
+        - password
       properties:
-        username: { $ref: '#/components/schemas/Username' }
-        password: { $ref: '#/components/schemas/Password' }
+        username:
+          $ref: "#/components/schemas/Username"
+        password:
+          $ref: "#/components/schemas/Password"
     StudentRegistration:
       type: object
       additionalProperties: false
-      required: [username, password, gradeId]
+      required:
+        - username
+        - password
+        - gradeId
       properties:
-        username: { $ref: '#/components/schemas/Username' }
-        password: { $ref: '#/components/schemas/Password' }
-        gradeId: { type: string, format: uuid }
+        username:
+          $ref: "#/components/schemas/Username"
+        password:
+          $ref: "#/components/schemas/Password"
+        gradeId:
+          type: string
+          format: uuid
     Username:
       type: string
       description: 规范化后 3–32 位英文字母、数字、下划线、点或连字符
@@ -595,11 +3460,1299 @@ components:
       description: 12–72 个 UTF-8 字节
     Role:
       type: string
-      enum: [STUDENT, ADMIN]
+      enum:
+        - STUDENT
+        - ADMIN
     GradeId:
-      type: [string, 'null']
+      type:
+        - string
+        - "null"
       format: uuid
       description: 学生必填，管理员为空
-    WechatCode:
+    Score:
       type: string
-      description: wx.login 返回的一次性 code
+      pattern: ^[0-9]+\.[0-9]{2}$
+    Revision:
+      type: object
+      properties:
+        expectedVersion:
+          type: integer
+          minimum: 1
+      required:
+        - expectedVersion
+      additionalProperties: false
+    Subject:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        gradeId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        version:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - gradeId
+        - name
+        - version
+        - createdAt
+      additionalProperties: false
+    Option:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+      required:
+        - id
+        - text
+      additionalProperties: false
+    ReferenceAnswer:
+      type: object
+      properties:
+        optionIds:
+          type:
+            - array
+            - "null"
+          items:
+            type: string
+        gaps:
+          type:
+            - array
+            - "null"
+          items:
+            type: string
+        text:
+          type:
+            - string
+            - "null"
+    QuestionType:
+      type: string
+      enum:
+        - SINGLE
+        - MULTIPLE
+        - TRUE_FALSE
+        - GAP
+        - SHORT
+    QuestionDraft:
+      type: object
+      properties:
+        subjectId:
+          type: string
+          format: uuid
+        type:
+          $ref: "#/components/schemas/QuestionType"
+        difficulty:
+          type: integer
+          minimum: 1
+          maximum: 5
+        score:
+          $ref: "#/components/schemas/Score"
+        stemHtml:
+          type: string
+          maxLength: 10000
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/Option"
+        answer:
+          $ref: "#/components/schemas/ReferenceAnswer"
+        explanationHtml:
+          type:
+            - string
+            - "null"
+          maxLength: 10000
+      required:
+        - subjectId
+        - type
+        - difficulty
+        - score
+        - stemHtml
+        - answer
+      additionalProperties: false
+    QuestionVersion:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        version:
+          type: integer
+        subjectId:
+          type: string
+          format: uuid
+        type:
+          $ref: "#/components/schemas/QuestionType"
+        difficulty:
+          type: integer
+          minimum: 1
+          maximum: 5
+        score:
+          $ref: "#/components/schemas/Score"
+        stemHtml:
+          type: string
+          maxLength: 10000
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/Option"
+        answer:
+          $ref: "#/components/schemas/ReferenceAnswer"
+        explanationHtml:
+          type:
+            - string
+            - "null"
+          maxLength: 10000
+        archived:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - version
+        - subjectId
+        - type
+        - difficulty
+        - score
+        - stemHtml
+        - options
+        - answer
+        - explanationHtml
+        - archived
+        - createdAt
+      additionalProperties: false
+    QuestionSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        version:
+          type: integer
+        subjectId:
+          type: string
+          format: uuid
+        type:
+          $ref: "#/components/schemas/QuestionType"
+        difficulty:
+          type: integer
+        score:
+          $ref: "#/components/schemas/Score"
+        stemPreview:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - version
+        - subjectId
+        - type
+        - difficulty
+        - score
+        - stemPreview
+        - createdAt
+      additionalProperties: false
+    PaperDraft:
+      type: object
+      properties:
+        name:
+          type: string
+        durationMinutes:
+          type: integer
+          minimum: 1
+          maximum: 180
+        opensAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        closesAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        groups:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              questionIds:
+                type: array
+                items:
+                  type: string
+                  format: uuid
+            required:
+              - name
+              - questionIds
+            additionalProperties: false
+      required:
+        - name
+        - durationMinutes
+        - groups
+      additionalProperties: false
+    PaperHead:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        subjectId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+            - FIXED
+            - TIMED
+            - TASK
+        version:
+          type: integer
+        draftId:
+          type:
+            - string
+            - "null"
+          format: uuid
+        publishedId:
+          type:
+            - string
+            - "null"
+          format: uuid
+        archived:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - subjectId
+        - type
+        - version
+        - draftId
+        - publishedId
+        - archived
+        - createdAt
+      additionalProperties: false
+    PaperContent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        revision:
+          type: integer
+        name:
+          type: string
+        durationMinutes:
+          type: integer
+        opensAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        closesAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        publishedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+      required:
+        - id
+        - revision
+        - name
+        - durationMinutes
+        - opensAt
+        - closesAt
+        - publishedAt
+      additionalProperties: false
+    PaperItem:
+      type: object
+      properties:
+        position:
+          type: integer
+        groupPosition:
+          type: integer
+        groupName:
+          type: string
+        questionId:
+          type: string
+          format: uuid
+        questionVersion:
+          type: integer
+        score:
+          $ref: "#/components/schemas/Score"
+      required:
+        - position
+        - groupPosition
+        - groupName
+        - questionId
+        - questionVersion
+        - score
+      additionalProperties: false
+    PaperView:
+      type: object
+      properties:
+        paper:
+          $ref: "#/components/schemas/PaperHead"
+        content:
+          $ref: "#/components/schemas/PaperContent"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/PaperItem"
+        totalScore:
+          $ref: "#/components/schemas/Score"
+      required:
+        - paper
+        - content
+        - items
+        - totalScore
+      additionalProperties: false
+    PaperSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        subjectId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+            - FIXED
+            - TIMED
+            - TASK
+        name:
+          type: string
+        version:
+          type: integer
+        draftId:
+          type:
+            - string
+            - "null"
+          format: uuid
+        publishedId:
+          type:
+            - string
+            - "null"
+          format: uuid
+        archived:
+          type: boolean
+      required:
+        - id
+        - subjectId
+        - type
+        - name
+        - version
+        - draftId
+        - publishedId
+        - archived
+      additionalProperties: false
+    TaskDraft:
+      type: object
+      properties:
+        gradeId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        paperIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+        - gradeId
+        - name
+        - paperIds
+      additionalProperties: false
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        gradeId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        paperIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        state:
+          type: string
+          enum:
+            - DRAFT
+            - PUBLISHED
+            - ARCHIVED
+        version:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        publishedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+      required:
+        - id
+        - gradeId
+        - name
+        - paperIds
+        - state
+        - version
+        - createdAt
+        - publishedAt
+      additionalProperties: false
+    TaskPaper:
+      type: object
+      properties:
+        paperId:
+          type: string
+          format: uuid
+        paperVersionId:
+          type: string
+          format: uuid
+        position:
+          type: integer
+        name:
+          type: string
+        durationMinutes:
+          type: integer
+      required:
+        - paperId
+        - paperVersionId
+        - position
+        - name
+        - durationMinutes
+      additionalProperties: false
+    TaskView:
+      type: object
+      properties:
+        task:
+          $ref: "#/components/schemas/Task"
+        papers:
+          type: array
+          items:
+            $ref: "#/components/schemas/TaskPaper"
+        recipientCount:
+          type: integer
+      required:
+        - task
+        - papers
+        - recipientCount
+      additionalProperties: false
+    StudentTaskPaper:
+      type: object
+      properties:
+        paperId:
+          type: string
+          format: uuid
+        paperVersionId:
+          type: string
+          format: uuid
+        position:
+          type: integer
+        name:
+          type: string
+        durationMinutes:
+          type: integer
+        status:
+          type: string
+          enum:
+            - NOT_STARTED
+            - IN_PROGRESS
+            - WAIT_SELF_GRADE
+            - COMPLETED
+        attemptId:
+          type:
+            - string
+            - "null"
+          format: uuid
+      required:
+        - paperId
+        - paperVersionId
+        - position
+        - name
+        - durationMinutes
+        - status
+        - attemptId
+      additionalProperties: false
+    StudentTask:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        state:
+          type: string
+          enum:
+            - DRAFT
+            - PUBLISHED
+            - ARCHIVED
+        papers:
+          type: array
+          items:
+            $ref: "#/components/schemas/StudentTaskPaper"
+        completedCount:
+          type: integer
+        totalCount:
+          type: integer
+        completed:
+          type: boolean
+      required:
+        - id
+        - name
+        - state
+        - papers
+        - completedCount
+        - totalCount
+        - completed
+      additionalProperties: false
+    ReviewItem:
+      type: object
+      properties:
+        position:
+          type: integer
+        questionId:
+          type: string
+          format: uuid
+        questionVersion:
+          type: integer
+        type:
+          $ref: "#/components/schemas/QuestionType"
+        score:
+          $ref: "#/components/schemas/Score"
+        stemHtml:
+          type: string
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/Option"
+        answer:
+          type:
+            - object
+            - "null"
+        referenceAnswer:
+          $ref: "#/components/schemas/ReferenceAnswer"
+        explanationHtml:
+          type:
+            - string
+            - "null"
+        awardedScore:
+          type:
+            - string
+            - "null"
+        subjective:
+          type: boolean
+        empty:
+          type: boolean
+      required:
+        - position
+        - questionId
+        - questionVersion
+        - type
+        - score
+        - stemHtml
+        - options
+        - answer
+        - referenceAnswer
+        - explanationHtml
+        - awardedScore
+        - subjective
+        - empty
+      additionalProperties: false
+    Review:
+      type: object
+      properties:
+        attempt:
+          $ref: "#/components/schemas/Attempt"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReviewItem"
+        gradingSource:
+          type: string
+          enum:
+            - AUTO
+            - SELF
+        metadata:
+          type: object
+          properties:
+            paperName:
+              type: string
+            username:
+              type: string
+            startedAt:
+              type: string
+              format: date-time
+            elapsedSeconds:
+              type: integer
+            confirmedAt:
+              type:
+                - string
+                - "null"
+              format: date-time
+          required:
+            - paperName
+            - username
+            - startedAt
+            - elapsedSeconds
+            - confirmedAt
+          additionalProperties: false
+      required:
+        - attempt
+        - items
+        - gradingSource
+        - metadata
+      additionalProperties: false
+    AttemptSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        ownerId:
+          type: string
+          format: uuid
+        username:
+          type: string
+        paperId:
+          type: string
+          format: uuid
+        subjectId:
+          type: string
+          format: uuid
+        paperName:
+          type: string
+        status:
+          type: string
+          enum:
+            - IN_PROGRESS
+            - WAIT_SELF_GRADE
+            - COMPLETED
+        version:
+          type: integer
+        startedAt:
+          type: string
+          format: date-time
+        deadlineAt:
+          type: string
+          format: date-time
+        frozenAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        elapsedSeconds:
+          type: integer
+        automaticScore:
+          type:
+            - string
+            - "null"
+        finalScore:
+          type:
+            - string
+            - "null"
+        gradingSource:
+          type: string
+          enum:
+            - AUTO
+            - SELF
+      required:
+        - id
+        - ownerId
+        - username
+        - paperId
+        - subjectId
+        - paperName
+        - status
+        - version
+        - startedAt
+        - deadlineAt
+        - frozenAt
+        - elapsedSeconds
+        - automaticScore
+        - finalScore
+        - gradingSource
+      additionalProperties: false
+    SelfGrade:
+      type: object
+      properties:
+        expectedVersion:
+          type: integer
+          minimum: 1
+        scores:
+          type: array
+          items:
+            type: object
+            properties:
+              questionId:
+                type: string
+                format: uuid
+              score:
+                type: string
+                pattern: ^(?:0|[1-9][0-9]*)(?:\.[0-9]{1,2})?$
+            required:
+              - questionId
+              - score
+            additionalProperties: false
+      required:
+        - expectedVersion
+        - scores
+      additionalProperties: false
+      description: 仅全套主观题；0 至快照满分、最多两位小数，空答案固定0。24小时同键异载荷409。完成后另键相同评分返回原结果，修改已确认分数409。
+    Mistake:
+      type: object
+      properties:
+        questionId:
+          type: string
+          format: uuid
+        attemptId:
+          type: string
+          format: uuid
+        item:
+          $ref: "#/components/schemas/ReviewItem"
+        subject:
+          type: object
+          properties:
+            subjectId:
+              type: string
+              format: uuid
+            subjectName:
+              type: string
+          required:
+            - subjectId
+            - subjectName
+          additionalProperties: false
+      required:
+        - questionId
+        - attemptId
+        - item
+        - subject
+      additionalProperties: false
+    Profile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        role:
+          type: string
+          enum:
+            - STUDENT
+            - ADMIN
+        name:
+          type: string
+        phone:
+          type: string
+        birthday:
+          type:
+            - string
+            - "null"
+          format: date
+        avatarId:
+          type:
+            - string
+            - "null"
+          format: uuid
+        version:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - username
+        - role
+        - name
+        - phone
+        - birthday
+        - avatarId
+        - version
+        - createdAt
+      additionalProperties: false
+    ProfileEdit:
+      type: object
+      properties:
+        expectedVersion:
+          type: integer
+          minimum: 1
+        name:
+          type: string
+          maxLength: 100
+        phone:
+          type: string
+          maxLength: 32
+        birthday:
+          type:
+            - string
+            - "null"
+          format: date
+      required:
+        - expectedVersion
+        - name
+        - phone
+      additionalProperties: false
+      description: 管理员禁止 birthday；学生生日为 1900-01-01 至香港今天。角色、年级、状态等未知字段整体拒绝。
+    Inbox:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        body:
+          type: string
+        sentAt:
+          type: string
+          format: date-time
+        readAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+      required:
+        - id
+        - title
+        - body
+        - sentAt
+        - readAt
+      additionalProperties: false
+    AdminMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        body:
+          type: string
+        sentAt:
+          type: string
+          format: date-time
+        readAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        recipientCount:
+          type: integer
+        readCount:
+          type: integer
+      required:
+        - id
+        - title
+        - body
+        - sentAt
+        - readAt
+        - recipientCount
+        - readCount
+      additionalProperties: false
+    SentMessage:
+      type: object
+      properties:
+        message:
+          $ref: "#/components/schemas/AdminMessage"
+        recipients:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              username:
+                type: string
+              readAt:
+                type:
+                  - string
+                  - "null"
+                format: date-time
+            required:
+              - id
+              - username
+              - readAt
+            additionalProperties: false
+      required:
+        - message
+        - recipients
+      additionalProperties: false
+    SendMessage:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        body:
+          type: string
+          minLength: 1
+          maxLength: 10000
+        recipientIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          minItems: 1
+      required:
+        - title
+        - body
+        - recipientIds
+      additionalProperties: false
+      description: 去重后 1–500 个启用账号；任意无效收件人整体拒绝；已发送内容不可修改。
+    AuditEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        requestId:
+          type: string
+          format: uuid
+        actorId:
+          type:
+            - string
+            - "null"
+          format: uuid
+        module:
+          type: string
+        action:
+          type: string
+        targetId:
+          type:
+            - string
+            - "null"
+          format: uuid
+        result:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - requestId
+        - actorId
+        - module
+        - action
+        - targetId
+        - result
+        - createdAt
+      additionalProperties: false
+    DayCount:
+      type: object
+      properties:
+        day:
+          type: string
+          format: date
+        count:
+          type: integer
+      required:
+        - day
+        - count
+      additionalProperties: false
+    Statistics:
+      type: object
+      properties:
+        paperCount:
+          type: integer
+        questionCount:
+          type: integer
+        activeUsers:
+          type: array
+          items:
+            $ref: "#/components/schemas/DayCount"
+        newQuestions:
+          type: array
+          items:
+            $ref: "#/components/schemas/DayCount"
+        timeZone:
+          const: Asia/Hong_Kong
+      required:
+        - paperCount
+        - questionCount
+        - activeUsers
+        - newQuestions
+        - timeZone
+      additionalProperties: false
+    Observability:
+      type: object
+      properties:
+        requestCount:
+          type: integer
+        failureCount:
+          type: integer
+        failureRate:
+          type: number
+        p95Millis:
+          type: number
+        databaseUp:
+          type: boolean
+        overdueCount:
+          type: integer
+        deadlineLagSeconds:
+          type: integer
+        alerts:
+          type: array
+          items:
+            type: string
+            enum:
+              - DATABASE_UNAVAILABLE
+              - DEADLINE_BACKLOG
+              - ERROR_RATE_HIGH
+        responsibility:
+          type: string
+        connectionPoolWaiting:
+          type: integer
+          minimum: 0
+        connectionPoolActive:
+          type: integer
+          minimum: 0
+        connectionPoolIdle:
+          type: integer
+          minimum: 0
+      required:
+        - requestCount
+        - failureCount
+        - failureRate
+        - p95Millis
+        - databaseUp
+        - overdueCount
+        - deadlineLagSeconds
+        - alerts
+        - responsibility
+        - connectionPoolWaiting
+        - connectionPoolActive
+        - connectionPoolIdle
+      additionalProperties: false
+    Attachment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        contentType:
+          type: string
+        byteSize:
+          type: integer
+      required:
+        - id
+        - contentType
+        - byteSize
+      additionalProperties: false
+    SubjectPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Subject"
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      additionalProperties: false
+    QuestionSummaryPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionSummary"
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      additionalProperties: false
+    PaperSummaryPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/PaperSummary"
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      additionalProperties: false
+    TaskPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Task"
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      additionalProperties: false
+    StudentTaskPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/StudentTask"
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      additionalProperties: false
+    AttemptSummaryPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttemptSummary"
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      additionalProperties: false
+    InboxPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Inbox"
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      additionalProperties: false
+    AdminMessagePage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminMessage"
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      additionalProperties: false
+    MistakePage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Mistake"
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      additionalProperties: false
+    AuditEventPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditEvent"
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      additionalProperties: false

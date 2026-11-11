@@ -40,8 +40,6 @@ services:
       DATABASE_URL: jdbc:postgresql://db:5432/exam_java_dev
       DATABASE_USER: exam_app
       PRIVATE_STORAGE_ROOT: /var/lib/exam-platform/attachments
-      WECHAT_APP_ID: ${WECHAT_APP_ID:-}
-      WECHAT_APP_SECRET: ${WECHAT_APP_SECRET:-}
       DATABASE_PASSWORD: ${EXAM_APP_PASSWORD:?Set EXAM_APP_PASSWORD}
     depends_on:
       migrate:
